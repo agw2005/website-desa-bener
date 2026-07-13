@@ -1,0 +1,18 @@
+FROM denoland/deno:alpine
+
+EXPOSE 8000
+
+ENV DENO_DIR=/deno-dir
+
+WORKDIR /server
+
+RUN mkdir -p /deno-dir && \
+    chown -R deno:deno /deno-dir /server
+
+USER deno
+
+COPY --chown=deno:deno . .
+
+RUN deno cache --reload main.ts
+
+CMD ["deno", "task", "dev"]
