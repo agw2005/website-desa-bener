@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import Button from "./Button.tsx";
 import { Link } from "react-router";
+import Breadcrumbs from "./Breadcrumbs.tsx";
 
 interface PrimitiveProps {
   children: ReactNode;
@@ -21,7 +22,7 @@ const LINKS = {
 const Primitive = ({ children }: PrimitiveProps) => {
   return (
     <>
-      <title>{globalThis.location.pathname}</title>
+      <title>Desa Bener</title>
       <div className="flex bg-amber-500 px-16 pt-8">
         <div className="flex gap-4 items-center">
           <div className="w-24 h-24 p-2 bg-white rounded-2xl flex justify-center items-center overflow-hidden">
@@ -42,7 +43,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
 
       <div className="sticky top-0 z-50">
         <div className="flex bg-amber-500 px-16 pt-4 pb-12 rounded-b-full">
-          <h2 className="font-bold text-white">Bread &gt; Crumbs</h2>
+          <Breadcrumbs />
         </div>
         <nav className="px-32 flex justify-center gap-4 relative bottom-6">
           <Link to={LINKS.profil}>
