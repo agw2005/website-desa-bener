@@ -42,36 +42,36 @@ const Primitive = ({ children }: PrimitiveProps) => {
           </div>
         </div>
         <div className="sticky top-0 z-50">
-          <div className="flex bg-amber-500 px-16 pt-4 pb-12 rounded-b-full">
+          <div className="flex bg-amber-500 px-16 pt-4 pb-12 rounded-b-full bottom-shadow">
             <Breadcrumbs />
           </div>
           <nav className="px-32 flex justify-center gap-4 relative bottom-6">
             <Link to={LINKS.home}>
-              <Button>BERANDA</Button>
+              <Button className="bottom-shadow">BERANDA</Button>
             </Link>
             <Link to={LINKS.profil}>
-              <Button>PROFIL</Button>
+              <Button className="bottom-shadow">PROFIL</Button>
             </Link>
             <Link to={LINKS.data}>
-              <Button>DATA</Button>
+              <Button className="bottom-shadow">DATA</Button>
             </Link>
             <Link to={LINKS.layanan}>
-              <Button>LAYANAN PUBLIK</Button>
+              <Button className="bottom-shadow">LAYANAN PUBLIK</Button>
             </Link>
             <Link to={LINKS.pengumuman}>
-              <Button>PENGUMUMAN</Button>
+              <Button className="bottom-shadow">PENGUMUMAN</Button>
             </Link>
             <Link to={LINKS.wisata}>
-              <Button>WISATA</Button>
+              <Button className="bottom-shadow">WISATA</Button>
             </Link>
             <Link to={LINKS.kontak}>
-              <Button>KONTAK ASPIRASI</Button>
+              <Button className="bottom-shadow">KONTAK ASPIRASI</Button>
             </Link>
             <Link to={LINKS.kalender}>
-              <Button>KALENDER</Button>
+              <Button className="bottom-shadow">KALENDER</Button>
             </Link>
             <Link to={LINKS.login}>
-              <Button>LOGIN</Button>
+              <Button className="bottom-shadow">LOGIN</Button>
             </Link>
           </nav>
         </div>
