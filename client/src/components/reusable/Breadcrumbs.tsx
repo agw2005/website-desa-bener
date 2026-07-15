@@ -9,7 +9,7 @@ const Breadcrumbs = () => {
       <ol className="flex gap-2 text-white font-bold">
         {crumbs.map((crumb, index) => (
           <li key={crumb.path} className="flex items-center gap-2">
-            {index > 0 && <span>&gt;</span>}
+            {index > 0 && <span className="select-none">&gt;</span>}
             {index === crumbs.length - 1
               ? <span className="select-none">{crumb.label}</span>
               : (

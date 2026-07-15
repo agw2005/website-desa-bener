@@ -7,6 +7,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 const variantStyles = {
   nav:
     "bg-amber-200 hover:bg-amber-400 active:bg-amber-300 disabled:hover:bg-amber-200 disabled:active:bg-amber-200",
+  black:
+    "bg-black hover:bg-black/70 active:bg-black/85 disabled:hover:bg-black disabled:active:bg-black text-white",
 };
 
 const Button = ({

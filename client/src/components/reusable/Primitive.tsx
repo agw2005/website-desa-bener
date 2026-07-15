@@ -46,6 +46,9 @@ const Primitive = ({ children }: PrimitiveProps) => {
             <Breadcrumbs />
           </div>
           <nav className="px-32 flex justify-center gap-4 relative bottom-6">
+            <Link to={LINKS.home}>
+              <Button>BERANDA</Button>
+            </Link>
             <Link to={LINKS.profil}>
               <Button>PROFIL</Button>
             </Link>
