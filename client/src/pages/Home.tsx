@@ -1,9 +1,9 @@
 import Primitive from "../components/reusable/Primitive.tsx";
 import SimpleSection from "../components/reusable/SimpleSection.tsx";
 import ManualCarousel from "../components/reusable/ManualCarousel.tsx";
-import NumberInput from "../components/reusable/NumberInput.tsx";
+import NumberInput from "../components/reusable/inputs/NumberInput.tsx";
 import { useState } from "react";
-import PasswordInput from "../components/reusable/PasswordInput.tsx";
+import PasswordInput from "../components/reusable/inputs/PasswordInput.tsx";
 import Button from "../components/reusable/Button.tsx";
 
 const APARATUR_DESA = [

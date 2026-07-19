@@ -1,9 +1,9 @@
 import { useState } from "react";
 import Button from "../components/reusable/Button.tsx";
 import Primitive from "../components/reusable/Primitive.tsx";
-import TextInput from "../components/reusable/TextInput.tsx";
-import NumberInput from "../components/reusable/NumberInput.tsx";
-import PasswordInput from "../components/reusable/PasswordInput.tsx";
+import TextInput from "../components/reusable/inputs/TextInput.tsx";
+import NumberInput from "../components/reusable/inputs/NumberInput.tsx";
+import PasswordInput from "../components/reusable/inputs/PasswordInput.tsx";
 
 const Login = () => {
   const [nik, setNik] = useState("");
