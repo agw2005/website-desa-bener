@@ -1,3 +1,4 @@
+import APBDes from "../components/non-reusable/APBDes.tsx";
 import Primitive from "../components/reusable/Primitive.tsx";
 import RoundedSection from "../components/reusable/RoundedSection.tsx";
 
@@ -5,6 +6,9 @@ const Data = () => {
   return (
     <Primitive>
       <div className="flex flex-col gap-8 px-32">
+        <RoundedSection title="APBDes (Anggaran Pendapatan dan Belanja Desa)">
+          <APBDes year={2026} />
+        </RoundedSection>
         <RoundedSection title="DATA UMUM">
           <div className="overflow-x-auto rounded-lg border shadow-sm">
             <table className="w-full border-collapse text-sm">
