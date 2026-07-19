@@ -13,6 +13,7 @@ const Pengumuman = () => {
             articleId={index}
             title="ARTIKEL"
             uploadDate={(new Date()).getTime()}
+            key={index}
           >
             {PLACEHOLDER_CONTENT}
           </ArticleSection>
