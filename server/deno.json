@@ -3,6 +3,7 @@
     "dev": "deno run --watch --allow-net main.ts"
   },
   "imports": {
+    "@db/postgres": "jsr:@db/postgres@^0.19.5",
     "@oak/oak": "jsr:@oak/oak@^17.2.0"
   }
 }
