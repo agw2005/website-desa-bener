@@ -1,6 +1,6 @@
-CREATE DATABASE testdb;
+CREATE DATABASE bener;
 
-\c testdb;
+\c bener;
 
 CREATE TABLE Aparatur (
     aparatur_id SERIAL PRIMARY KEY,
@@ -8,6 +8,13 @@ CREATE TABLE Aparatur (
     jabatan VARCHAR(255) NOT NULL,
     telepon VARCHAR(255) NOT NULL,
     foto BYTEA NOT NULL,
+    kata_sandi VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE Umum (
+    umum_id SERIAL PRIMARY KEY,
+    nama VARCHAR(255) NOT NULL,
+    nik VARCHAR(255) NOT NULL,
     kata_sandi VARCHAR(255) NOT NULL
 );
 
