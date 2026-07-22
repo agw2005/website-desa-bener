@@ -122,7 +122,7 @@ const Home = () => {
       <SimpleSection subtitle="ARTIKEL TERKINI">
         <div className="flex gap-8 my-4">
           <img
-            className="rounded-2xl flex-1"
+            className="rounded-2xl flex-1 object-cover w-full h-full self-center"
             src="example-artikel-terkini.png"
             alt="foto-cover-artikel-terkini"
           />
