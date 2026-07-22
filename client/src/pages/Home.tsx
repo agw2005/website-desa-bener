@@ -10,47 +10,47 @@ const APARATUR_DESA = [
   {
     title: "Kepala Desa",
     subtitle: "Beni Saefudin",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
   {
     title: "Kepala Dusun Krajan I",
     subtitle: "Kadus 1",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
   {
     title: "Kepala Dusun Krajan II",
     subtitle: "Kadus 2",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
   {
     title: "Kepala Dusun Cebongan",
     subtitle: "Kadus 3",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
   {
     title: "Kepala Dusun Tuguh",
     subtitle: "Kadus 4",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
   {
     title: "Kepala Dusun Karangbalong",
     subtitle: "Kadus 5",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
   {
     title: "Kepala Dusun Kadipurwo",
     subtitle: "Kadus 6",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
   {
     title: "Sekretaris I",
     subtitle: "Sekdes 1",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
   {
     title: "Sekretaris II",
     subtitle: "Sekdes 2",
-    photo: "example-profile.jpg",
+    photo: "tidak-ada-gambar-2x3.png",
   },
 ];
 

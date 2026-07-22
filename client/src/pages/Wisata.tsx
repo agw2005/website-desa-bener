@@ -14,27 +14,27 @@ const Wisata = () => {
               {
                 title: "Kerajinan Bambu",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
               },
               {
                 title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
               },
               {
                 title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
               },
               {
                 title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
               },
               {
                 title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
               },
             ]}
           />
@@ -47,31 +47,31 @@ const Wisata = () => {
               {
                 title: "Kerajinan Bambu",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
                 link: `${globalThis.location.pathname}/umkm/0`,
               },
               {
                 title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
                 link: `${globalThis.location.pathname}/umkm/1`,
               },
               {
                 title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
                 link: `${globalThis.location.pathname}/umkm/1`,
               },
               {
                 title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
                 link: `${globalThis.location.pathname}/umkm/1`,
               },
               {
                 title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
-                photo: "https://picsum.photos/id/237/200",
+                photo: "/tidak-ada-gambar-box.png",
                 link: `${globalThis.location.pathname}/umkm/1`,
               },
             ]}

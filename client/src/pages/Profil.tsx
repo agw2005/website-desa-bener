@@ -116,7 +116,7 @@ const Profil = () => {
           <RoundedSection title="PETA DESA">
             <img
               className="border-4"
-              src="example-peta-desa.jpg"
+              src="tidak-ada-gambar-box.png"
               alt="peta-desa"
             />
           </RoundedSection>

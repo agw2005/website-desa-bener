@@ -18,7 +18,7 @@ const ArticleSection = (
         <div className="flex flex-col gap-2">
           <Link to={`${globalThis.location.pathname}/${articleId}`}>
             <img
-              src="https://picsum.photos/id/237/200"
+              src="tidak-ada-gambar-box.png"
               alt={`Image for article ${title}`}
               className="w-full max-h-98 object-cover rounded-xl | transition duration-300 ease-in-out hover:brightness-75"
             />

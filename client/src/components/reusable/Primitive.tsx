@@ -20,6 +20,8 @@ const LINKS = {
 };
 
 const Primitive = ({ children }: PrimitiveProps) => {
+  const logo = null;
+
   return (
     <>
       <div className="flex flex-col min-h-screen">
@@ -28,7 +30,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
           <div className="flex gap-4 items-center">
             <div className="w-24 h-24 p-2 bg-white rounded-2xl flex justify-center items-center overflow-hidden">
               <img
-                src="contoh-logo.png"
+                src={logo ?? "tidak-ada-gambar-4x5.png"}
                 alt="logo-desa-bener"
                 className="w-full h-full object-contain"
               />
@@ -94,10 +96,10 @@ const Primitive = ({ children }: PrimitiveProps) => {
             </div>
           </section>
           <section className="flex flex-col flex-1 items-center justify-between -mt-32">
-            <div className="border-4 border-black rounded-full aspect-square size-40 flex items-center justify-center bg-white font-bold text-sm">
+            <div className="border-4 border-black rounded-full aspect-square size-40 flex items-center justify-center bg-white font-bold overflow-hidden">
               <img
-                className="mt-2"
-                src="contoh-logo.png"
+                className="w-full h-full object-contain"
+                src={logo ?? "tidak-ada-gambar-4x5.png"}
                 alt="logo-desa-bener"
               />
             </div>

@@ -1,9 +1,5 @@
-CREATE DATABASE bener;
-
-\c bener;
-
 CREATE TABLE Aparatur (
-    aparatur_id SERIAL PRIMARY KEY,
+    aparatur_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
     jabatan VARCHAR(255) NOT NULL,
     telepon VARCHAR(255) NOT NULL,
@@ -12,19 +8,19 @@ CREATE TABLE Aparatur (
 );
 
 CREATE TABLE Umum (
-    umum_id SERIAL PRIMARY KEY,
+    umum_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
     nik VARCHAR(255) NOT NULL,
     kata_sandi VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE Pelayanan (
-    pelayanan_id SERIAL PRIMARY KEY,
+    pelayanan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama VARCHAR(255)
 );
 
 CREATE TABLE Pengajuan (
-    pengajuan_id SERIAL PRIMARY KEY,
+    pengajuan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     jenis_pelayanan INT NOT NULL,
     status VARCHAR(20) CHECK (status in ('dalam antrian', 'disetujui', 'ditolak')),
     alasan_penolakan TEXT NOT NULL,
@@ -43,7 +39,7 @@ CREATE TABLE Pengajuan (
 );
 
 CREATE TABLE Lampiran_Pengajuan (
-    lampiran_pengajuan_id SERIAL PRIMARY KEY,
+    lampiran_pengajuan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     pengajuan_id INT,
     nama_file VARCHAR(255) NOT NULL,
     besar_file INT NOT NULL,
@@ -57,7 +53,7 @@ CREATE TABLE Lampiran_Pengajuan (
 );
 
 CREATE TABLE Komentar (
-    komentar_id SERIAL PRIMARY KEY,
+    komentar_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
     surel VARCHAR(255) NOT NULL,
     isi TEXT NOT NULL,
@@ -65,12 +61,12 @@ CREATE TABLE Komentar (
 );
 
 CREATE TABLE Label (
-    label_id SERIAL PRIMARY KEY,
+    label_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE Artikel (
-    artikel_id SERIAL PRIMARY KEY,
+    artikel_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     judul VARCHAR(255) NOT NULL,
     isi TEXT,
     waktu_upload INT NOT NULL
@@ -92,7 +88,7 @@ CREATE TABLE Label_Artikel (
 );
 
 CREATE TABLE Lampiran_Artikel (
-    lampiran_artikel_id SERIAL PRIMARY KEY,
+    lampiran_artikel_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     artikel_id INT,
     nama_file VARCHAR(255) NOT NULL,
     besar_file INT NOT NULL,
@@ -105,7 +101,7 @@ CREATE TABLE Lampiran_Artikel (
 );
 
 CREATE TABLE Dusun (
-    dusun_id SERIAL PRIMARY KEY,
+    dusun_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
     rt INT NOT NULL,
     populasi INT NOT NULL,
@@ -133,7 +129,7 @@ CREATE TABLE Dusun (
 );
 
 CREATE TABLE Profil (
-    profil_id SERIAL PRIMARY KEY,
+    profil_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     deskripsi_sekilas VARCHAR(255) NOT NULL,
     kode_desa INT NOT NULL,
     kecamatan VARCHAR(255) NOT NULL,
@@ -155,22 +151,22 @@ CREATE TABLE Profil (
 );
 
 CREATE TABLE Visi (
-    visi_id SERIAL PRIMARY KEY,
+    visi_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     isi TEXT
 );
 
 CREATE TABLE Misi (
-    misi_id SERIAL PRIMARY KEY,
+    misi_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     isi TEXT
 );
 
 CREATE TABLE Apbdes (
-    apbdes_id SERIAL PRIMARY KEY,
+    apbdes_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     tahun INT
 );
 
 CREATE TABLE Lampiran_Apbdes (
-    apbdes_file_id SERIAL PRIMARY KEY,
+    apbdes_file_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     apbdes_id INT,
     nama_file VARCHAR(255),
     besar_file INT NOT NULL,
@@ -183,18 +179,18 @@ CREATE TABLE Lampiran_Apbdes (
 );
 
 CREATE TABLE Wisata (
-    wisata_id SERIAL PRIMARY KEY,
+    wisata_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
     deskripsi TEXT NOT NULL,
     foto BYTEA NOT NULL
 );
 
 CREATE TABLE Umkm (
-    umkm_id SERIAL PRIMARY KEY,
+    umkm_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama VARCHAR(255) NOT NULL,
     dusun_id INT,
     deskripsi TEXT NOT NULL,
-    foto BYTEA NOT NULL
+    foto BYTEA NOT NULL,
 
     CONSTRAINT dusun_dari_umkm 
         FOREIGN KEY (dusun_id) 
@@ -203,11 +199,11 @@ CREATE TABLE Umkm (
 );
 
 CREATE TABLE Kontak_Umkm (
-    kontak_umkm_id SERIAL PRIMARY KEY,
+    kontak_umkm_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     umkm_id INT,
     jenis_kontak VARCHAR(255),
     isi VARCHAR(255),
-    tautan VARCHAR(255)
+    tautan VARCHAR(255),
 
     CONSTRAINT umkm_dari_kontak 
         FOREIGN KEY (umkm_id) 

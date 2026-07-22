@@ -65,7 +65,7 @@ const ManualCarousel = (
               <Link
                 key={i}
                 to={item.link}
-                className={`${className} hover:opacity-90 transition-opacity`}
+                className={`${className} | transition duration-300 ease-in-out hover:brightness-75`}
                 style={style}
               >
                 {content}

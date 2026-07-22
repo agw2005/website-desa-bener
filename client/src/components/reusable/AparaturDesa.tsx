@@ -7,7 +7,7 @@ interface AparaturDesaProps {
 const AparaturDesa = ({ name, position, phone }: AparaturDesaProps) => {
   return (
     <div className="flex flex-col gap-2">
-      <img src="example-profile.jpg" alt="foto-aparatur-desa" />
+      <img src="tidak-ada-gambar-2x3.png" alt="foto-aparatur-desa" />
       <div className="flex flex-col gap-1 items-center">
         <h2 className="font-bold">{name}</h2>
         <h3 className="font-bold text-xs">{position}</h3>
