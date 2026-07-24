@@ -6,13 +6,14 @@ export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.body = "Healthy";
 };
 
-export const profilSekilas = async (ctx: RouterContext<"/profil-sekilas">) => {
+export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
   const connection = await pool.connect();
-  const result = await connection.queryArray<DeskripsiSekilas[]>(
+  const result = await connection.queryObject<DeskripsiSekilas[]>(
     "SELECT deskripsi_sekilas FROM Profil LIMIT 1;",
   );
+  const content = result.rows[0];
   ctx.response.status = 200;
-  ctx.response.body = result.rows;
+  ctx.response.body = content;
   connection.release();
 };
 
@@ -79,6 +80,140 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data aparatur." };
+  } finally {
+    connection.release();
+  }
+};
+
+export const patchProfil = async (ctx: RouterContext<"/">) => {
+  const PROFIL_TEXT_FIELDS = [
+    "deskripsi_sekilas",
+    "kecamatan",
+    "kabupaten_kota",
+    "provinsi",
+    "koordinat",
+    "tipologi",
+    "klasifikasi",
+    "kategori",
+    "batas_timur",
+    "batas_barat",
+    "batas_selatan",
+    "batas_utara",
+    "sejarah",
+    "tautan_kalender",
+  ] as const;
+
+  const PROFIL_INT_FIELDS = ["kode_desa", "tahun_pembentukan"] as const;
+  const PROFIL_DECIMAL_FIELDS = ["luas"] as const;
+
+  type ProfilTextField = typeof PROFIL_TEXT_FIELDS[number];
+  type ProfilIntField = typeof PROFIL_INT_FIELDS[number];
+  type ProfilDecimalField = typeof PROFIL_DECIMAL_FIELDS[number];
+
+  const form = await ctx.request.body.formData();
+
+  const setClauses: string[] = [];
+  const values: unknown[] = [];
+  let paramIndex = 1;
+
+  const addField = (field: string, value: unknown) => {
+    setClauses.push(`${field} = $${paramIndex}`);
+    values.push(value);
+    paramIndex++;
+  };
+
+  // Text fields: skip if missing OR empty string after trimming
+  for (const field of PROFIL_TEXT_FIELDS) {
+    const value = form.get(field);
+    if (typeof value === "string" && value.trim() !== "") {
+      addField(field, value.trim());
+    }
+  }
+
+  // Int fields: skip if missing, empty, or not a valid integer
+  for (const field of PROFIL_INT_FIELDS) {
+    const value = form.get(field);
+    if (typeof value === "string" && value.trim() !== "") {
+      const parsed = Number.parseInt(value, 10);
+      if (Number.isNaN(parsed)) {
+        ctx.response.status = 400;
+        ctx.response.body = {
+          error: `Field ${field} harus berupa angka bulat.`,
+        };
+        return;
+      }
+      addField(field, parsed);
+    }
+  }
+
+  // Decimal fields: same pattern
+  for (const field of PROFIL_DECIMAL_FIELDS) {
+    const value = form.get(field);
+    if (typeof value === "string" && value.trim() !== "") {
+      const parsed = Number.parseFloat(value);
+      if (Number.isNaN(parsed)) {
+        ctx.response.status = 400;
+        ctx.response.body = { error: `Field ${field} harus berupa angka.` };
+        return;
+      }
+      addField(field, parsed);
+    }
+  }
+
+  // File field: skip if not provided, or if it's an empty file input
+  const peta = form.get("peta");
+  if (peta instanceof File && peta.size > 0) {
+    if (!["image/jpeg", "image/png", "image/jpg"].includes(peta.type)) {
+      ctx.response.status = 400;
+      ctx.response.body = {
+        error: "Peta harus berformat JPEG, PNG, atau JPG.",
+      };
+      return;
+    }
+    if (peta.size > 5 * 1024 * 1024) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Ukuran peta maksimal 5MB." };
+      return;
+    }
+    addField("peta", new Uint8Array(await peta.arrayBuffer()));
+  }
+
+  if (setClauses.length === 0) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      error: "Tidak ada field yang dikirim untuk diperbarui.",
+    };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const existing = await connection.queryObject<{ profil_id: number }>(
+      "SELECT profil_id FROM Profil LIMIT 1",
+    );
+
+    if (existing.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Data profil desa belum tersedia." };
+      return;
+    }
+
+    const profilId = existing.rows[0].profil_id;
+    values.push(profilId);
+
+    await connection.queryObject(
+      `UPDATE Profil SET ${
+        setClauses.join(", ")
+      } WHERE profil_id = $${paramIndex}`,
+      values,
+    );
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Profil desa berhasil diperbarui." };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal memperbarui data profil desa." };
   } finally {
     connection.release();
   }
