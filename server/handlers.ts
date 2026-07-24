@@ -1,5 +1,6 @@
 import { RouterContext } from "@oak/oak/router";
 import { pool } from "./dbpool.ts";
+import type { DeskripsiSekilas } from "./types/Profil.d.ts";
 
 export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.status = 200;
@@ -8,10 +9,10 @@ export const healthCheck = (ctx: RouterContext<"/">) => {
 
 export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
   const connection = await pool.connect();
-  const result = await connection.queryObject<DeskripsiSekilas[]>(
+  const result = await connection.queryObject<DeskripsiSekilas>(
     "SELECT deskripsi_sekilas FROM Profil LIMIT 1;",
   );
-  const content = result.rows[0];
+  const content = result.rows;
   ctx.response.status = 200;
   ctx.response.body = content;
   connection.release();

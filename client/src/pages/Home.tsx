@@ -5,6 +5,8 @@ import NumberInput from "../components/reusable/inputs/NumberInput.tsx";
 import { useState } from "react";
 import PasswordInput from "../components/reusable/inputs/PasswordInput.tsx";
 import Button from "../components/reusable/Button.tsx";
+import useFetch from "../hooks/useFetch.tsx";
+import type { DeskripsiSekilas } from "../types/Profil.d.ts";
 
 const APARATUR_DESA = [
   {
@@ -54,9 +56,6 @@ const APARATUR_DESA = [
   },
 ];
 
-const PROFIL_SEKILAS =
-  'Desa Prayungan memiliki akar sejarah yang erat dengan era Kerajaan Majapahit, di mana asal-usul namanya diambil dari peristiwa "Perang Uyang-Uyungan". Menurut kisah turun-temurun, perang sengit dan lama tersebut melibatkan seorang tokoh sakti setempat bernama Kyai Tjok Brosot melawan Putra Kyai Sendang Drajat Sedayu, yang dipicu oleh perebutan istri Kyai Tjok Brosot yang berparas cantik, Nyai Tani, setelah sebuah sayembara menanam padi. Tempat di mana pertempuran hebat secara uyang-uyungan (saling mengejar/berkelit) itu berlangsung kini abadi menjadi nama Desa Prayungan, yang pada awalnya berfungsi sebagai area pendopo atau tempat menerima tamu (dayohan) milik keluarga Kyai Tjok Brosot.';
-
 const LAYANAN_MANDIRI = [
   "Surat Pengantar SKCK",
   "Surat Keterangan Kelahiran & Kematian",
@@ -68,10 +67,18 @@ const Home = () => {
   const [nik, setNik] = useState("");
   const [password, setPassword] = useState("");
 
+  const {
+    data: profilSekilas,
+    isLoading: _profilSekilasIsLoading,
+    isError: _profilSekilasIsError,
+  } = useFetch<DeskripsiSekilas>(
+    `http://${globalThis.location.hostname}:8000/profil/deskripsi`,
+  );
+
   return (
     <Primitive>
       <SimpleSection subtitle="PROFIL SEKILAS">
-        {PROFIL_SEKILAS}
+        {profilSekilas && profilSekilas[0].deskripsi_sekilas}
       </SimpleSection>
 
       <SimpleSection subtitle="APARATUR DESA">
