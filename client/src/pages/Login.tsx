@@ -38,7 +38,8 @@ const Login = () => {
 
         if (response.ok) {
           const responseBody: { jwt: string } = await response.json();
-          sessionStorage.setItem("session_token", responseBody.jwt);
+          localStorage.setItem("local_token", responseBody.jwt);
+          console.log(responseBody.jwt);
           navigate("/");
         } else {
           setInputIsWrong(true);

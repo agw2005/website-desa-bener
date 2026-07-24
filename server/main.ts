@@ -13,7 +13,8 @@ root
 
 aparatur
   .post("/", handlers.postAparatur)
-  .post("/login", handlers.requestJwtAparatur);
+  .post("/login", handlers.requestJwtAparatur)
+  .get("/verifikasi", handlers.verifyJwtAparatur);
 
 profil
   .patch("/", handlers.patchProfil)

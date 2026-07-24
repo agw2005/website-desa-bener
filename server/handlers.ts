@@ -7,8 +7,9 @@ import {
   getNumericDate,
   type Header,
   type Payload,
+  verify,
 } from "@zaubrik/djwt";
-import { LoginInfo } from "./types/Aparatur.d.ts";
+import { JwtPayload, LoginInfo } from "./types/Aparatur.d.ts";
 
 export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.status = 200;
@@ -296,4 +297,52 @@ export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
 
   ctx.response.status = 200;
   ctx.response.body = { jwt };
+};
+
+export const verifyJwtAparatur = async (ctx: RouterContext<"/verifikasi">) => {
+  const jwtKeyString = Deno.env.get("JWT_KEY");
+  if (!jwtKeyString) throw new Error("JWT_KEY environment variable is missing");
+  const jwtKeyBytes = decodeBase64(jwtKeyString);
+
+  const jwtKey = await crypto.subtle.importKey(
+    "raw",
+    jwtKeyBytes,
+    { name: "HMAC", hash: "SHA-512" },
+    true,
+    ["sign", "verify"],
+  );
+
+  const headers = ctx.request.headers;
+  const authHeader = headers.get("Authorization");
+
+  if (!authHeader) {
+    ctx.response.status = 401;
+    ctx.response.body = { message: "No authorization detected" };
+    return;
+  }
+
+  const clientJwtToken = authHeader.split(" ")[1];
+
+  if (!clientJwtToken) {
+    ctx.response.status = 401;
+    ctx.response.body = { message: "Invalid JWT" };
+    return;
+  }
+
+  try {
+    const decoded = (await verify(
+      clientJwtToken,
+      jwtKey,
+    ) as unknown) as JwtPayload;
+
+    if (decoded) {
+      ctx.response.status = 200;
+      ctx.response.body = decoded;
+    } else {
+      ctx.response.status = 401;
+      ctx.response.body = { message: "JWT is no longer valid" };
+    }
+  } catch (err) {
+    console.error(err);
+  }
 };

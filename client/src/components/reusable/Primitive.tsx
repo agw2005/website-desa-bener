@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 import Button from "./Button.tsx";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import Breadcrumbs from "./Breadcrumbs.tsx";
+import useAuth from "../../hooks/useAuth.tsx";
 
 interface PrimitiveProps {
   children: ReactNode;
@@ -20,6 +21,8 @@ const LINKS = {
 };
 
 const Primitive = ({ children }: PrimitiveProps) => {
+  const navigate = useNavigate();
+  const { isAuthorized, authIsLoading, authInfo } = useAuth();
   const logo = null;
 
   return (
@@ -44,7 +47,12 @@ const Primitive = ({ children }: PrimitiveProps) => {
           </div>
         </div>
         <div className="sticky top-0 z-50">
-          <div className="flex bg-amber-500 px-16 pt-4 pb-12 rounded-b-full bottom-shadow">
+          <div className="flex gap-2 bg-amber-500 px-16 pt-4 pb-12 rounded-b-full bottom-shadow">
+            {isAuthorized && (
+              <p className="font-bold text-white">
+                ({authIsLoading ? "Loading" : authInfo.name})
+              </p>
+            )}
             <Breadcrumbs />
           </div>
           <nav className="px-32 flex justify-center gap-4 relative bottom-6">
@@ -72,9 +80,23 @@ const Primitive = ({ children }: PrimitiveProps) => {
             <Link to={LINKS.kalender}>
               <Button className="bottom-shadow">KALENDER</Button>
             </Link>
-            <Link to={LINKS.login}>
-              <Button className="bottom-shadow">LOGIN</Button>
-            </Link>
+            {isAuthorized
+              ? (
+                <Button
+                  onClick={() => {
+                    localStorage.removeItem("local_token");
+                    navigate("/login");
+                  }}
+                  className="bottom-shadow"
+                >
+                  LOGOUT
+                </Button>
+              )
+              : (
+                <Link to={LINKS.login}>
+                  <Button className="bottom-shadow">LOGIN</Button>
+                </Link>
+              )}
           </nav>
         </div>
         <main className="flex flex-col gap-16 flex-1">
