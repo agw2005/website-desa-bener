@@ -12,7 +12,8 @@ root
   .get("/", handlers.healthCheck);
 
 aparatur
-  .post("/", handlers.postAparatur);
+  .post("/", handlers.postAparatur)
+  .post("/login", handlers.requestJwtAparatur);
 
 profil
   .patch("/", handlers.patchProfil)

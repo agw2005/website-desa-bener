@@ -1,6 +1,14 @@
 import { RouterContext } from "@oak/oak/router";
 import { pool } from "./dbpool.ts";
 import type { DeskripsiSekilas } from "./types/Profil.d.ts";
+import { decodeBase64 } from "@std/encoding/base64";
+import {
+  create,
+  getNumericDate,
+  type Header,
+  type Payload,
+} from "@zaubrik/djwt";
+import { LoginInfo } from "./types/Aparatur.d.ts";
 
 export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.status = 200;
@@ -218,4 +226,74 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
   } finally {
     connection.release();
   }
+};
+
+// LOGIN HANDLERS
+
+const getAparaturByName = async (nama: string): Promise<LoginInfo | null> => {
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<LoginInfo>(
+      "SELECT aparatur_id, nama, kata_sandi FROM Aparatur WHERE nama = $1 LIMIT 1",
+      [nama],
+    );
+    return result.rows[0] ?? null;
+  } finally {
+    connection.release();
+  }
+};
+
+export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
+  let request: LoginInfo;
+  try {
+    request = await ctx.request.body.json();
+  } catch {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Body permintaan tidak valid." };
+    return;
+  }
+
+  const { nama, kata_sandi } = request;
+
+  if (
+    typeof nama !== "string" || typeof kata_sandi !== "string" ||
+    nama.trim() === "" || kata_sandi.trim() === ""
+  ) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Nama dan kata sandi wajib diisi." };
+    return;
+  }
+
+  const candidate = await getAparaturByName(nama);
+
+  const passwordMatches = candidate?.kata_sandi === request.kata_sandi;
+
+  if (!candidate || !passwordMatches) {
+    ctx.response.status = 401;
+    ctx.response.body = { error: "Nama atau kata sandi salah." };
+    return;
+  }
+
+  const jwtKeyString = Deno.env.get("JWT_KEY");
+  if (!jwtKeyString) throw new Error("JWT_KEY environment variable is missing");
+  const jwtKeyBytes = decodeBase64(jwtKeyString);
+  const jwtKey = await crypto.subtle.importKey(
+    "raw",
+    jwtKeyBytes,
+    { name: "HMAC", hash: "SHA-512" },
+    true,
+    ["sign", "verify"],
+  );
+
+  const jwtHeader: Header = { alg: "HS512", typ: "JWT" };
+  const jwtPayload: Payload = {
+    iss: "System",
+    exp: getNumericDate(60 * 60 * 9), // 9 hours
+    name: candidate.nama,
+  };
+
+  const jwt = await create(jwtHeader, jwtPayload, jwtKey);
+
+  ctx.response.status = 200;
+  ctx.response.body = { jwt };
 };

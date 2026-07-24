@@ -1,9 +1,12 @@
 {
   "tasks": {
-    "dev": "deno run --watch --allow-net --allow-env --allow-read --allow-write main.ts"
+    "dev": "deno run --watch --allow-net --allow-env --allow-read --allow-write main.ts",
+    "keygen": "deno run --allow-read --allow-write ./generateKey.ts"
   },
   "imports": {
     "@db/postgres": "jsr:@db/postgres@^0.19.5",
-    "@oak/oak": "jsr:@oak/oak@^17.2.0"
+    "@oak/oak": "jsr:@oak/oak@^17.2.0",
+    "@std/encoding": "jsr:@std/encoding@^1.0.11",
+    "@zaubrik/djwt": "jsr:@zaubrik/djwt@^3.0.2"
   }
 }
