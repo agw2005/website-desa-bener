@@ -9,6 +9,7 @@ const LABELS: Record<string, string> = {
   wisata: "Wisata",
   kontak: "Kontak Aspirasi",
   kalender: "Kalender",
+  manajemen: "Manajemen",
   login: "Login",
 };
 
