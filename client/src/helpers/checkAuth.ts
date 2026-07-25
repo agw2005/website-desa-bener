@@ -1,10 +1,12 @@
-export const checkAparaturAuth = async () => {
+import type { LoggedInInfo } from "../types/Login.d.ts";
+
+export const checkAuth = async (): Promise<null | LoggedInInfo> => {
   const storedToken = localStorage.getItem("local_token");
-  if (!storedToken) return false;
+  if (!storedToken) return null;
 
   try {
     const response = await fetch(
-      `http://${globalThis.location.hostname}:8000/aparatur/verifikasi`,
+      `http://${globalThis.location.hostname}:8000/verifikasi`,
       {
         method: "GET",
         headers: { Authorization: `Bearer ${storedToken}` },
@@ -13,13 +15,15 @@ export const checkAparaturAuth = async () => {
 
     if (!response.ok) {
       localStorage.removeItem("local_token");
-      return false;
+      return null;
     }
 
-    return true;
+    const body: LoggedInInfo = await response.json();
+
+    return body;
   } catch (err) {
     console.error(err);
     localStorage.removeItem("local_token");
-    return false;
+    return null;
   }
 };

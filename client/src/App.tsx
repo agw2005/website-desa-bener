@@ -10,6 +10,8 @@ import Kontak from "./pages/Kontak.tsx";
 import Kalender from "./pages/Kalender.tsx";
 import Login from "./pages/Login.tsx";
 import { loginLoader } from "./helpers/loginLoader.ts";
+import Manajemen from "./pages/Manajemen.tsx";
+import { manajemenLoader } from "./helpers/manajemenLoader.ts";
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
@@ -20,6 +22,7 @@ const router = createBrowserRouter([
   { path: "/wisata", element: <Wisata /> },
   { path: "/kontak", element: <Kontak /> },
   { path: "/kalender", element: <Kalender /> },
+  { path: "/manajemen", element: <Manajemen />, loader: manajemenLoader },
   { path: "/login", element: <Login />, loader: loginLoader },
 ]);
 

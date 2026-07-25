@@ -9,9 +9,9 @@ import {
   type Payload,
   verify,
 } from "@zaubrik/djwt";
-import { Aparatur, JwtPayload } from "./types/Aparatur.d.ts";
+import { Aparatur } from "./types/Aparatur.d.ts";
 import { Umum } from "./types/Umum.d.ts";
-import { LoginInfo } from "./types/Login.d.ts";
+import { LoggedInInfo, LoginInfo } from "./types/Login.d.ts";
 
 export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.status = 200;
@@ -445,7 +445,7 @@ export const verifyJwt = async (ctx: RouterContext<"/verifikasi">) => {
     const decoded = (await verify(
       clientJwtToken,
       jwtKey,
-    ) as unknown) as JwtPayload;
+    ) as unknown) as LoggedInInfo;
 
     if (decoded) {
       ctx.response.status = 200;

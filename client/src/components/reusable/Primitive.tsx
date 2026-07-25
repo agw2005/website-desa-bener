@@ -17,6 +17,7 @@ const LINKS = {
   wisata: "/wisata",
   kontak: "/kontak",
   kalender: "/kalender",
+  manajemen: "/manajemen",
   login: "/login",
 };
 
@@ -55,7 +56,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
             )}
             <Breadcrumbs />
           </div>
-          <nav className="px-32 flex justify-center gap-4 relative bottom-6">
+          <nav className="px-8 flex justify-center gap-4 relative bottom-6">
             <Link to={LINKS.home}>
               <Button className="bottom-shadow">BERANDA</Button>
             </Link>
@@ -80,6 +81,11 @@ const Primitive = ({ children }: PrimitiveProps) => {
             <Link to={LINKS.kalender}>
               <Button className="bottom-shadow">KALENDER</Button>
             </Link>
+            {isLoggedIn && !authIsLoading && authInfo.type === "aparatur" && (
+              <Link to={LINKS.manajemen}>
+                <Button className="bottom-shadow">MANAJEMEN</Button>
+              </Link>
+            )}
             {isLoggedIn
               ? (
                 <Button
