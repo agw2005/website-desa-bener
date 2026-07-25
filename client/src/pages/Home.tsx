@@ -7,6 +7,8 @@ import PasswordInput from "../components/reusable/inputs/PasswordInput.tsx";
 import Button from "../components/reusable/Button.tsx";
 import useFetch from "../hooks/useFetch.tsx";
 import type { DeskripsiSekilas } from "../types/Profil.d.ts";
+import useAuth from "../hooks/useAuth.tsx";
+import type { LoginInfo } from "../types/Login.d.ts";
 
 const APARATUR_DESA = [
   {
@@ -66,6 +68,9 @@ const LAYANAN_MANDIRI = [
 const Home = () => {
   const [nik, setNik] = useState("");
   const [password, setPassword] = useState("");
+  const [inputIsEmpty, setInputIsEmpty] = useState(false);
+  const [inputIsWrong, setInputIsWrong] = useState(false);
+  const { isLoggedIn, authIsLoading: _, authInfo: __ } = useAuth();
 
   const {
     data: profilSekilas,
@@ -74,6 +79,41 @@ const Home = () => {
   } = useFetch<DeskripsiSekilas>(
     `http://${globalThis.location.hostname}:8000/profil/deskripsi`,
   );
+
+  const handleLogin = async () => {
+    setInputIsEmpty(false);
+    setInputIsWrong(false);
+
+    if (nik === "" || password === "") setInputIsEmpty(true);
+
+    const payload: LoginInfo = {
+      identifier: nik,
+      kata_sandi: password,
+    };
+
+    try {
+      const response = await fetch(
+        `http://${globalThis.location.hostname}:8000/umum/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
+        },
+      );
+
+      if (response.ok) {
+        const responseBody: { jwt: string } = await response.json();
+        localStorage.setItem("local_token", responseBody.jwt);
+        globalThis.location.reload();
+      } else {
+        setInputIsWrong(true);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   return (
     <Primitive>
@@ -85,46 +125,58 @@ const Home = () => {
         <ManualCarousel visibleCards={7} pixelGap={16} items={APARATUR_DESA} />
       </SimpleSection>
 
-      <SimpleSection subtitle="LAYANAN MANDIRI">
-        <div className="flex gap-8">
-          <div className="bg-blue-300 flex-1 border p-4 rounded-2xl">
-            <h3 className="text-xl font-bold">LAYANAN YANG TERSEDIA</h3>
-            <ul className="list-disc">
-              {LAYANAN_MANDIRI.map((layanan, index) => (
-                <li key={index} className="list-inside">{layanan}</li>
-              ))}
-            </ul>
+      {!isLoggedIn && (
+        <SimpleSection subtitle="LAYANAN MANDIRI">
+          <div className="flex gap-8">
+            <div className="bg-blue-300 flex-1 border p-4 rounded-2xl">
+              <h3 className="text-xl font-bold">LAYANAN YANG TERSEDIA</h3>
+              <ul className="list-disc">
+                {LAYANAN_MANDIRI.map((layanan, index) => (
+                  <li key={index} className="list-inside">{layanan}</li>
+                ))}
+              </ul>
+            </div>
+            <div className="flex-1 flex flex-col gap-4">
+              <NumberInput
+                label="NIK"
+                name="nik-umum"
+                id="nik-umum"
+                value={nik}
+                onChangeHandler={(e) => setNik(e.currentTarget.value)}
+              />
+              <PasswordInput
+                label="Kata Sandi"
+                name="password-umum"
+                id="password-umum"
+                value={password}
+                onChangeHandler={(e) => setPassword(e.currentTarget.value)}
+              />
+              <div className="flex gap-2">
+                <Button
+                  className="w-max"
+                  onClick={handleLogin}
+                  variant="black"
+                >
+                  Login
+                </Button>
+                {inputIsEmpty && (
+                  <div className="w-max rounded-2xl bg-red-500 px-4 py-2 text-white text-xs font-bold flex items-center">
+                    NIK dan kata sandi tidak boleh kosong
+                  </div>
+                )}
+                {inputIsWrong && (
+                  <div className="w-max rounded-2xl bg-red-500 px-4 py-2 text-white text-xs font-bold flex items-center">
+                    NIK atau kata sandi yang anda masukan salah
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className="bg-red-500 flex-1 p-4 rounded-2xl flex items-center justify-center font-bold text-4xl">
+              <h3 className="text-center">HUBUNGI DESA UNTUK PEMBUATAN AKUN</h3>
+            </div>
           </div>
-          <div className="flex-1 flex flex-col gap-4">
-            <NumberInput
-              label="NIK"
-              name="nik-umum"
-              id="nik-umum"
-              value={nik}
-              onChangeHandler={(e) => setNik(e.currentTarget.value)}
-            />
-            <PasswordInput
-              label="Kata Sandi"
-              name="password-umum"
-              id="password-umum"
-              value={password}
-              onChangeHandler={(e) => setPassword(e.currentTarget.value)}
-            />
-            <Button
-              className="w-max"
-              onClick={() => {
-                console.log({ nik, password });
-              }}
-              variant="black"
-            >
-              Login
-            </Button>
-          </div>
-          <div className="bg-red-500 flex-1 p-4 rounded-2xl flex items-center justify-center font-bold text-4xl">
-            <h3 className="text-center">HUBUNGI DESA UNTUK PEMBUATAN AKUN</h3>
-          </div>
-        </div>
-      </SimpleSection>
+        </SimpleSection>
+      )}
 
       <SimpleSection subtitle="ARTIKEL TERKINI">
         <div className="flex gap-8 my-4">

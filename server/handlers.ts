@@ -318,8 +318,6 @@ export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
 
   const aparaturCandidate = await getAparaturByName(namaAparatur);
 
-  console.log(aparaturCandidate);
-
   const passwordMatches = aparaturCandidate?.kata_sandi === kataSandi;
 
   if (!aparaturCandidate || !passwordMatches) {
