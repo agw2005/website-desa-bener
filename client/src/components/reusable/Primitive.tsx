@@ -22,7 +22,7 @@ const LINKS = {
 
 const Primitive = ({ children }: PrimitiveProps) => {
   const navigate = useNavigate();
-  const { isAuthorized, authIsLoading, authInfo } = useAuth();
+  const { isLoggedIn, authIsLoading, authInfo } = useAuth();
   const logo = null;
 
   return (
@@ -48,9 +48,9 @@ const Primitive = ({ children }: PrimitiveProps) => {
         </div>
         <div className="sticky top-0 z-50">
           <div className="flex gap-2 bg-amber-500 px-16 pt-4 pb-12 rounded-b-full bottom-shadow">
-            {isAuthorized && (
+            {isLoggedIn && (
               <p className="font-bold text-white">
-                ({authIsLoading ? "Loading" : authInfo.name})
+                ({authIsLoading ? "Loading" : authInfo.identifier})
               </p>
             )}
             <Breadcrumbs />
@@ -80,7 +80,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
             <Link to={LINKS.kalender}>
               <Button className="bottom-shadow">KALENDER</Button>
             </Link>
-            {isAuthorized
+            {isLoggedIn
               ? (
                 <Button
                   onClick={() => {

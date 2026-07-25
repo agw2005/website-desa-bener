@@ -7,22 +7,28 @@ const app = new Application();
 const root = new Router();
 const aparatur = new Router();
 const profil = new Router();
+const umum = new Router();
 
 root
-  .get("/", handlers.healthCheck);
+  .get("/", handlers.healthCheck)
+  .get("/verifikasi", handlers.verifyJwt);
 
 aparatur
   .post("/", handlers.postAparatur)
-  .post("/login", handlers.requestJwtAparatur)
-  .get("/verifikasi", handlers.verifyJwtAparatur);
+  .post("/login", handlers.requestJwtAparatur);
 
 profil
   .patch("/", handlers.patchProfil)
   .get("/deskripsi", handlers.deskripsiSekilas);
 
+umum
+  .post("/", handlers.postUmum)
+  .post("/login", handlers.requestJwtWargaUmum);
+
 root
   .use("/aparatur", aparatur.routes(), aparatur.allowedMethods())
-  .use("/profil", profil.routes(), profil.allowedMethods());
+  .use("/profil", profil.routes(), profil.allowedMethods())
+  .use("/umum", umum.routes(), umum.allowedMethods());
 
 app
   .use(async (ctx, next) => {

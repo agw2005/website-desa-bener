@@ -4,8 +4,8 @@ import Primitive from "../components/reusable/Primitive.tsx";
 import TextInput from "../components/reusable/inputs/TextInput.tsx";
 import NumberInput from "../components/reusable/inputs/NumberInput.tsx";
 import PasswordInput from "../components/reusable/inputs/PasswordInput.tsx";
-import type { LoginInfo } from "../types/Aparatur.d.ts";
 import { useNavigate } from "react-router";
+import type { LoginInfo } from "../types/Login.d.ts";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,20 +13,32 @@ const Login = () => {
   const [passwordUmum, setPasswordUmum] = useState("");
   const [nama, setNama] = useState("");
   const [passwordAparatur, setPasswordAparatur] = useState("");
-  const [inputIsEmpty, setInputIsEmpty] = useState(false);
-  const [inputIsWrong, setInputIsWrong] = useState(false);
 
-  const handleAparaturLogin = async () => {
-    setInputIsEmpty(false);
-    setInputIsWrong(false);
+  const [aparaturInputIsEmpty, setAparaturInputIsEmpty] = useState(false);
+  const [aparaturInputIsWrong, setAparaturInputIsWrong] = useState(false);
+  const [umumInputIsEmpty, setUmumInputIsEmpty] = useState(false);
+  const [umumInputIsWrong, setUmumInputIsWrong] = useState(false);
 
-    if (nama === "" || passwordAparatur === "") {
-      setInputIsEmpty(true);
+  const handleLogin = async (type: "aparatur" | "umum") => {
+    setAparaturInputIsEmpty(false);
+    setAparaturInputIsWrong(false);
+    setUmumInputIsEmpty(false);
+    setUmumInputIsWrong(false);
+
+    const identifier = type === "aparatur" ? nama : nik;
+    const password = type === "aparatur" ? passwordAparatur : passwordUmum;
+
+    if (identifier === "" || password === "") {
+      if (type === "aparatur") setAparaturInputIsEmpty(true);
+      else setUmumInputIsEmpty(true);
     } else {
-      const payload: LoginInfo = { nama, kata_sandi: passwordAparatur };
+      const payload: LoginInfo = {
+        identifier: identifier,
+        kata_sandi: password,
+      };
       try {
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/aparatur/login`,
+          `http://${globalThis.location.hostname}:8000/${type}/login`,
           {
             method: "POST",
             headers: {
@@ -39,10 +51,10 @@ const Login = () => {
         if (response.ok) {
           const responseBody: { jwt: string } = await response.json();
           localStorage.setItem("local_token", responseBody.jwt);
-          console.log(responseBody.jwt);
           navigate("/");
         } else {
-          setInputIsWrong(true);
+          if (type === "aparatur") setAparaturInputIsWrong(true);
+          else setUmumInputIsWrong(true);
         }
       } catch (err) {
         console.error(err);
@@ -73,15 +85,27 @@ const Login = () => {
               onChangeHandler={(e) => setPasswordUmum(e.currentTarget.value)}
             />
 
-            <Button
-              className="w-max"
-              onClick={() => {
-                console.log({ nik, passwordUmum });
-              }}
-              variant="black"
-            >
-              Login
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                className="w-max"
+                onClick={() => {
+                  handleLogin("umum");
+                }}
+                variant="black"
+              >
+                Login
+              </Button>
+              {umumInputIsEmpty && (
+                <div className="w-max rounded-2xl bg-red-500 px-4 py-2 text-white font-bold">
+                  NIK dan kata sandi tidak boleh kosong
+                </div>
+              )}
+              {umumInputIsWrong && (
+                <div className="w-max rounded-2xl bg-red-500 px-4 py-2 text-white font-bold">
+                  NIK atau kata sandi yang anda masukan salah
+                </div>
+              )}
+            </div>
           </div>
         </form>
         <form className="flex-1">
@@ -108,17 +132,19 @@ const Login = () => {
             <div className="flex gap-4">
               <Button
                 className="w-max"
-                onClick={handleAparaturLogin}
+                onClick={() => {
+                  handleLogin("aparatur");
+                }}
                 variant="black"
               >
                 Login
               </Button>
-              {inputIsEmpty && (
+              {aparaturInputIsEmpty && (
                 <div className="w-max rounded-2xl bg-red-500 px-4 py-2 text-white font-bold">
                   Nama dan kata sandi tidak boleh kosong
                 </div>
               )}
-              {inputIsWrong && (
+              {aparaturInputIsWrong && (
                 <div className="w-max rounded-2xl bg-red-500 px-4 py-2 text-white font-bold">
                   Nama atau kata sandi yang anda masukan salah
                 </div>

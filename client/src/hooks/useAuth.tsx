@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import type { JwtPayload } from "../types/Aparatur.d.ts";
+import type { LoggedInInfo } from "../types/Login.d.ts";
 
 const useAuth = () => {
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
-  const [authInfo, setAuthInfo] = useState<JwtPayload | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [authInfo, setAuthInfo] = useState<LoggedInInfo | null>(null);
   const [authIsLoading, setAuthIsLoading] = useState(false);
 
   useEffect(() => {
@@ -12,13 +12,13 @@ const useAuth = () => {
       try {
         const storedToken = localStorage.getItem("local_token");
         if (!storedToken) {
-          setIsAuthorized(false);
+          setIsLoggedIn(false);
           setAuthInfo(null);
           return;
         }
 
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/aparatur/verifikasi`,
+          `http://${globalThis.location.hostname}:8000/verifikasi`,
           {
             method: "GET",
             headers: {
@@ -27,10 +27,10 @@ const useAuth = () => {
           },
         );
 
-        setIsAuthorized(response.ok);
+        setIsLoggedIn(response.ok);
 
         if (response.ok) {
-          const responseJson: JwtPayload = await response.json();
+          const responseJson: LoggedInInfo = await response.json();
           setAuthInfo(responseJson);
         } else {
           console.error(response.status);
@@ -49,7 +49,7 @@ const useAuth = () => {
     checkSession();
   }, []);
 
-  return { isAuthorized, authIsLoading, authInfo };
+  return { isLoggedIn, authIsLoading, authInfo };
 };
 
 export default useAuth;

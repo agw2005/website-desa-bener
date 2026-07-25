@@ -9,7 +9,9 @@ import {
   type Payload,
   verify,
 } from "@zaubrik/djwt";
-import { JwtPayload, LoginInfo } from "./types/Aparatur.d.ts";
+import { Aparatur, JwtPayload } from "./types/Aparatur.d.ts";
+import { Umum } from "./types/Umum.d.ts";
+import { LoginInfo } from "./types/Login.d.ts";
 
 export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.status = 200;
@@ -29,6 +31,46 @@ export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
 
 // POST HANDLERS
 
+export const postUmum = async (ctx: RouterContext<"/">) => {
+  const form = await ctx.request.body.formData();
+  const nama = form.get("nama");
+  const nik = form.get("nik");
+  const kataSandi = form.get("kata_sandi");
+
+  if (
+    typeof nama !== "string" || nama.trim() === "" ||
+    typeof nik !== "string" || nik.trim() === "" ||
+    typeof kataSandi !== "string" || kataSandi.trim() === ""
+  ) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      error: "Field nama, nik, dan kata_sandi wajib diisi.",
+    };
+    return;
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<{ umum_id: number }>(
+      `INSERT INTO
+       Umum (nama, nik, kata_sandi)
+       VALUES ($1, $2, $3)
+       RETURNING umum_id`,
+      [nama, nik, kataSandi],
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = { umum_id: result.rows[0].umum_id };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data warga umum." };
+  } finally {
+    connection.release();
+  }
+};
+
 export const postAparatur = async (ctx: RouterContext<"/">) => {
   const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
   const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -37,14 +79,14 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
   const nama = form.get("nama");
   const jabatan = form.get("jabatan");
   const telepon = form.get("telepon");
-  const kata_sandi = form.get("kata_sandi");
+  const kataSandi = form.get("kata_sandi");
   const foto = form.get("foto");
 
   if (
     typeof nama !== "string" || nama.trim() === "" ||
     typeof jabatan !== "string" || jabatan.trim() === "" ||
     typeof telepon !== "string" || telepon.trim() === "" ||
-    typeof kata_sandi !== "string" || kata_sandi.trim() === ""
+    typeof kataSandi !== "string" || kataSandi.trim() === ""
   ) {
     ctx.response.status = 400;
     ctx.response.body = {
@@ -81,7 +123,7 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
        Aparatur (nama, jabatan, telepon, foto, kata_sandi)
        VALUES ($1, $2, $3, $4, $5)
        RETURNING aparatur_id`,
-      [nama, jabatan, telepon, fotoBytes, kata_sandi],
+      [nama, jabatan, telepon, fotoBytes, kataSandi],
     );
 
     ctx.response.status = 201;
@@ -115,10 +157,6 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
 
   const PROFIL_INT_FIELDS = ["kode_desa", "tahun_pembentukan"] as const;
   const PROFIL_DECIMAL_FIELDS = ["luas"] as const;
-
-  type ProfilTextField = typeof PROFIL_TEXT_FIELDS[number];
-  type ProfilIntField = typeof PROFIL_INT_FIELDS[number];
-  type ProfilDecimalField = typeof PROFIL_DECIMAL_FIELDS[number];
 
   const form = await ctx.request.body.formData();
 
@@ -231,12 +269,25 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
 
 // LOGIN HANDLERS
 
-const getAparaturByName = async (nama: string): Promise<LoginInfo | null> => {
+const getAparaturByName = async (nama: string): Promise<Aparatur | null> => {
   const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<LoginInfo>(
-      "SELECT aparatur_id, nama, kata_sandi FROM Aparatur WHERE nama = $1 LIMIT 1",
+    const result = await connection.queryObject<Aparatur>(
+      "SELECT * FROM Aparatur WHERE nama = $1 LIMIT 1",
       [nama],
+    );
+    return result.rows[0] ?? null;
+  } finally {
+    connection.release();
+  }
+};
+
+const getWargaByNik = async (nik: string): Promise<Umum | null> => {
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<Umum>(
+      "SELECT * FROM Umum WHERE nik = $1 LIMIT 1",
+      [nik],
     );
     return result.rows[0] ?? null;
   } finally {
@@ -254,22 +305,24 @@ export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
     return;
   }
 
-  const { nama, kata_sandi } = request;
+  const { identifier: namaAparatur, kata_sandi: kataSandi } = request;
 
   if (
-    typeof nama !== "string" || typeof kata_sandi !== "string" ||
-    nama.trim() === "" || kata_sandi.trim() === ""
+    typeof namaAparatur !== "string" || typeof kataSandi !== "string" ||
+    namaAparatur.trim() === "" || kataSandi.trim() === ""
   ) {
     ctx.response.status = 400;
     ctx.response.body = { error: "Nama dan kata sandi wajib diisi." };
     return;
   }
 
-  const candidate = await getAparaturByName(nama);
+  const aparaturCandidate = await getAparaturByName(namaAparatur);
 
-  const passwordMatches = candidate?.kata_sandi === request.kata_sandi;
+  console.log(aparaturCandidate);
 
-  if (!candidate || !passwordMatches) {
+  const passwordMatches = aparaturCandidate?.kata_sandi === kataSandi;
+
+  if (!aparaturCandidate || !passwordMatches) {
     ctx.response.status = 401;
     ctx.response.body = { error: "Nama atau kata sandi salah." };
     return;
@@ -290,7 +343,9 @@ export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
   const jwtPayload: Payload = {
     iss: "System",
     exp: getNumericDate(60 * 60 * 9), // 9 hours
-    name: candidate.nama,
+    id: aparaturCandidate.aparatur_id,
+    identifier: aparaturCandidate.nama,
+    type: "aparatur",
   };
 
   const jwt = await create(jwtHeader, jwtPayload, jwtKey);
@@ -299,7 +354,64 @@ export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
   ctx.response.body = { jwt };
 };
 
-export const verifyJwtAparatur = async (ctx: RouterContext<"/verifikasi">) => {
+export const requestJwtWargaUmum = async (ctx: RouterContext<"/login">) => {
+  let request: LoginInfo;
+  try {
+    request = await ctx.request.body.json();
+  } catch {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Body permintaan tidak valid." };
+    return;
+  }
+
+  const { identifier: nikWarga, kata_sandi: kataSandi } = request;
+
+  if (
+    typeof nikWarga !== "string" || typeof kataSandi !== "string" ||
+    nikWarga.trim() === "" || kataSandi.trim() === ""
+  ) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Nama dan kata sandi wajib diisi." };
+    return;
+  }
+
+  const wargaCandidate = await getWargaByNik(nikWarga);
+
+  const passwordMatches = wargaCandidate?.kata_sandi === kataSandi;
+
+  if (!wargaCandidate || !passwordMatches) {
+    ctx.response.status = 401;
+    ctx.response.body = { error: "Nama atau kata sandi salah." };
+    return;
+  }
+
+  const jwtKeyString = Deno.env.get("JWT_KEY");
+  if (!jwtKeyString) throw new Error("JWT_KEY environment variable is missing");
+  const jwtKeyBytes = decodeBase64(jwtKeyString);
+  const jwtKey = await crypto.subtle.importKey(
+    "raw",
+    jwtKeyBytes,
+    { name: "HMAC", hash: "SHA-512" },
+    true,
+    ["sign", "verify"],
+  );
+
+  const jwtHeader: Header = { alg: "HS512", typ: "JWT" };
+  const jwtPayload: Payload = {
+    iss: "System",
+    exp: getNumericDate(60 * 60 * 9), // 9 hours
+    id: wargaCandidate.umum_id,
+    identifier: wargaCandidate.nik,
+    type: "warga",
+  };
+
+  const jwt = await create(jwtHeader, jwtPayload, jwtKey);
+
+  ctx.response.status = 200;
+  ctx.response.body = { jwt };
+};
+
+export const verifyJwt = async (ctx: RouterContext<"/verifikasi">) => {
   const jwtKeyString = Deno.env.get("JWT_KEY");
   if (!jwtKeyString) throw new Error("JWT_KEY environment variable is missing");
   const jwtKeyBytes = decodeBase64(jwtKeyString);

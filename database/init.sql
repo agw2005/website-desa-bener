@@ -255,4 +255,14 @@ INSERT INTO Profil (
     NULL,
     NULL,
     NULL
-)
+);
+
+INSERT INTO Umum (
+    nama,
+    nik,
+    kata_sandi
+) VALUES (
+    'Danial Al-Ghazali Walangadi',
+    '2304130143',
+    '1234567890'
+);
