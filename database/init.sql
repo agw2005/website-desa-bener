@@ -1,27 +1,28 @@
 CREATE TABLE Aparatur (
     aparatur_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
-    jabatan VARCHAR(255) NOT NULL,
-    telepon VARCHAR(255) NOT NULL,
+    nama TEXT NOT NULL,
+    jabatan TEXT NOT NULL,
+    telepon TEXT NOT NULL,
     foto BYTEA NOT NULL,
-    kata_sandi VARCHAR(255) NOT NULL
+    kata_sandi TEXT NOT NULL
 );
 
 CREATE TABLE Umum (
     umum_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
-    nik VARCHAR(255) NOT NULL,
-    kata_sandi VARCHAR(255) NOT NULL
+    nama TEXT NOT NULL,
+    nik TEXT NOT NULL,
+    kata_sandi TEXT NOT NULL
 );
 
 CREATE TABLE Pelayanan (
     pelayanan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama VARCHAR(255)
+    nama TEXT
 );
 
 CREATE TABLE Pengajuan (
     pengajuan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    jenis_pelayanan INT NOT NULL,
+    pengaju INT,
+    jenis_pelayanan INT,
     status VARCHAR(20) CHECK (status in ('dalam antrian', 'disetujui', 'ditolak')),
     alasan_penolakan TEXT NOT NULL,
     ditolak_oleh INT,
@@ -30,6 +31,11 @@ CREATE TABLE Pengajuan (
     CONSTRAINT jenis_pelayanan_ajuan 
         FOREIGN KEY (jenis_pelayanan) 
         REFERENCES Pelayanan(pelayanan_id) 
+        ON DELETE CASCADE,
+
+    CONSTRAINT pengaju_ajuan 
+        FOREIGN KEY (pengaju)
+        REFERENCES Umum(umum_id) 
         ON DELETE CASCADE,
 
     CONSTRAINT aparatur_penolak 
@@ -41,10 +47,10 @@ CREATE TABLE Pengajuan (
 CREATE TABLE Lampiran_Pengajuan (
     lampiran_pengajuan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     pengajuan_id INT,
-    nama_file VARCHAR(255) NOT NULL,
+    nama_file TEXT NOT NULL,
     besar_file INT NOT NULL,
     isi_file BYTEA NOT NULL,
-    deskripsi VARCHAR(255) NOT NULL,
+    deskripsi TEXT NOT NULL,
 
     CONSTRAINT lampiran_suatu_ajuan 
         FOREIGN KEY (pengajuan_id) 
@@ -54,20 +60,20 @@ CREATE TABLE Lampiran_Pengajuan (
 
 CREATE TABLE Komentar (
     komentar_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
-    surel VARCHAR(255) NOT NULL,
+    nama TEXT NOT NULL,
+    surel TEXT NOT NULL,
     isi TEXT NOT NULL,
     waktu_upload INT NOT NULL
 );
 
 CREATE TABLE Label (
     label_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL
+    nama TEXT NOT NULL
 );
 
 CREATE TABLE Artikel (
     artikel_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    judul VARCHAR(255) NOT NULL,
+    judul TEXT NOT NULL,
     isi TEXT,
     waktu_upload INT NOT NULL
 );
@@ -90,7 +96,7 @@ CREATE TABLE Label_Artikel (
 CREATE TABLE Lampiran_Artikel (
     lampiran_artikel_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     artikel_id INT,
-    nama_file VARCHAR(255) NOT NULL,
+    nama_file TEXT NOT NULL,
     besar_file INT NOT NULL,
     isi_file BYTEA NOT NULL,
 
@@ -102,7 +108,7 @@ CREATE TABLE Lampiran_Artikel (
 
 CREATE TABLE Dusun (
     dusun_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
+    nama TEXT NOT NULL,
     rt INT NOT NULL,
     populasi INT NOT NULL,
     keluarga INT NOT NULL,
@@ -132,22 +138,22 @@ CREATE TABLE Profil (
     profil_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     deskripsi_sekilas TEXT,
     kode_desa INT,
-    kecamatan VARCHAR(255),
-    kabupaten_kota VARCHAR(255),
-    provinsi VARCHAR(255),
+    kecamatan TEXT,
+    kabupaten_kota TEXT,
+    provinsi TEXT,
     tahun_pembentukan INT,
     luas DECIMAL,
-    koordinat VARCHAR(255),
-    tipologi VARCHAR(255),
-    klasifikasi VARCHAR(255),
-    kategori VARCHAR(255),
-    batas_timur VARCHAR(255),
-    batas_barat VARCHAR(255),
-    batas_selatan VARCHAR(255),
-    batas_utara VARCHAR(255),
+    koordinat TEXT,
+    tipologi TEXT,
+    klasifikasi TEXT,
+    kategori TEXT,
+    batas_timur TEXT,
+    batas_barat TEXT,
+    batas_selatan TEXT,
+    batas_utara TEXT,
     sejarah TEXT,
     peta BYTEA,
-    tautan_kalender VARCHAR(255)
+    tautan_kalender TEXT
 );
 
 CREATE TABLE Visi (
@@ -168,7 +174,7 @@ CREATE TABLE Apbdes (
 CREATE TABLE Lampiran_Apbdes (
     apbdes_file_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     apbdes_id INT,
-    nama_file VARCHAR(255),
+    nama_file TEXT,
     besar_file INT NOT NULL,
     isi_file BYTEA NOT NULL,
 
@@ -180,14 +186,14 @@ CREATE TABLE Lampiran_Apbdes (
 
 CREATE TABLE Wisata (
     wisata_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
+    nama TEXT NOT NULL,
     deskripsi TEXT NOT NULL,
     foto BYTEA NOT NULL
 );
 
 CREATE TABLE Umkm (
     umkm_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama VARCHAR(255) NOT NULL,
+    nama TEXT NOT NULL,
     dusun_id INT,
     deskripsi TEXT NOT NULL,
     foto BYTEA NOT NULL,
@@ -201,9 +207,9 @@ CREATE TABLE Umkm (
 CREATE TABLE Kontak_Umkm (
     kontak_umkm_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     umkm_id INT,
-    jenis_kontak VARCHAR(255),
-    isi VARCHAR(255),
-    tautan VARCHAR(255),
+    jenis_kontak TEXT,
+    isi TEXT,
+    tautan TEXT,
 
     CONSTRAINT umkm_dari_kontak 
         FOREIGN KEY (umkm_id) 
