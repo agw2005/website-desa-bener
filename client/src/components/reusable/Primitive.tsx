@@ -24,7 +24,6 @@ const LINKS = {
 const Primitive = ({ children }: PrimitiveProps) => {
   const navigate = useNavigate();
   const { isLoggedIn, authIsLoading, authInfo } = useAuth();
-  const logo = null;
 
   return (
     <>
@@ -34,7 +33,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
           <div className="flex gap-4 items-center">
             <div className="w-24 h-24 p-2 bg-white rounded-2xl flex justify-center items-center overflow-hidden">
               <img
-                src={logo ?? "tidak-ada-gambar-4x5.png"}
+                src="logo-kabupaten-semarang.png"
                 alt="logo-desa-bener"
                 className="w-full h-full object-contain"
               />
@@ -126,8 +125,8 @@ const Primitive = ({ children }: PrimitiveProps) => {
           <section className="flex flex-col flex-1 items-center justify-between -mt-32">
             <div className="border-4 border-black rounded-full aspect-square size-40 flex items-center justify-center bg-white font-bold overflow-hidden">
               <img
-                className="w-full h-full object-contain"
-                src={logo ?? "tidak-ada-gambar-4x5.png"}
+                className="w-full h-full object-contain p-4"
+                src="logo-kabupaten-semarang.png"
                 alt="logo-desa-bener"
               />
             </div>
