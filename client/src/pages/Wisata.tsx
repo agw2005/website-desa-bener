@@ -8,11 +8,22 @@ const Wisata = () => {
       <div className="flex flex-col gap-8 px-32">
         <RoundedSection title="TEMPAT WISATA">
           <ManualCarousel
-            visibleCards={3}
+            minCardWidth={180}
+            maxVisibleCards={5}
             pixelGap={16}
             items={[
               {
                 title: "Kerajinan Bambu",
+                subtitle: "UMKM Desa Sukamaju",
+                photo: "/tidak-ada-gambar-box.png",
+              },
+              {
+                title: "Batik Tulis",
+                subtitle: "UMKM Desa Sukamaju",
+                photo: "/tidak-ada-gambar-box.png",
+              },
+              {
+                title: "Batik Tulis",
                 subtitle: "UMKM Desa Sukamaju",
                 photo: "/tidak-ada-gambar-box.png",
               },
@@ -41,7 +52,8 @@ const Wisata = () => {
         </RoundedSection>
         <RoundedSection title="UMKM DESA">
           <ManualCarousel
-            visibleCards={3}
+            minCardWidth={180}
+            maxVisibleCards={5}
             pixelGap={16}
             items={[
               {
@@ -73,6 +85,16 @@ const Wisata = () => {
                 subtitle: "UMKM Desa Sukamaju",
                 photo: "/tidak-ada-gambar-box.png",
                 link: `${globalThis.location.pathname}/umkm/1`,
+              },
+              {
+                title: "Batik Tulis",
+                subtitle: "UMKM Desa Sukamaju",
+                photo: "/tidak-ada-gambar-box.png",
+              },
+              {
+                title: "Batik Tulis",
+                subtitle: "UMKM Desa Sukamaju",
+                photo: "/tidak-ada-gambar-box.png",
               },
             ]}
           />

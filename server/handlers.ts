@@ -23,10 +23,59 @@ export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
   const result = await connection.queryObject<DeskripsiSekilas>(
     "SELECT deskripsi_sekilas FROM Profil LIMIT 1;",
   );
-  const content = result.rows;
   ctx.response.status = 200;
-  ctx.response.body = content;
+  ctx.response.body = result.rows;
   connection.release();
+};
+
+export const aparaturDesa = async (ctx: RouterContext<"/">) => {
+  const connection = await pool.connect();
+  const result = await connection.queryObject<
+    Omit<Aparatur, "kata_sandi" | "foto">
+  >(
+    "SELECT aparatur_id, nama, jabatan, telepon FROM Aparatur;",
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
+export const fotoAparaturDesa = async (ctx: RouterContext<"/foto/:id">) => {
+  const id = ctx.params.id;
+
+  if (!id) {
+    ctx.response.status = 400;
+    ctx.response.body = { message: "Missing id parameter" };
+    return;
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<{ foto: Uint8Array | null }>(
+      "SELECT foto FROM Aparatur WHERE aparatur_id = $1;",
+      [id],
+    );
+
+    if (result.rows.length === 0 || !result.rows[0].foto) {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Foto not found" };
+      return;
+    }
+
+    const foto = result.rows[0].foto;
+
+    ctx.response.status = 200;
+    ctx.response.headers.set("Content-Type", "image/jpeg");
+    ctx.response.headers.set(
+      "Cache-Control",
+      "public, max-age=31536000, immutable",
+    );
+    ctx.response.body = foto;
+  } finally {
+    connection.release();
+  }
 };
 
 // POST HANDLERS

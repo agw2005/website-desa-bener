@@ -9,54 +9,7 @@ import useFetch from "../hooks/useFetch.tsx";
 import type { DeskripsiSekilas } from "../types/Profil.d.ts";
 import useAuth from "../hooks/useAuth.tsx";
 import type { LoginInfo } from "../types/Login.d.ts";
-
-const APARATUR_DESA = [
-  {
-    title: "Kepala Desa",
-    subtitle: "Beni Saefudin",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-  {
-    title: "Kepala Dusun Krajan I",
-    subtitle: "Kadus 1",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-  {
-    title: "Kepala Dusun Krajan II",
-    subtitle: "Kadus 2",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-  {
-    title: "Kepala Dusun Cebongan",
-    subtitle: "Kadus 3",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-  {
-    title: "Kepala Dusun Tuguh",
-    subtitle: "Kadus 4",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-  {
-    title: "Kepala Dusun Karangbalong",
-    subtitle: "Kadus 5",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-  {
-    title: "Kepala Dusun Kadipurwo",
-    subtitle: "Kadus 6",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-  {
-    title: "Sekretaris I",
-    subtitle: "Sekdes 1",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-  {
-    title: "Sekretaris II",
-    subtitle: "Sekdes 2",
-    photo: "tidak-ada-gambar-2x3.png",
-  },
-];
+import type { Aparatur } from "../types/Aparatur.d.ts";
 
 const LAYANAN_MANDIRI = [
   "Surat Pengantar SKCK",
@@ -79,6 +32,21 @@ const Home = () => {
   } = useFetch<DeskripsiSekilas>(
     `http://${globalThis.location.hostname}:8000/profil/deskripsi`,
   );
+
+  const {
+    data: aparaturDesa,
+    isLoading: _aparaturDesaIsLoading,
+    isError: _aparaturDesaIsError,
+  } = useFetch<Omit<Aparatur, "kata_sandi" | "foto">>(
+    `http://${globalThis.location.hostname}:8000/aparatur`,
+  );
+
+  const aparaturItems = aparaturDesa?.map((aparatur) => ({
+    title: aparatur.nama,
+    subtitle: aparatur.jabatan,
+    photo:
+      `http://${globalThis.location.hostname}:8000/aparatur/foto/${aparatur.aparatur_id}`,
+  })) ?? [];
 
   const handleLogin = async () => {
     setInputIsEmpty(false);
@@ -122,7 +90,12 @@ const Home = () => {
       </SimpleSection>
 
       <SimpleSection subtitle="APARATUR DESA">
-        <ManualCarousel visibleCards={7} pixelGap={16} items={APARATUR_DESA} />
+        <ManualCarousel
+          minCardWidth={180}
+          maxVisibleCards={8}
+          pixelGap={16}
+          items={aparaturItems}
+        />
       </SimpleSection>
 
       {!isLoggedIn && (

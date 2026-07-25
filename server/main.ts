@@ -15,7 +15,9 @@ root
 
 aparatur
   .post("/", handlers.postAparatur)
-  .post("/login", handlers.requestJwtAparatur);
+  .post("/login", handlers.requestJwtAparatur)
+  .get("/", handlers.aparaturDesa)
+  .get("/foto/:id", handlers.fotoAparaturDesa);
 
 profil
   .patch("/", handlers.patchProfil)
