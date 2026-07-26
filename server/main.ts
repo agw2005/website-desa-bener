@@ -25,7 +25,8 @@ profil
   .patch("/", handlers.patchProfil)
   .get("/deskripsi", handlers.deskripsiSekilas)
   .get("/data", handlers.getProfilDesa)
-  .get("/peta", handlers.petaDesa);
+  .get("/peta", handlers.petaDesa)
+  .get("/", handlers.getProfil);
 
 umum
   .post("/", handlers.postUmum)

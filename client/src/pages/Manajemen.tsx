@@ -1,6 +1,7 @@
 import Primitive from "../components/reusable/Primitive.tsx";
 import AparaturManager from "../components/non-reusable/AparaturManager.tsx";
 import DusunManager from "../components/non-reusable/DusunManager.tsx";
+import ProfilDesaManager from "../components/non-reusable/ProfilDesaManager.tsx";
 
 const Manajemen = () => {
   return (
@@ -8,6 +9,7 @@ const Manajemen = () => {
       <div className="flex flex-col gap-8 px-32">
         <AparaturManager />
         <DusunManager />
+        <ProfilDesaManager />
       </div>
     </Primitive>
   );
