@@ -11,6 +11,7 @@ const Wisata = () => {
             minCardWidth={180}
             maxVisibleCards={5}
             pixelGap={16}
+            aspectRatio="1/1"
             items={[
               {
                 title: "Kerajinan Bambu",
@@ -55,6 +56,7 @@ const Wisata = () => {
             minCardWidth={180}
             maxVisibleCards={5}
             pixelGap={16}
+            aspectRatio="1/1"
             items={[
               {
                 title: "Kerajinan Bambu",

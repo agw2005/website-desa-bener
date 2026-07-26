@@ -13,11 +13,17 @@ interface ManualCarouselProps {
   pixelGap: number;
   minCardWidth?: number; // e.g. 200 — used to derive how many cards fit
   maxVisibleCards?: number; // upper bound, e.g. 3
+  aspectRatio?: string; // e.g. "2 / 3"
 }
 
 const ManualCarousel = (
-  { items, pixelGap, minCardWidth = 180, maxVisibleCards = 3 }:
-    ManualCarouselProps,
+  {
+    items,
+    pixelGap,
+    minCardWidth = 180,
+    maxVisibleCards = 3,
+    aspectRatio = "2 / 3",
+  }: ManualCarouselProps,
 ) => {
   const [index, setIndex] = useState(0);
   const [visibleCards, setVisibleCards] = useState(1);
@@ -48,7 +54,6 @@ const ManualCarousel = (
   const maxIndex = Math.max(items.length - visibleCards, 0);
 
   useEffect(() => {
-    // keep index valid if visibleCards changes (e.g. window resized)
     setIndex((prev) => Math.min(prev, maxIndex));
   }, [maxIndex]);
 
@@ -56,9 +61,9 @@ const ManualCarousel = (
   const goNext = () => setIndex((prev) => Math.min(prev + 1, maxIndex));
 
   return (
-    <div ref={containerRef} className="relative w-full h-full overflow-hidden">
+    <div ref={containerRef} className="relative w-full overflow-hidden">
       <div
-        className="flex gap-4 h-full transition-transform duration-500 ease-in-out"
+        className="flex items-start gap-4 transition-transform duration-500 ease-in-out"
         style={{
           transform:
             `translateX(calc(-${index} * (100% / ${visibleCards} + ${pixelGap}px / ${visibleCards})))`,
@@ -66,11 +71,12 @@ const ManualCarousel = (
       >
         {items.map((item, i) => {
           const className =
-            `shrink-0 relative rounded-2xl overflow-hidden border-2 border-white shadow block h-full`;
+            `shrink-0 relative rounded-2xl overflow-hidden border-2 border-white shadow block`;
           const style = {
             width: `calc((100% - ${
               pixelGap * (visibleCards - 1)
             }px) / ${visibleCards})`,
+            aspectRatio,
           };
 
           const content = (
