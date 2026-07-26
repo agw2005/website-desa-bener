@@ -31,7 +31,8 @@ umum
 
 dusun
   .post("/", handlers.postDusun)
-  .get("/nama", handlers.namaDusun);
+  .get("/nama", handlers.namaDusun)
+  .get("/:id", handlers.getDusun);
 
 root
   .use("/aparatur", aparatur.routes(), aparatur.allowedMethods())

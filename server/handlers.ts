@@ -12,6 +12,7 @@ import {
 import { Aparatur } from "./types/Aparatur.d.ts";
 import { Umum } from "./types/Umum.d.ts";
 import { LoggedInInfo, LoginInfo } from "./types/Login.d.ts";
+import { Dusun } from "./types/Dusun.d.ts";
 
 export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.status = 200;
@@ -86,6 +87,21 @@ export const namaDusun = async (ctx: RouterContext<"/nama">) => {
     { dusun_id: number; nama: string }
   >(
     "SELECT dusun_id, nama FROM Dusun;",
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
+export const getDusun = async (ctx: RouterContext<"/:id">) => {
+  const id = ctx.params.id;
+
+  const connection = await pool.connect();
+
+  const result = await connection.queryObject<Dusun>(
+    "SELECT * FROM Dusun WHERE dusun_id = $1;",
+    [id],
   );
 
   ctx.response.status = 200;

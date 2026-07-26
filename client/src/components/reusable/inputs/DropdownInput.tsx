@@ -23,6 +23,8 @@ const DropdownInput = <Option,>(
     placeholder,
   }: DropdownProps<Option>,
 ) => {
+  const hasSelection = value !== "";
+
   return (
     <label className="flex">
       <div className="border w-max px-4 py-2 text-white font-bold border-black bg-black rounded-l-2xl select-none">
@@ -35,7 +37,7 @@ const DropdownInput = <Option,>(
         value={value}
         onChange={(e) => onChangeHandler(Number(e.target.value))}
       >
-        {placeholder && (
+        {placeholder && !hasSelection && (
           <option value="" disabled hidden>
             {placeholder}
           </option>
