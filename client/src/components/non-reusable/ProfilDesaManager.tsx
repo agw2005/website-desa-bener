@@ -212,7 +212,7 @@ const ProfilDesaManager = () => {
           onChangeHandler={(e) => {
             setInputSejarah(e.target.value);
           }}
-          rows={12}
+          rows={16}
         />
 
         <div className="flex flex-col gap-2">

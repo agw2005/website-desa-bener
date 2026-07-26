@@ -30,9 +30,6 @@ const MISI = [
   "Meningkatkan kesejahteraan masyarakat melalui peningkatan ketrampilan/life skill",
 ];
 
-const SEJARAH =
-  "Terjadinya Desa Prayungan, hampir bersamaan dengan jaman kerajaan majapahit, Jalan ceritanya adalah sebagaimana berikut : Kyai Tjok Brosot begitulah orang tua terdahulu di Desa Menyebutkan, hidup dengan seorang istri bernama Nyai Tani. Kehidupan keluarga ini bahagia dan sejahtera, disamping saling mengasihi mereka pun rajin bertani, mereka memiliki seorang pembantu yang sangat sakti dan bijaksana bernama Sungging Purbongkoro. Menurut Dongeng Sesepuh Desa, bahwa rumah Kyai Tjok Brosot  terletak di suatu tempat yang dinamakan Desa Juma, Pendoponya (tempat untuk menerima tamu) di dayohan (prayungan), dapurnya di mejuwet, sawahnya di Desa Pratun yang di sebut sawah lembak. Istri Tjok Brosot (Nyai Tani) terkenal dengan kecantikannya, sehingga banyak orang-orang yang ingin merebutnya dari Tjok Brosot. Pada suatu hari datanglah seorang tamu/dayoh, yaitu Putro Kyai Sendang Drajat Sedayu. Kedatangnya bermaksud untuk mengadu kesaktiannya dengan Tjok Brosot, disamping itu tamu tersebut juga ingin merebut Nyai Tani dari tangan Tjok Brosot. Kyai Tjok Brosot sangat termashur dengan kesaktiannya baik dalam ilmu bela diri maupun ilmu pertanian. Dalam hikayatnya diceritakan kesaktian Kyai Tjok Brosot di bidang pertanian adalah setiap beliau menanam padi pasti hasilnya melimpah ruah dan ulen padinya panjangnya satu lengan lebih, sehingga tiada yang mampu menyaingi hasil panen dari Kyai Tjok Brosot. Mengetahui demikian Putro Kyai Sendang pun tidak kehilangan akal, dia menantang Kyai Tjok Brosot adu kesaktian dengannya, barang siapa yang mampu menanam padi meskipun tumbuhan padinya pendek tetapi hasilnya melimpah dan ulen padinya panjang, Kyai Tjok Brosot menganggap itu hal yang mudah dan menyanggupinya, beliau berkata : (Tak ladeni apa sing dadi kekarepanmu lan menawa aku kalah Nyai Tani dak pasrahke Sliramu, ananging yen ora gelem karo sliramu Nyai Tani ojo dipekso) Maka dimulailah pertandingan menanam padi tersebut. Setelah beberapa bulan menunggu tanaman Padi yang tumbuh ternyata yang menang adalah Putro Kyai Sendang Drajat, dan dengan berat hati Kyai Tjok Brosot pun menepati janjinya untuk menyerahkan Nyai Tani ke tangan Putro Kyai Sendang Drajat. Akan tetapi Nyai Tani tidak bersedia dibawa oleh Putro Kyai Sendang Drajat, sehingga diapun dipaksa akan dibawa pergi. Mendengar hal tersebut Kyai Tjok Brosot pun marah dan mengadu kesaktian bela dirinya dengan Putro Kyai Sendang Drajat Sedayu, Perang pun berlangsung dengan sengit dan lama secara Uyang uyungan, dan tempat berlangsungnya perang tersebut ahkirnya diberi nama Prayungan sampai sekarang ini. Jadi Asal-Usul Nama Prayungan berasal dari nama \“Perang Uyang-Uyungan\”.";
-
 const Profil = () => {
   const {
     data: profilDesa,
@@ -135,9 +132,13 @@ const Profil = () => {
               alt="peta-desa"
             />
           </RoundedSection>
-          <RoundedSection title="SEJARAH DESA">
-            <p className="text-justify">{SEJARAH}</p>
-          </RoundedSection>
+          {profilDesa && (
+            <RoundedSection title="SEJARAH DESA">
+              <p className="text-justify whitespace-pre-line">
+                {profilDesa[0].sejarah}
+              </p>
+            </RoundedSection>
+          )}
         </div>
       </div>
     </Primitive>
