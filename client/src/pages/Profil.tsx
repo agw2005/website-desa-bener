@@ -130,7 +130,8 @@ const Profil = () => {
           <RoundedSection title="PETA DESA">
             <img
               className="border-4"
-              src="tidak-ada-gambar-box.png"
+              src={`http://${globalThis.location.hostname}:8000/profil/peta` ||
+                "tidak-ada-gambar-box.png"}
               alt="peta-desa"
             />
           </RoundedSection>

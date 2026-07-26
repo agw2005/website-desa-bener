@@ -69,8 +69,12 @@ export const fotoAparaturDesa = async (ctx: RouterContext<"/foto/:id">) => {
 
     const foto = result.rows[0].foto;
 
+    const contentType = foto[0] === 0xFF && foto[1] === 0xD8 && foto[2] === 0xFF
+      ? "image/jpeg"
+      : "image/png";
+
     ctx.response.status = 200;
-    ctx.response.headers.set("Content-Type", "image/jpeg");
+    ctx.response.headers.set("Content-Type", contentType);
     ctx.response.headers.set(
       "Cache-Control",
       "public, max-age=31536000, immutable",
@@ -131,6 +135,38 @@ export const getProfilDesa = async (ctx: RouterContext<"/data">) => {
   ctx.response.status = 200;
   ctx.response.body = result.rows;
   connection.release();
+};
+
+export const petaDesa = async (ctx: RouterContext<"/peta">) => {
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<{ peta: Uint8Array | null }>(
+      "SELECT peta FROM Profil LIMIT 1;",
+    );
+
+    if (result.rows.length === 0 || !result.rows[0].peta) {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Peta desa not found" };
+      return;
+    }
+
+    const peta = result.rows[0].peta;
+
+    const contentType = peta[0] === 0xFF && peta[1] === 0xD8 && peta[2] === 0xFF
+      ? "image/jpeg"
+      : "image/png";
+
+    ctx.response.status = 200;
+    ctx.response.headers.set("Content-Type", contentType);
+    ctx.response.headers.set(
+      "Cache-Control",
+      "public, max-age=31536000, immutable",
+    );
+    ctx.response.body = peta;
+  } finally {
+    connection.release();
+  }
 };
 
 // POST HANDLERS

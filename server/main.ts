@@ -24,7 +24,8 @@ aparatur
 profil
   .patch("/", handlers.patchProfil)
   .get("/deskripsi", handlers.deskripsiSekilas)
-  .get("/data", handlers.getProfilDesa);
+  .get("/data", handlers.getProfilDesa)
+  .get("/peta", handlers.petaDesa);
 
 umum
   .post("/", handlers.postUmum)
