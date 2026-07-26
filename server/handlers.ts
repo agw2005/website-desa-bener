@@ -1,6 +1,6 @@
 import { RouterContext } from "@oak/oak/router";
 import { pool } from "./dbpool.ts";
-import type { DeskripsiSekilas } from "./types/Profil.d.ts";
+import type { DeskripsiSekilas, ProfilDesaData } from "./types/Profil.d.ts";
 import { decodeBase64 } from "@std/encoding/base64";
 import {
   create,
@@ -114,6 +114,18 @@ export const getOneDusun = async (ctx: RouterContext<"/:id">) => {
   const result = await connection.queryObject<Dusun>(
     "SELECT * FROM Dusun WHERE dusun_id = $1;",
     [id],
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
+export const getProfilDesa = async (ctx: RouterContext<"/data">) => {
+  const connection = await pool.connect();
+
+  const result = await connection.queryObject<ProfilDesaData>(
+    "SELECT kode_desa, kecamatan, kabupaten_kota, provinsi, tahun_pembentukan, luas, koordinat, tipologi, klasifikasi, kategori, batas_timur, batas_barat, batas_selatan batas_utara, sejarah FROM Profil LIMIT 1;",
   );
 
   ctx.response.status = 200;

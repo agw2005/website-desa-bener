@@ -134,6 +134,8 @@ CREATE TABLE Dusun (
     ks_tiga_plus INT NOT NULL
 );
 
+-- 
+
 CREATE TABLE Profil (
     profil_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     deskripsi_sekilas TEXT,
