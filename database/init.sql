@@ -130,7 +130,7 @@ CREATE TABLE Dusun (
     kps INT NOT NULL,
     ks_satu INT NOT NULL,
     ks_dua INT NOT NULL,
-    ks_tuga INT NOT NULL,
+    ks_tiga INT NOT NULL,
     ks_tiga_plus INT NOT NULL
 );
 

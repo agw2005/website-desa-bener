@@ -18,6 +18,8 @@ export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.body = "Healthy";
 };
 
+// GET HANDLERS
+
 export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
   const connection = await pool.connect();
   const result = await connection.queryObject<DeskripsiSekilas>(
@@ -78,7 +80,53 @@ export const fotoAparaturDesa = async (ctx: RouterContext<"/foto/:id">) => {
   }
 };
 
+export const namaDusun = async (ctx: RouterContext<"/nama">) => {
+  const connection = await pool.connect();
+  const result = await connection.queryObject<
+    { dusun_id: number; nama: string }
+  >(
+    "SELECT dusun_id, nama FROM Dusun;",
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
 // POST HANDLERS
+
+export const postDusun = async (ctx: RouterContext<"/">) => {
+  const nama = ctx.request.url.searchParams.get("nama");
+
+  if (!nama) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      error: "Field nama wajib diisi.",
+    };
+    return;
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<{ dusun_id: number }>(
+      `INSERT INTO
+       Dusun (nama, rt, populasi, keluarga, laki, perempuan, umkm, islam, protestanisme, katolisisme, hinduisme, buddhisme, konfusianisme, tunadaksa, tunanetra, tunarungu, tunawicara, tunagrahita, tunalaras, kps, ks_satu, ks_dua, ks_tuga, ks_tiga_plus)
+       VALUES ($1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+       RETURNING dusun_id`,
+      [nama],
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = { dusun_id: result.rows[0].dusun_id };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data dusun." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const postUmum = async (ctx: RouterContext<"/">) => {
   const form = await ctx.request.body.formData();

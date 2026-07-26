@@ -7,6 +7,7 @@ import TextInput from "../components/reusable/inputs/TextInput.tsx";
 import { useEffect, useState } from "react";
 import PasswordInput from "../components/reusable/inputs/PasswordInput.tsx";
 import OneFileInput from "../components/reusable/inputs/OneFileInput.tsx";
+import DropdownInput from "../components/reusable/inputs/DropdownInput.tsx";
 
 const Manajemen = () => {
   const {
@@ -16,6 +17,15 @@ const Manajemen = () => {
     refetch: refetchAparaturDesa,
   } = useFetch<Omit<Aparatur, "kata_sandi" | "foto">>(
     `http://${globalThis.location.hostname}:8000/aparatur`,
+  );
+
+  const {
+    data: namaDusun,
+    isLoading: _namaDusunIsLoading,
+    isError: _namaDusunIsError,
+    refetch: _refetchNamaDusun,
+  } = useFetch<{ dusun_id: number; nama: string }>(
+    `http://${globalThis.location.hostname}:8000/dusun/nama`,
   );
 
   const [inputNamaAparatur, setInputNamaAparatur] = useState("");
@@ -28,6 +38,8 @@ const Manajemen = () => {
   const [inputFilenameAparatur, setInputFilenameAparatur] = useState("");
   const [aparaturTerkonfirmasi, setAparaturTerkonfirmasi] = useState(false);
   const [previewFotoUrl, setPreviewFotoUrl] = useState<string | null>(null);
+  const [inputNamaDusun, setInputNamaDusun] = useState("");
+  const [selectedDusun, setSelectedDusun] = useState<number | "">("");
 
   useEffect(() => {
     if (!inputFotoAparatur) {
@@ -42,6 +54,10 @@ const Manajemen = () => {
       URL.revokeObjectURL(objectUrl);
     };
   }, [inputFotoAparatur]);
+
+  useEffect(() => {
+    console.log(selectedDusun);
+  }, [selectedDusun]);
 
   const handleAparaturFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -244,6 +260,39 @@ const Manajemen = () => {
                     })}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </RoundedSection>
+        <RoundedSection title="Dusun">
+          <div className="flex flex-col gap-8">
+            <div className="flex flex-col gap-2 w-max">
+              <h2 className="text-2xl font-bold">Data Per-dusun</h2>
+              {namaDusun && (
+                <DropdownInput
+                  label="Dusun"
+                  name="selected-dusun"
+                  id="selected-dusun"
+                  value={selectedDusun}
+                  options={namaDusun}
+                  getId={(dusun) => dusun.dusun_id}
+                  getLabel={(dusun) => dusun.nama}
+                  onChangeHandler={setSelectedDusun}
+                />
+              )}
+            </div>
+            <div className="flex flex-col gap-2 w-max">
+              <h2 className="text-2xl font-bold">Tambah Dusun Baru</h2>
+              <TextInput
+                label="Nama Dusun"
+                name="nama-dusun-baru"
+                id="nama-dusun-baru"
+                value={inputNamaDusun}
+                onChangeHandler={(e) => {
+                  setInputNamaDusun(e.target.value);
+                }}
+                placeholder="Contoh: Karangbalong"
+              />
+              <Button variant="black">Tambah Dusun Baru</Button>
             </div>
           </div>
         </RoundedSection>

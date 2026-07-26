@@ -8,6 +8,7 @@ const root = new Router();
 const aparatur = new Router();
 const profil = new Router();
 const umum = new Router();
+const dusun = new Router();
 
 root
   .get("/", handlers.healthCheck)
@@ -28,10 +29,15 @@ umum
   .post("/", handlers.postUmum)
   .post("/login", handlers.requestJwtWargaUmum);
 
+dusun
+  .post("/", handlers.postDusun)
+  .get("/nama", handlers.namaDusun);
+
 root
   .use("/aparatur", aparatur.routes(), aparatur.allowedMethods())
   .use("/profil", profil.routes(), profil.allowedMethods())
-  .use("/umum", umum.routes(), umum.allowedMethods());
+  .use("/umum", umum.routes(), umum.allowedMethods())
+  .use("/dusun", dusun.routes(), dusun.allowedMethods());
 
 app
   .use(async (ctx, next) => {
