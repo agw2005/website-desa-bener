@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";
 import DropdownInput from "../reusable/inputs/DropdownInput.tsx";
@@ -17,19 +17,13 @@ const DusunManager = () => {
     `http://${globalThis.location.hostname}:8000/dusun/nama`,
   );
 
-  useEffect(() => {
-    console.log(selectedDusun);
-  }, [selectedDusun]);
-
   const handleAddDusun = async () => {
     if (!inputNamaDusun.trim()) return;
 
     const response = await fetch(
-      `http://${globalThis.location.hostname}:8000/dusun`,
+      `http://${globalThis.location.hostname}:8000/dusun?nama=${inputNamaDusun}`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nama: inputNamaDusun.trim() }),
       },
     );
 

@@ -35,7 +35,8 @@ dusun
   .post("/", handlers.postDusun)
   .get("/nama", handlers.namaDusun)
   .get("/:id", handlers.getOneDusun)
-  .get("/", handlers.getDusun);
+  .get("/", handlers.getDusun)
+  .patch("/:id", handlers.patchDusun);
 
 root
   .use("/aparatur", aparatur.routes(), aparatur.allowedMethods())
