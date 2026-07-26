@@ -9,10 +9,22 @@ const aparatur = new Router();
 const profil = new Router();
 const umum = new Router();
 const dusun = new Router();
+const visi = new Router();
+const misi = new Router();
 
 root
   .get("/", handlers.healthCheck)
   .get("/verifikasi", handlers.verifyJwt);
+
+misi
+  .get("/", handlers.misi)
+  .post("/", handlers.postMisi)
+  .delete("/:id", handlers.deleteMisi);
+
+visi
+  .get("/", handlers.visi)
+  .post("/", handlers.postVisi)
+  .delete("/:id", handlers.deleteVisi);
 
 aparatur
   .post("/", handlers.postAparatur)
@@ -43,13 +55,15 @@ root
   .use("/aparatur", aparatur.routes(), aparatur.allowedMethods())
   .use("/profil", profil.routes(), profil.allowedMethods())
   .use("/umum", umum.routes(), umum.allowedMethods())
-  .use("/dusun", dusun.routes(), dusun.allowedMethods());
+  .use("/dusun", dusun.routes(), dusun.allowedMethods())
+  .use("/visi", visi.routes(), visi.allowedMethods())
+  .use("/misi", misi.routes(), misi.allowedMethods());
 
 app
   .use(async (ctx, next) => {
     ctx.response.headers.set(
       "Access-Control-Allow-Origin",
-      `*`,
+      `http://localhost:5173`,
     );
 
     ctx.response.headers.set(

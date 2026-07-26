@@ -190,8 +190,6 @@ const AparaturManager = () => {
                 <th className="py-2 px-4 font-bold border border-black text-center">
                   Jabatan
                 </th>
-                <th className="py-2 px-4 font-bold border border-black text-center">
-                </th>
               </tr>
             </thead>
             <tbody>

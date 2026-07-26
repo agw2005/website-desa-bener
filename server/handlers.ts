@@ -13,6 +13,8 @@ import { Aparatur } from "./types/Aparatur.d.ts";
 import { Umum } from "./types/Umum.d.ts";
 import { LoggedInInfo, LoginInfo } from "./types/Login.d.ts";
 import { Dusun } from "./types/Dusun.d.ts";
+import { Visi, VisiPostPayload } from "./types/Visi.d.ts";
+import { Misi, MisiPostPayload } from "./types/Misi.d.ts";
 
 export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.status = 200;
@@ -181,7 +183,62 @@ export const getProfil = async (ctx: RouterContext<"/">) => {
   connection.release();
 };
 
+export const visi = async (ctx: RouterContext<"/">) => {
+  const connection = await pool.connect();
+
+  const result = await connection.queryObject<Visi>(
+    "SELECT * FROM Visi;",
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
+export const misi = async (ctx: RouterContext<"/">) => {
+  const connection = await pool.connect();
+
+  const result = await connection.queryObject<Misi>(
+    "SELECT * FROM Misi;",
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
 // POST HANDLERS
+
+export const postVisi = async (ctx: RouterContext<"/">) => {
+  const request: VisiPostPayload = await ctx.request.body.json();
+  console.log(request);
+
+  const connection = await pool.connect();
+
+  const result = await connection.queryObject<{ visi_id: number }>(
+    "INSERT INTO Visi (isi) VALUES ($1) RETURNING visi_id;",
+    [request.isi],
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
+export const postMisi = async (ctx: RouterContext<"/">) => {
+  const request: MisiPostPayload = await ctx.request.body.json();
+
+  const connection = await pool.connect();
+
+  const result = await connection.queryObject<{ misi_id: number }>(
+    "INSERT INTO Misi (isi) VALUES ($1) RETURNING misi_id;",
+    [request.isi],
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
 
 export const postDusun = async (ctx: RouterContext<"/">) => {
   const nama = ctx.request.url.searchParams.get("nama");
@@ -321,6 +378,207 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
     connection.release();
   }
 };
+// DELETE HANDLERS
+
+export const deleteAparatur = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject(
+      "DELETE FROM Aparatur WHERE aparatur_id = $1",
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Data aparatur tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Data aparatur berhasil dihapus." };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menghapus data aparatur." };
+  } finally {
+    connection.release();
+  }
+};
+
+export const deleteVisi = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject(
+      "DELETE FROM Visi WHERE visi_id = $1",
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Visi tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Visi berhasil dihapus." };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menghapus data aparatur." };
+  } finally {
+    connection.release();
+  }
+};
+
+export const deleteMisi = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject(
+      "DELETE FROM Misi WHERE misi_id = $1",
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Misi tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Misi berhasil dihapus." };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menghapus data aparatur." };
+  } finally {
+    connection.release();
+  }
+};
+
+// PATCH HANDLERS
+
+export const patchDusun = async (ctx: RouterContext<"/:id">) => {
+  const DUSUN_TEXT_FIELDS = ["nama"] as const;
+
+  const DUSUN_INT_FIELDS = [
+    "rt",
+    "populasi",
+    "keluarga",
+    "laki",
+    "perempuan",
+    "umkm",
+    "islam",
+    "protestanisme",
+    "katolisisme",
+    "hinduisme",
+    "buddhisme",
+    "konfusianisme",
+    "tunadaksa",
+    "tunanetra",
+    "tunarungu",
+    "tunawicara",
+    "tunagrahita",
+    "tunalaras",
+    "kps",
+    "ks_satu",
+    "ks_dua",
+    "ks_tiga",
+    "ks_tiga_plus",
+  ] as const;
+
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID dusun tidak valid." };
+    return;
+  }
+
+  let body: Record<string, unknown>;
+
+  try {
+    body = await ctx.request.body.json();
+  } catch {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Body permintaan tidak valid." };
+    return;
+  }
+
+  const setClauses: string[] = [];
+  const values: unknown[] = [];
+  let paramIndex = 1;
+
+  const addField = (field: string, value: unknown) => {
+    setClauses.push(`${field} = $${paramIndex}`);
+    values.push(value);
+    paramIndex++;
+  };
+
+  for (const field of DUSUN_TEXT_FIELDS) {
+    const value = body[field];
+    if (typeof value === "string" && value.trim() !== "") {
+      addField(field, value.trim());
+    }
+  }
+
+  for (const field of DUSUN_INT_FIELDS) {
+    const raw = body[field];
+    if (raw === undefined || raw === null || raw === "") continue;
+
+    const parsed = typeof raw === "number"
+      ? raw
+      : Number.parseInt(String(raw), 10);
+    if (!Number.isInteger(parsed) || parsed < 0) {
+      ctx.response.status = 400;
+      ctx.response.body = {
+        error: `Field ${field} harus berupa angka bulat non-negatif.`,
+      };
+      return;
+    }
+    addField(field, parsed);
+  }
+
+  if (setClauses.length === 0) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      error: "Tidak ada field yang dikirim untuk diperbarui.",
+    };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    values.push(id);
+
+    const result = await connection.queryObject(
+      `UPDATE Dusun SET ${
+        setClauses.join(", ")
+      } WHERE dusun_id = $${paramIndex}`,
+      values,
+    );
+
+    if (result.rowCount === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Data dusun tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Data dusun berhasil diperbarui." };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal memperbarui data dusun." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const patchProfil = async (ctx: RouterContext<"/">) => {
   const PROFIL_TEXT_FIELDS = [
@@ -447,152 +705,6 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal memperbarui data profil desa." };
-  } finally {
-    connection.release();
-  }
-};
-
-// DELETE HANDLERS
-
-export const deleteAparatur = async (ctx: RouterContext<"/:id">) => {
-  const id = Number(ctx.params.id);
-
-  const connection = await pool.connect();
-  try {
-    const result = await connection.queryObject(
-      "DELETE FROM Aparatur WHERE aparatur_id = $1",
-      [id],
-    );
-
-    if (result.rowCount === 0) {
-      ctx.response.status = 404;
-      ctx.response.body = { error: "Data aparatur tidak ditemukan." };
-      return;
-    }
-
-    ctx.response.status = 200;
-    ctx.response.body = { message: "Data aparatur berhasil dihapus." };
-  } catch (err) {
-    console.error(err);
-    ctx.response.status = 500;
-    ctx.response.body = { error: "Gagal menghapus data aparatur." };
-  } finally {
-    connection.release();
-  }
-};
-
-export const patchDusun = async (ctx: RouterContext<"/:id">) => {
-  const DUSUN_TEXT_FIELDS = ["nama"] as const;
-
-  const DUSUN_INT_FIELDS = [
-    "rt",
-    "populasi",
-    "keluarga",
-    "laki",
-    "perempuan",
-    "umkm",
-    "islam",
-    "protestanisme",
-    "katolisisme",
-    "hinduisme",
-    "buddhisme",
-    "konfusianisme",
-    "tunadaksa",
-    "tunanetra",
-    "tunarungu",
-    "tunawicara",
-    "tunagrahita",
-    "tunalaras",
-    "kps",
-    "ks_satu",
-    "ks_dua",
-    "ks_tiga",
-    "ks_tiga_plus",
-  ] as const;
-
-  const id = Number(ctx.params.id);
-
-  if (!Number.isInteger(id) || id <= 0) {
-    ctx.response.status = 400;
-    ctx.response.body = { error: "ID dusun tidak valid." };
-    return;
-  }
-
-  let body: Record<string, unknown>;
-
-  try {
-    body = await ctx.request.body.json();
-  } catch {
-    ctx.response.status = 400;
-    ctx.response.body = { error: "Body permintaan tidak valid." };
-    return;
-  }
-
-  const setClauses: string[] = [];
-  const values: unknown[] = [];
-  let paramIndex = 1;
-
-  const addField = (field: string, value: unknown) => {
-    setClauses.push(`${field} = $${paramIndex}`);
-    values.push(value);
-    paramIndex++;
-  };
-
-  for (const field of DUSUN_TEXT_FIELDS) {
-    const value = body[field];
-    if (typeof value === "string" && value.trim() !== "") {
-      addField(field, value.trim());
-    }
-  }
-
-  for (const field of DUSUN_INT_FIELDS) {
-    const raw = body[field];
-    if (raw === undefined || raw === null || raw === "") continue;
-
-    const parsed = typeof raw === "number"
-      ? raw
-      : Number.parseInt(String(raw), 10);
-    if (!Number.isInteger(parsed) || parsed < 0) {
-      ctx.response.status = 400;
-      ctx.response.body = {
-        error: `Field ${field} harus berupa angka bulat non-negatif.`,
-      };
-      return;
-    }
-    addField(field, parsed);
-  }
-
-  if (setClauses.length === 0) {
-    ctx.response.status = 400;
-    ctx.response.body = {
-      error: "Tidak ada field yang dikirim untuk diperbarui.",
-    };
-    return;
-  }
-
-  const connection = await pool.connect();
-  try {
-    values.push(id);
-
-    const result = await connection.queryObject(
-      `UPDATE Dusun SET ${
-        setClauses.join(", ")
-      } WHERE dusun_id = $${paramIndex}`,
-      values,
-    );
-
-    if (result.rowCount === 0) {
-      ctx.response.status = 404;
-      ctx.response.body = { error: "Data dusun tidak ditemukan." };
-      return;
-    }
-
-    ctx.response.status = 200;
-    ctx.response.body = { message: "Data dusun berhasil diperbarui." };
-  } catch (err) {
-    console.error(err);
-    ctx.response.status = 500;
-    ctx.response.body = { error: "Gagal memperbarui data dusun." };
   } finally {
     connection.release();
   }
