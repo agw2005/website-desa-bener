@@ -223,7 +223,13 @@ const Manajemen = () => {
                             {aparatur.jabatan}
                           </td>
                           <td
-                            onClick={() => {
+                            onClick={async () => {
+                              const response = await fetch(
+                                `http://${globalThis.location.hostname}:8000/aparatur/${aparatur.aparatur_id}`,
+                                { method: "DELETE" },
+                              );
+                              const responseBody = await response.json();
+                              console.log(responseBody);
                               console.log(
                                 `Deleted Aparatur of ID ${aparatur.aparatur_id}`,
                               );

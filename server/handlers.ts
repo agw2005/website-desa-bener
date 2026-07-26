@@ -316,6 +316,35 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
   }
 };
 
+// DELETE HANDLERS
+
+export const deleteAparatur = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject(
+      "DELETE FROM Aparatur WHERE aparatur_id = $1",
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Data aparatur tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Data aparatur berhasil dihapus." };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menghapus data aparatur." };
+  } finally {
+    connection.release();
+  }
+};
+
 // LOGIN HANDLERS
 
 const getAparaturByName = async (nama: string): Promise<Aparatur | null> => {

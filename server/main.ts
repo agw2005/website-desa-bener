@@ -17,7 +17,8 @@ aparatur
   .post("/", handlers.postAparatur)
   .post("/login", handlers.requestJwtAparatur)
   .get("/", handlers.aparaturDesa)
-  .get("/foto/:id", handlers.fotoAparaturDesa);
+  .get("/foto/:id", handlers.fotoAparaturDesa)
+  .delete("/:id", handlers.deleteAparatur);
 
 profil
   .patch("/", handlers.patchProfil)
