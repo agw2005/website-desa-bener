@@ -3,6 +3,7 @@ import AparaturManager from "../components/non-reusable/AparaturManager.tsx";
 import DusunManager from "../components/non-reusable/DusunManager.tsx";
 import ProfilDesaManager from "../components/non-reusable/ProfilDesaManager.tsx";
 import VisiMisiManager from "../components/non-reusable/VisiMisiManager.tsx";
+import ApbdesManager from "../components/non-reusable/ApbdesManager.tsx";
 
 const Manajemen = () => {
   return (
@@ -12,6 +13,7 @@ const Manajemen = () => {
         <DusunManager />
         <ProfilDesaManager />
         <VisiMisiManager />
+        <ApbdesManager />
       </div>
     </Primitive>
   );

@@ -15,6 +15,9 @@ import { LoggedInInfo, LoginInfo } from "./types/Login.d.ts";
 import { Dusun } from "./types/Dusun.d.ts";
 import { Visi, VisiPostPayload } from "./types/Visi.d.ts";
 import { Misi, MisiPostPayload } from "./types/Misi.d.ts";
+import { JoinedApbdes } from "./types/Apbdes.d.ts";
+import { getExtension } from "./helpers/getExtension.ts";
+import { contentType } from "@std/media-types/content-type";
 
 export const healthCheck = (ctx: RouterContext<"/">) => {
   ctx.response.status = 200;
@@ -207,11 +210,157 @@ export const misi = async (ctx: RouterContext<"/">) => {
   connection.release();
 };
 
+export const getApbdesAtYear = async (ctx: RouterContext<"/:year">) => {
+  const year = Number(ctx.params.year);
+
+  const connection = await pool.connect();
+
+  const result = await connection.queryObject<JoinedApbdes>(
+    `
+      SELECT
+        Apbdes.apbdes_id AS apbdes_id,
+        tahun,
+        apbdes_file_id,
+        nama_file,
+        besar_file
+      FROM Apbdes
+      LEFT JOIN Lampiran_Apbdes
+        ON Apbdes.apbdes_id = Lampiran_Apbdes.apbdes_id
+      WHERE Apbdes.tahun = $1;
+    `,
+    [year],
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
+export const getApbdesFile = async (ctx: RouterContext<"/file/:id">) => {
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID lampiran tidak valid." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<
+      { nama_file: string; isi_file: Uint8Array }
+    >(
+      "SELECT nama_file, isi_file FROM Lampiran_Apbdes WHERE apbdes_file_id = $1",
+      [id],
+    );
+
+    if (result.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Lampiran tidak ditemukan." };
+      return;
+    }
+
+    const { nama_file: namaFile, isi_file: isiFile } = result.rows[0];
+    const extension = getExtension(namaFile);
+    const fileContentType = contentType(extension);
+
+    if (!fileContentType) {
+      ctx.response.status = 401;
+      ctx.response.body = { error: "Lampiran tidak memiliki MIME type valid." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.headers.set(
+      "Content-Type",
+      fileContentType,
+    );
+    ctx.response.headers.set(
+      "Content-Disposition",
+      `attachment; filename="${encodeURIComponent(namaFile)}"`,
+    );
+    ctx.response.body = isiFile;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil lampiran." };
+  } finally {
+    connection.release();
+  }
+};
+
 // POST HANDLERS
+
+export const postApbdesFileAtYear = async (ctx: RouterContext<"/:year">) => {
+  const MAX_FILE_SIZE = 10 * 1024 * 1024;
+
+  const year = Number(ctx.params.year);
+
+  if (!Number.isInteger(year) || year < 1900 || year > 2100) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Tahun tidak valid." };
+    return;
+  }
+
+  const form = await ctx.request.body.formData();
+  const file = form.get("file");
+
+  if (!(file instanceof File)) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Field file wajib berupa berkas." };
+    return;
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Ukuran berkas maksimal 10MB." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const existing = await connection.queryObject<{ apbdes_id: number }>(
+      "SELECT apbdes_id FROM Apbdes WHERE tahun = $1",
+      [year],
+    );
+
+    let apbdesId: number;
+
+    if (existing.rows.length > 0) {
+      apbdesId = existing.rows[0].apbdes_id;
+    } else {
+      const created = await connection.queryObject<{ apbdes_id: number }>(
+        "INSERT INTO Apbdes (tahun) VALUES ($1) RETURNING apbdes_id",
+        [year],
+      );
+      apbdesId = created.rows[0].apbdes_id;
+    }
+
+    const fileBytes = new Uint8Array(await file.arrayBuffer());
+
+    const inserted = await connection.queryObject<{ apbdes_file_id: number }>(
+      `INSERT INTO Lampiran_Apbdes (apbdes_id, nama_file, besar_file, isi_file)
+       VALUES ($1, $2, $3, $4)
+       RETURNING apbdes_file_id`,
+      [apbdesId, file.name, file.size, fileBytes],
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = {
+      apbdes_id: apbdesId,
+      apbdes_file_id: inserted.rows[0].apbdes_file_id,
+    };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan lampiran APBDes." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const postVisi = async (ctx: RouterContext<"/">) => {
   const request: VisiPostPayload = await ctx.request.body.json();
-  console.log(request);
 
   const connection = await pool.connect();
 

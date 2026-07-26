@@ -11,10 +11,16 @@ const umum = new Router();
 const dusun = new Router();
 const visi = new Router();
 const misi = new Router();
+const apbdes = new Router();
 
 root
   .get("/", handlers.healthCheck)
   .get("/verifikasi", handlers.verifyJwt);
+
+apbdes
+  .get("/:year", handlers.getApbdesAtYear)
+  .post("/:year", handlers.postApbdesFileAtYear)
+  .get("/file/:id", handlers.getApbdesFile);
 
 misi
   .get("/", handlers.misi)
@@ -57,7 +63,8 @@ root
   .use("/umum", umum.routes(), umum.allowedMethods())
   .use("/dusun", dusun.routes(), dusun.allowedMethods())
   .use("/visi", visi.routes(), visi.allowedMethods())
-  .use("/misi", misi.routes(), misi.allowedMethods());
+  .use("/misi", misi.routes(), misi.allowedMethods())
+  .use("/apbdes", apbdes.routes(), apbdes.allowedMethods());
 
 app
   .use(async (ctx, next) => {

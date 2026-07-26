@@ -1,17 +1,26 @@
-import { useMemo } from "react";
-import APBDes from "../components/non-reusable/APBDes.tsx";
+import { useMemo, useState } from "react";
 import Primitive from "../components/reusable/Primitive.tsx";
 import RoundedSection from "../components/reusable/RoundedSection.tsx";
 import useFetch from "../hooks/useFetch.tsx";
 import type { Dusun } from "../types/Dusun.d.ts";
+import Button from "../components/reusable/Button.tsx";
+import type { JoinedApbdes } from "../types/Apbdes.d.ts";
 
 const Data = () => {
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+
   const {
     data: dataSemuaDusun,
     isLoading: _dataSemuaDusunIsLoading,
     isError: _dataSemuaDusunIsError,
   } = useFetch<Dusun>(
     `http://${globalThis.location.hostname}:8000/dusun`,
+  );
+
+  const {
+    data: apbdesTahun,
+  } = useFetch<JoinedApbdes>(
+    `http://${globalThis.location.hostname}:8000/apbdes/${selectedYear}`,
   );
 
   const totals = useMemo(() => {
@@ -31,7 +40,46 @@ const Data = () => {
       {dataSemuaDusun && (
         <div className="flex flex-col gap-8 px-32">
           <RoundedSection title="APBDes (Anggaran Pendapatan dan Belanja Desa)">
-            <APBDes year={2026} />
+            <div className="flex flex-col gap-4">
+              <div className="flex gap-2">
+                <Button
+                  variant="black"
+                  onClick={() => {
+                    setSelectedYear((prev) => prev - 1);
+                  }}
+                >
+                  -
+                </Button>
+                <div className="bg-white text-black font-bold px-4 py-2 flex items-center rounded-2xl select-none">
+                  {selectedYear}
+                </div>
+                <Button
+                  variant="black"
+                  onClick={() => {
+                    setSelectedYear((prev) => prev + 1);
+                  }}
+                >
+                  +
+                </Button>
+              </div>
+              <ul className="list-disc list-inside">
+                {apbdesTahun && apbdesTahun.map((apbdes, index) => {
+                  return (
+                    <a
+                      href={`http://${globalThis.location.hostname}:8000/apbdes/file/${apbdes.apbdes_file_id}`}
+                    >
+                      <li
+                        key={index}
+                        className="font-bold text-blue-600 hover:text-blue-900 active:text-blue-700"
+                      >
+                        ({(apbdes.besar_file / (1024)).toFixed(2)} KB){" "}
+                        {apbdes.nama_file}
+                      </li>
+                    </a>
+                  );
+                })}
+              </ul>
+            </div>
           </RoundedSection>
           <RoundedSection title="DATA UMUM">
             <div className="overflow-x-auto rounded-lg border shadow-sm">
