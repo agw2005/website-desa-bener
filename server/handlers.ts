@@ -94,7 +94,19 @@ export const namaDusun = async (ctx: RouterContext<"/nama">) => {
   connection.release();
 };
 
-export const getDusun = async (ctx: RouterContext<"/:id">) => {
+export const getDusun = async (ctx: RouterContext<"/">) => {
+  const connection = await pool.connect();
+
+  const result = await connection.queryObject<Dusun>(
+    "SELECT * FROM Dusun;",
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
+export const getOneDusun = async (ctx: RouterContext<"/:id">) => {
   const id = ctx.params.id;
 
   const connection = await pool.connect();
