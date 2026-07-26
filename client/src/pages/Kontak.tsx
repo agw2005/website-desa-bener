@@ -4,66 +4,66 @@ import Button from "../components/reusable/Button.tsx";
 import Primitive from "../components/reusable/Primitive.tsx";
 import RoundedSection from "../components/reusable/RoundedSection.tsx";
 import Schedule from "../components/reusable/Schedule.tsx";
-
-interface AparaturDesa {
-  name: string;
-  position: string;
-  phone: string;
-}
-
-const EXAMPLE_APARATUR_DESA: AparaturDesa[] = [
-  { name: "Beni Saefudin", position: "Kepala Desa", phone: "0281-3254-69994" },
-  {
-    name: "Buni Bener Kesra",
-    position: "Sekretaris Desa",
-    phone: "0822-2048-2073",
-  },
-];
+import useFetch from "../hooks/useFetch.tsx";
+import type { Aparatur } from "../types/Aparatur.d.ts";
 
 const Kontak = () => {
-  const [aparaturDesa, setAparaturDesa] = useState(0);
+  const [indexAparaturDesa, setIndexAparaturDesa] = useState(0);
   const jumlahKomentar = 16;
+
+  const {
+    data: aparaturDesa,
+    isLoading: _aparaturDesaIsLoading,
+    isError: _aparaturDesaIsError,
+  } = useFetch<Omit<Aparatur, "kata_sandi" | "foto">>(
+    `http://${globalThis.location.hostname}:8000/aparatur`,
+  );
 
   return (
     <Primitive>
       <div className="flex flex-col gap-8 px-32">
         <div className="flex gap-8">
           <div className="flex flex-col flex-1 gap-8">
-            <RoundedSection
-              title={`APARATUR DESA`}
-              contentClassName="flex flex-col gap-3 items-center"
-            >
-              <AparaturDesa
-                name={EXAMPLE_APARATUR_DESA[aparaturDesa].name}
-                position={EXAMPLE_APARATUR_DESA[aparaturDesa].position}
-                phone={EXAMPLE_APARATUR_DESA[aparaturDesa].phone}
-              />
-              {aparaturDesa + 1}/{EXAMPLE_APARATUR_DESA.length}
-              <div className="flex justify-around w-full self-stretch">
-                <Button
-                  variant="black"
-                  onClick={() => {
-                    aparaturDesa < 1
-                      ? setAparaturDesa((_prev) =>
-                        EXAMPLE_APARATUR_DESA.length - 1
-                      )
-                      : setAparaturDesa((prev) => prev - 1);
-                  }}
-                >
-                  SEBELUM
-                </Button>
-                <Button
-                  variant="black"
-                  onClick={() => {
-                    aparaturDesa === EXAMPLE_APARATUR_DESA.length - 1
-                      ? setAparaturDesa((_prev) => 0)
-                      : setAparaturDesa((prev) => prev + 1);
-                  }}
-                >
-                  BERIKUT
-                </Button>
-              </div>
-            </RoundedSection>
+            {aparaturDesa && (
+              <RoundedSection
+                title={`APARATUR DESA`}
+                contentClassName="flex flex-col gap-3 items-center"
+              >
+                <AparaturDesa
+                  name={aparaturDesa[indexAparaturDesa].nama}
+                  position={aparaturDesa[indexAparaturDesa].jabatan}
+                  phone={aparaturDesa[indexAparaturDesa].telepon}
+                  photo={`http://${globalThis.location.hostname}:8000/aparatur/foto/${
+                    aparaturDesa[indexAparaturDesa].aparatur_id
+                  }`}
+                />
+                <p>{indexAparaturDesa + 1}/{aparaturDesa.length}</p>
+                <div className="flex justify-around w-full self-stretch">
+                  <Button
+                    variant="black"
+                    onClick={() => {
+                      indexAparaturDesa < 1
+                        ? setIndexAparaturDesa((_prev) =>
+                          aparaturDesa.length - 1
+                        )
+                        : setIndexAparaturDesa((prev) => prev - 1);
+                    }}
+                  >
+                    SEBELUM
+                  </Button>
+                  <Button
+                    variant="black"
+                    onClick={() => {
+                      indexAparaturDesa === aparaturDesa.length - 1
+                        ? setIndexAparaturDesa((_prev) => 0)
+                        : setIndexAparaturDesa((prev) => prev + 1);
+                    }}
+                  >
+                    BERIKUT
+                  </Button>
+                </div>
+              </RoundedSection>
+            )}
             <RoundedSection
               title={`KOMENTAR`}
               contentClassName="flex flex-col gap-3"
