@@ -8,17 +8,11 @@ import useFetch from "../../hooks/useFetch.tsx";
 const ApbdesManager = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [inputFile, setInputFile] = useState<null | File>(null);
-  const [inputFilename, setInputFilename] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setInputFilename(file.name);
-      setInputFile(file);
-    } else {
-      setInputFilename("");
-      setInputFile(null);
-    }
+    if (file) setInputFile(file);
+    else setInputFile(null);
   };
 
   const {
@@ -42,7 +36,6 @@ const ApbdesManager = () => {
 
       if (response.ok) {
         setInputFile(null);
-        setInputFilename("");
         refetchApbdesTahun();
       } else {
         console.error(response);
@@ -76,7 +69,7 @@ const ApbdesManager = () => {
             +
           </Button>
         </div>
-        <ul className="list-disc list-inside">
+        <ul className="list-disc list-inside w-max">
           {apbdesTahun && apbdesTahun.map((apbdes, index) => {
             return (
               <a
@@ -99,7 +92,7 @@ const ApbdesManager = () => {
           id="file-apbdes"
           onChangeHandler={handleFileChange}
           accept="*"
-          fileName={inputFilename}
+          fileName={inputFile?.name}
         />
         <Button variant="black" onClick={handleAddApbdesFile}>Lampirkan</Button>
       </div>

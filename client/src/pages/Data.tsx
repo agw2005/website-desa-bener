@@ -62,7 +62,7 @@ const Data = () => {
                   +
                 </Button>
               </div>
-              <ul className="list-disc list-inside">
+              <ul className="list-disc list-inside w-max">
                 {apbdesTahun && apbdesTahun.map((apbdes, index) => {
                   return (
                     <a
