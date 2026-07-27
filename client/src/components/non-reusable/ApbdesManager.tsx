@@ -79,7 +79,7 @@ const ApbdesManager = () => {
                   key={index}
                   className="font-bold text-blue-600 hover:text-blue-900 active:text-blue-700"
                 >
-                  ({(apbdes.besar_file / (1024)).toFixed(2)} KB){" "}
+                  ({(apbdes.besar_file / (1024 * 1024)).toFixed(2)} MB){" "}
                   {apbdes.nama_file}
                 </li>
               </a>
