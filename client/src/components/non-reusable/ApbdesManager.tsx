@@ -2,7 +2,7 @@ import { useState } from "react";
 import Button from "../reusable/Button.tsx";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
-import { type JoinedApbdes } from "../../types/Apbdes.d.ts";
+import type { JoinedApbdes } from "../../types/Apbdes.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
 
 const ApbdesManager = () => {

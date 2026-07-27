@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { type Dusun } from "../../types/Dusun.d.ts";
+import type { Dusun } from "../../types/Dusun.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";
 import Button from "../reusable/Button.tsx";

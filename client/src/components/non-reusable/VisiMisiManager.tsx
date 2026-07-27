@@ -2,8 +2,8 @@ import { useState } from "react";
 import TextAreaInput from "../reusable/inputs/TextAreaInput.tsx";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import useFetch from "../../hooks/useFetch.tsx";
-import { type Visi, type VisiPostPayload } from "../../types/Visi.d.ts";
-import { type Misi, type MisiPostPayload } from "../../types/Misi.d.ts";
+import type { Visi, VisiPostPayload } from "../../types/Visi.d.ts";
+import type { Misi, MisiPostPayload } from "../../types/Misi.d.ts";
 import Button from "../reusable/Button.tsx";
 
 const VisiMisiManager = () => {

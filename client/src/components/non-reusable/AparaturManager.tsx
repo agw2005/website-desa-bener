@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import RoundedSection from "../reusable/RoundedSection.tsx";
-import { type Aparatur } from "../../types/Aparatur.d.ts";
+import type { Aparatur } from "../../types/Aparatur.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
 import Button from "../reusable/Button.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";

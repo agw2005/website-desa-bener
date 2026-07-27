@@ -1,6 +1,38 @@
 import { Application } from "@oak/oak/application";
-import { Router } from "@oak/oak/router";
-import * as handlers from "./handlers.ts";
+import { Router, type RouterContext } from "@oak/oak/router";
+import {
+  requestJwtAparatur,
+  requestJwtWargaUmum,
+  verifyJwt,
+} from "./handlers/login.ts";
+import {
+  aparaturDesa,
+  deskripsiSekilas,
+  fotoAparaturDesa,
+  getApbdesAtYear,
+  getApbdesFile,
+  getDusun,
+  getMisi,
+  getOneDusun,
+  getProfil,
+  getProfilDesa,
+  getVisi,
+  namaDusun,
+  petaDesa,
+} from "./handlers/get.ts";
+import {
+  deleteAparatur,
+  deleteMisi,
+  deleteVisi,
+  postAparatur,
+  postApbdesFileAtYear,
+  postDusun,
+  postMisi,
+  postUmum,
+  postVisi,
+} from "./handlers/post.ts";
+import { patchDusun, patchProfil } from "./handlers/patch.ts";
+import type { Next } from "@oak/oak/middleware";
 
 const port = 8000;
 const app = new Application();
@@ -14,48 +46,51 @@ const misi = new Router();
 const apbdes = new Router();
 
 root
-  .get("/", handlers.healthCheck)
-  .get("/verifikasi", handlers.verifyJwt);
+  .get("/", (ctx: RouterContext<"/">) => {
+    ctx.response.status = 200;
+    ctx.response.body = "Healthy";
+  })
+  .get("/verifikasi", verifyJwt);
 
 apbdes
-  .get("/:year", handlers.getApbdesAtYear)
-  .post("/:year", handlers.postApbdesFileAtYear)
-  .get("/file/:id", handlers.getApbdesFile);
+  .get("/:year", getApbdesAtYear)
+  .post("/:year", postApbdesFileAtYear)
+  .get("/file/:id", getApbdesFile);
 
 misi
-  .get("/", handlers.misi)
-  .post("/", handlers.postMisi)
-  .delete("/:id", handlers.deleteMisi);
+  .get("/", getMisi)
+  .post("/", postMisi)
+  .delete("/:id", deleteMisi);
 
 visi
-  .get("/", handlers.visi)
-  .post("/", handlers.postVisi)
-  .delete("/:id", handlers.deleteVisi);
+  .get("/", getVisi)
+  .post("/", postVisi)
+  .delete("/:id", deleteVisi);
 
 aparatur
-  .post("/", handlers.postAparatur)
-  .post("/login", handlers.requestJwtAparatur)
-  .get("/", handlers.aparaturDesa)
-  .get("/foto/:id", handlers.fotoAparaturDesa)
-  .delete("/:id", handlers.deleteAparatur);
+  .post("/", postAparatur)
+  .post("/login", requestJwtAparatur)
+  .get("/", aparaturDesa)
+  .get("/foto/:id", fotoAparaturDesa)
+  .delete("/:id", deleteAparatur);
 
 profil
-  .patch("/", handlers.patchProfil)
-  .get("/deskripsi", handlers.deskripsiSekilas)
-  .get("/data", handlers.getProfilDesa)
-  .get("/peta", handlers.petaDesa)
-  .get("/", handlers.getProfil);
+  .patch("/", patchProfil)
+  .get("/deskripsi", deskripsiSekilas)
+  .get("/data", getProfilDesa)
+  .get("/peta", petaDesa)
+  .get("/", getProfil);
 
 umum
-  .post("/", handlers.postUmum)
-  .post("/login", handlers.requestJwtWargaUmum);
+  .post("/", postUmum)
+  .post("/login", requestJwtWargaUmum);
 
 dusun
-  .post("/", handlers.postDusun)
-  .get("/nama", handlers.namaDusun)
-  .get("/:id", handlers.getOneDusun)
-  .get("/", handlers.getDusun)
-  .patch("/:id", handlers.patchDusun);
+  .post("/", postDusun)
+  .get("/nama", namaDusun)
+  .get("/:id", getOneDusun)
+  .get("/", getDusun)
+  .patch("/:id", patchDusun);
 
 root
   .use("/aparatur", aparatur.routes(), aparatur.allowedMethods())
@@ -67,7 +102,7 @@ root
   .use("/apbdes", apbdes.routes(), apbdes.allowedMethods());
 
 app
-  .use(async (ctx, next) => {
+  .use(async (ctx, next: Next) => {
     ctx.response.headers.set(
       "Access-Control-Allow-Origin",
       `http://localhost:5173`,
