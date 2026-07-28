@@ -9,6 +9,7 @@ import {
   getApbdesFile,
   getDusun,
   getKalender,
+  getLabel,
   getMisi,
   getOneDusun,
   getProfil,
@@ -21,12 +22,18 @@ import {
   postAparatur,
   postApbdesFileAtYear,
   postDusun,
+  postLabel,
   postMisi,
   postVisi,
 } from "./handlers/post.ts";
 import { patchDusun, patchProfil } from "./handlers/patch.ts";
 import type { Next } from "@oak/oak/middleware";
-import { deleteAparatur, deleteMisi, deleteVisi } from "./handlers/delete.ts";
+import {
+  deleteAparatur,
+  deleteLabel,
+  deleteMisi,
+  deleteVisi,
+} from "./handlers/delete.ts";
 
 const port = 8000;
 const app = new Application();
@@ -37,6 +44,7 @@ const dusun = new Router();
 const visi = new Router();
 const misi = new Router();
 const apbdes = new Router();
+const label = new Router();
 
 root
   .get("/", (ctx: RouterContext<"/">) => {
@@ -44,6 +52,11 @@ root
     ctx.response.body = "Healthy";
   })
   .get("/verifikasi", verifyJwt);
+
+label
+  .get("/", getLabel)
+  .post("/", postLabel)
+  .delete("/:id", deleteLabel);
 
 apbdes
   .get("/:year", getApbdesAtYear)
@@ -88,7 +101,8 @@ root
   .use("/dusun", dusun.routes(), dusun.allowedMethods())
   .use("/visi", visi.routes(), visi.allowedMethods())
   .use("/misi", misi.routes(), misi.allowedMethods())
-  .use("/apbdes", apbdes.routes(), apbdes.allowedMethods());
+  .use("/apbdes", apbdes.routes(), apbdes.allowedMethods())
+  .use("/label", label.routes(), label.allowedMethods());
 
 app
   .use(async (ctx, next: Next) => {

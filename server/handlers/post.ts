@@ -3,6 +3,39 @@ import type { MisiPostPayload } from "../types/Misi.d.ts";
 import type { VisiPostPayload } from "../types/Visi.d.ts";
 import { pool } from "../dbpool.ts";
 
+export const postLabel = async (ctx: RouterContext<"/">) => {
+  const nama = ctx.request.url.searchParams.get("nama");
+
+  if (!nama) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      error: "Field nama wajib diisi.",
+    };
+    return;
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<{ label_id: number }>(
+      `INSERT INTO
+       Label (nama)
+       VALUES ($1)
+       RETURNING label_id`,
+      [nama],
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = { label_id: result.rows[0].label_id };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data label." };
+  } finally {
+    connection.release();
+  }
+};
+
 export const postApbdesFileAtYear = async (ctx: RouterContext<"/:year">) => {
   const MAX_FILE_SIZE = 10 * 1024 * 1024;
 

@@ -8,6 +8,18 @@ import type { JoinedApbdes } from "../types/Apbdes.d.ts";
 import { pool } from "../dbpool.ts";
 import { getExtension } from "../helpers/getExtension.ts";
 import { contentType } from "@std/media-types/content-type";
+import { Label } from "../types/Label.d.ts";
+
+export const getLabel = async (ctx: RouterContext<"/">) => {
+  const connection = await pool.connect();
+  const result = await connection.queryObject<Label>(
+    "SELECT * FROM Label;",
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
 
 export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
   const connection = await pool.connect();
