@@ -9,6 +9,7 @@ import DusunEditForm from "./DusunEditForm.tsx";
 const DusunManager = () => {
   const [inputNamaDusun, setInputNamaDusun] = useState("");
   const [selectedDusun, setSelectedDusun] = useState<number | "">("");
+  const [requiredInputIsEmpty, setRequiredInputIsEmpty] = useState(false);
 
   const {
     data: namaDusun,
@@ -18,7 +19,12 @@ const DusunManager = () => {
   );
 
   const handleAddDusun = async () => {
-    if (!inputNamaDusun.trim()) return;
+    setRequiredInputIsEmpty(false);
+
+    if (!inputNamaDusun.trim()) {
+      setRequiredInputIsEmpty(true);
+      return;
+    }
 
     const response = await fetch(
       `http://${globalThis.location.hostname}:8000/dusun?nama=${inputNamaDusun}`,
@@ -51,6 +57,11 @@ const DusunManager = () => {
           <Button variant="black" onClick={handleAddDusun}>
             Tambah Dusun Baru
           </Button>
+          {requiredInputIsEmpty && (
+            <div className="w-max px-4 py-2 bg-red-600 text-white font-bold rounded-2xl">
+              Nama dusun wajib diisi
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-2 flex-1">
