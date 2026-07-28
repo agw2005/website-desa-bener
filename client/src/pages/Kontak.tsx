@@ -28,6 +28,9 @@ const Kontak = () => {
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isSubmittingKomentar, setIsSubmittingKomentar] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [deletingKomentarId, setDeletingKomentarId] = useState<number | null>(
+    null,
+  );
 
   const {
     data: aparaturDesa,
@@ -134,6 +137,28 @@ const Kontak = () => {
       setSubmitError("Gagal mengunggah komentar. Periksa koneksi Anda.");
     } finally {
       setIsSubmittingKomentar(false);
+    }
+  };
+
+  const handleDeleteKomentar = async (id: number) => {
+    setDeletingKomentarId(id);
+
+    try {
+      const response = await fetch(
+        `http://${globalThis.location.hostname}:8000/komentar/${id}`,
+        { method: "DELETE" },
+      );
+
+      if (response.ok) {
+        setKomentarList((prev) => prev.filter((k) => k.komentar_id !== id));
+      } else {
+        const errorBody = await response.json();
+        console.error(errorBody.error ?? "Gagal menghapus komentar.");
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setDeletingKomentarId(null);
     }
   };
 
@@ -257,7 +282,21 @@ const Kontak = () => {
                 }`}
                 date={new Date(komentar.waktu_upload * 1000)}
               >
-                {komentar.isi}
+                <div className="flex flex-col gap-2">
+                  <p>{komentar.isi}</p>
+                  {isLoggedIn && (
+                    <Button
+                      variant="red"
+                      onClick={() => handleDeleteKomentar(komentar.komentar_id)}
+                      disabled={deletingKomentarId === komentar.komentar_id}
+                      className="w-max"
+                    >
+                      {deletingKomentarId === komentar.komentar_id
+                        ? "Menghapus..."
+                        : "Hapus"}
+                    </Button>
+                  )}
+                </div>
               </Schedule>
             ))}
 

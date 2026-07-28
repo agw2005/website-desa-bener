@@ -34,6 +34,7 @@ import { patchDusun, patchProfil } from "./handlers/patch.ts";
 import type { Next } from "@oak/oak/middleware";
 import {
   deleteAparatur,
+  deleteKomentar,
   deleteLabel,
   deleteMisi,
   deleteVisi,
@@ -61,7 +62,8 @@ root
 
 komentar
   .get("/", getKomentars)
-  .post("/", postKomentar);
+  .post("/", postKomentar)
+  .delete("/:id", deleteKomentar);
 
 artikel
   .post("/", postArtikel)
