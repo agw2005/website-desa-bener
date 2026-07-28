@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from "react";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "nav" | "black";
+  variant?: "nav" | "black" | "red";
 }
 
 const variantStyles = {
@@ -9,6 +9,8 @@ const variantStyles = {
     "bg-amber-200 hover:bg-amber-400 active:bg-amber-300 disabled:hover:bg-amber-200 disabled:active:bg-amber-200",
   black:
     "bg-black hover:bg-black/70 active:bg-black/85 disabled:hover:bg-black disabled:active:bg-black text-white",
+  red:
+    "text-white hover:text-white bg-red-700 hover:bg-red-700/70 active:bg-red-700/85 disabled:hover:bg-red-700 disabled:active:bg-red-700",
 };
 
 const Button = ({

@@ -233,3 +233,104 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
     connection.release();
   }
 };
+export const postArtikel = async (ctx: RouterContext<"/">) => {
+  const ALLOWED_LAMPIRAN_TYPES = ["image/jpeg", "image/png", "image/jpg"];
+  const MAX_LAMPIRAN_SIZE = 5 * 1024 * 1024; // 5MB per file
+
+  const form = await ctx.request.body.formData();
+
+  const judul = form.get("judul");
+  const isi = form.get("isi");
+
+  if (typeof judul !== "string" || judul.trim() === "") {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Judul artikel wajib diisi." };
+    return;
+  }
+
+  if (typeof isi !== "string" || isi.trim() === "") {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Isi artikel wajib diisi." };
+    return;
+  }
+
+  // Labels: frontend sends repeated "label_id" fields, one per selected label
+  const labelIds: number[] = [];
+  for (const value of form.getAll("label_id")) {
+    if (typeof value === "string") {
+      const parsed = Number.parseInt(value, 10);
+      if (!Number.isInteger(parsed)) {
+        ctx.response.status = 400;
+        ctx.response.body = { error: "ID label tidak valid." };
+        return;
+      }
+      labelIds.push(parsed);
+    }
+  }
+
+  // Attachments: frontend sends repeated "lampiran" file fields
+  const lampiranFiles: File[] = [];
+  for (const value of form.getAll("lampiran")) {
+    if (value instanceof File) {
+      if (!ALLOWED_LAMPIRAN_TYPES.includes(value.type)) {
+        ctx.response.status = 400;
+        ctx.response.body = {
+          error:
+            `Lampiran "${value.name}" harus berformat JPEG, PNG, atau JPG.`,
+        };
+        return;
+      }
+      if (value.size > MAX_LAMPIRAN_SIZE) {
+        ctx.response.status = 400;
+        ctx.response.body = {
+          error: `Lampiran "${value.name}" melebihi ukuran maksimal 5MB.`,
+        };
+        return;
+      }
+      lampiranFiles.push(value);
+    }
+  }
+
+  const connection = await pool.connect();
+  try {
+    await connection.queryObject("BEGIN");
+
+    const waktuUpload = Math.floor(Date.now() / 1000);
+
+    const created = await connection.queryObject<{ artikel_id: number }>(
+      `INSERT INTO Artikel (judul, isi, waktu_upload)
+       VALUES ($1, $2, $3)
+       RETURNING artikel_id`,
+      [judul.trim(), isi.trim(), waktuUpload],
+    );
+    const artikelId = created.rows[0].artikel_id;
+
+    for (const labelId of labelIds) {
+      await connection.queryObject(
+        `INSERT INTO Label_Artikel (artikel_id, label_id) VALUES ($1, $2)`,
+        [artikelId, labelId],
+      );
+    }
+
+    for (const file of lampiranFiles) {
+      const fileBytes = new Uint8Array(await file.arrayBuffer());
+      await connection.queryObject(
+        `INSERT INTO Lampiran_Artikel (artikel_id, nama_file, besar_file, isi_file)
+         VALUES ($1, $2, $3, $4)`,
+        [artikelId, file.name, file.size, fileBytes],
+      );
+    }
+
+    await connection.queryObject("COMMIT");
+
+    ctx.response.status = 201;
+    ctx.response.body = { artikel_id: artikelId };
+  } catch (err) {
+    await connection.queryObject("ROLLBACK");
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan artikel." };
+  } finally {
+    connection.release();
+  }
+};

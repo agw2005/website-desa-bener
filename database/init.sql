@@ -33,7 +33,7 @@ CREATE TABLE Artikel (
     artikel_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     judul TEXT NOT NULL,
     isi TEXT,
-    waktu_upload INT NOT NULL
+    waktu_upload BIGINT NOT NULL
 );
 
 CREATE TABLE Label_Artikel (

@@ -9,6 +9,72 @@ import { pool } from "../dbpool.ts";
 import { getExtension } from "../helpers/getExtension.ts";
 import { contentType } from "@std/media-types/content-type";
 import { Label } from "../types/Label.d.ts";
+import { Artikel } from "../types/Artikel.d.ts";
+
+export const getArtikels = async (ctx: RouterContext<"/">) => {
+  const url = new URL(ctx.request.url);
+  const cursorParam = url.searchParams.get("cursor");
+  const limitParam = url.searchParams.get("limit");
+
+  const limit = limitParam ? Number(limitParam) : 9;
+
+  if (!Number.isInteger(limit) || limit <= 0 || limit > 50) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Parameter limit tidak valid (1-50)." };
+    return;
+  }
+
+  let cursor: number | null = null;
+  if (cursorParam !== null) {
+    cursor = Number(cursorParam);
+    if (!Number.isInteger(cursor) || cursor <= 0) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Parameter cursor tidak valid." };
+      return;
+    }
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = cursor === null
+      ? await connection.queryObject<Artikel>(
+        `SELECT artikel_id, judul, isi, waktu_upload
+         FROM Artikel
+         ORDER BY artikel_id DESC
+         LIMIT $1`,
+        [limit + 1],
+      )
+      : await connection.queryObject<{
+        artikel_id: number;
+        judul: string;
+        isi: string;
+        waktu_upload: number;
+      }>(
+        `SELECT artikel_id, judul, isi, waktu_upload
+         FROM Artikel
+         WHERE artikel_id < $1
+         ORDER BY artikel_id DESC
+         LIMIT $2`,
+        [cursor, limit + 1],
+      );
+
+    const hasNextPage = result.rows.length > limit;
+    const items = hasNextPage ? result.rows.slice(0, limit) : result.rows;
+    const nextCursor = hasNextPage ? items[items.length - 1].artikel_id : null;
+
+    ctx.response.status = 200;
+    ctx.response.body = {
+      items,
+      next_cursor: nextCursor,
+    };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data artikel." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const getLabel = async (ctx: RouterContext<"/">) => {
   const connection = await pool.connect();
