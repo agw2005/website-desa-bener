@@ -8,6 +8,7 @@ import {
   getApbdesAtYear,
   getApbdesFile,
   getDusun,
+  getKalender,
   getMisi,
   getOneDusun,
   getProfil,
@@ -17,9 +18,6 @@ import {
   petaDesa,
 } from "./handlers/get.ts";
 import {
-  deleteAparatur,
-  deleteMisi,
-  deleteVisi,
   postAparatur,
   postApbdesFileAtYear,
   postDusun,
@@ -28,6 +26,7 @@ import {
 } from "./handlers/post.ts";
 import { patchDusun, patchProfil } from "./handlers/patch.ts";
 import type { Next } from "@oak/oak/middleware";
+import { deleteAparatur, deleteMisi, deleteVisi } from "./handlers/delete.ts";
 
 const port = 8000;
 const app = new Application();
@@ -73,7 +72,8 @@ profil
   .get("/deskripsi", deskripsiSekilas)
   .get("/data", getProfilDesa)
   .get("/peta", petaDesa)
-  .get("/", getProfil);
+  .get("/", getProfil)
+  .get("/kalender", getKalender);
 
 dusun
   .post("/", postDusun)

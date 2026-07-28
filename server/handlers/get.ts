@@ -19,6 +19,17 @@ export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
   connection.release();
 };
 
+export const getKalender = async (ctx: RouterContext<"/kalender">) => {
+  const connection = await pool.connect();
+  const result = await connection.queryObject<{ tautan_kalender: string }>(
+    "SELECT tautan_kalender FROM Profil LIMIT 1;",
+  );
+
+  ctx.response.status = 200;
+  ctx.response.body = result.rows;
+  connection.release();
+};
+
 export const aparaturDesa = async (ctx: RouterContext<"/">) => {
   const connection = await pool.connect();
   const result = await connection.queryObject<
