@@ -10,6 +10,81 @@ import { getExtension } from "../helpers/getExtension.ts";
 import { contentType } from "@std/media-types/content-type";
 import { Label } from "../types/Label.d.ts";
 import { ArtikelWithLabel } from "../types/Artikel.d.ts";
+import { Komentar } from "../types/Komentar.d.ts";
+
+export const getKomentars = async (ctx: RouterContext<"/">) => {
+  const url = new URL(ctx.request.url);
+  const cursorParam = url.searchParams.get("cursor");
+  const limitParam = url.searchParams.get("limit");
+
+  const limit = limitParam ? Number(limitParam) : 10;
+
+  if (!Number.isInteger(limit) || limit <= 0 || limit > 50) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Parameter limit tidak valid (1-50)." };
+    return;
+  }
+
+  let cursor: number | null = null;
+  if (cursorParam !== null) {
+    cursor = Number(cursorParam);
+    if (!Number.isInteger(cursor) || cursor <= 0) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Parameter cursor tidak valid." };
+      return;
+    }
+  }
+
+  const connection = await pool.connect();
+  try {
+    const whereClauses: string[] = [];
+    const values: unknown[] = [];
+    let paramIndex = 1;
+
+    if (cursor !== null) {
+      whereClauses.push(`Komentar.komentar_id < $${paramIndex}`);
+      values.push(cursor);
+      paramIndex++;
+    }
+
+    const whereSql = whereClauses.length > 0
+      ? `WHERE ${whereClauses.join(" AND ")}`
+      : "";
+
+    values.push(limit + 1);
+    const limitParamIndex = paramIndex;
+
+    const result = await connection.queryObject<Komentar>(
+      `
+      SELECT
+        *
+      FROM Komentar
+      ${whereSql}
+      ORDER BY Komentar.komentar_id DESC
+      LIMIT $${limitParamIndex}
+      `,
+      values,
+    );
+
+    const hasNextPage = result.rows.length > limit;
+    const rawItems = hasNextPage ? result.rows.slice(0, limit) : result.rows;
+    const items = rawItems.map((row) => ({
+      ...row,
+      waktu_upload: Number(row.waktu_upload),
+    }));
+
+    const nextCursor = hasNextPage ? items[items.length - 1].komentar_id : null;
+
+    ctx.response.status = 200;
+    ctx.response.body = { komentar: items, next_cursor: nextCursor };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data komentar." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const getArtikels = async (ctx: RouterContext<"/">) => {
   const url = new URL(ctx.request.url);

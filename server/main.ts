@@ -10,6 +10,7 @@ import {
   getArtikels,
   getDusun,
   getKalender,
+  getKomentars,
   getLabel,
   getMisi,
   getOneDusun,
@@ -24,6 +25,7 @@ import {
   postApbdesFileAtYear,
   postArtikel,
   postDusun,
+  postKomentar,
   postLabel,
   postMisi,
   postVisi,
@@ -48,6 +50,7 @@ const misi = new Router();
 const apbdes = new Router();
 const label = new Router();
 const artikel = new Router();
+const komentar = new Router();
 
 root
   .get("/", (ctx: RouterContext<"/">) => {
@@ -55,6 +58,10 @@ root
     ctx.response.body = "Healthy";
   })
   .get("/verifikasi", verifyJwt);
+
+komentar
+  .get("/", getKomentars)
+  .post("/", postKomentar);
 
 artikel
   .post("/", postArtikel)
@@ -110,7 +117,8 @@ root
   .use("/misi", misi.routes(), misi.allowedMethods())
   .use("/apbdes", apbdes.routes(), apbdes.allowedMethods())
   .use("/label", label.routes(), label.allowedMethods())
-  .use("/artikel", artikel.routes(), artikel.allowedMethods());
+  .use("/artikel", artikel.routes(), artikel.allowedMethods())
+  .use("/komentar", komentar.routes(), komentar.allowedMethods());
 
 app
   .use(async (ctx, next: Next) => {

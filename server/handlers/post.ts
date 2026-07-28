@@ -2,6 +2,43 @@ import type { RouterContext } from "@oak/oak/router";
 import type { MisiPostPayload } from "../types/Misi.d.ts";
 import type { VisiPostPayload } from "../types/Visi.d.ts";
 import { pool } from "../dbpool.ts";
+import { Komentar } from "../types/Komentar.d.ts";
+
+export const postKomentar = async (ctx: RouterContext<"/">) => {
+  const body: Omit<Komentar, "komentar_id" | "waktu_upload"> = await ctx.request
+    .body.json();
+
+  if (!body.nama) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      error: "Field nama wajib diisi.",
+    };
+    return;
+  }
+
+  const waktuUpload = Math.floor(Date.now() / 1000);
+
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<{ komentar_id: number }>(
+      `INSERT INTO
+       Komentar  (nama, surel, isi, waktu_upload)
+       VALUES    ($1  , $2   , $3 , $4          )
+       RETURNING komentar_id`,
+      [body.nama, body.surel, body.isi, waktuUpload],
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = { komentar_id: result.rows[0].komentar_id };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data label." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const postLabel = async (ctx: RouterContext<"/">) => {
   const nama = ctx.request.url.searchParams.get("nama");

@@ -177,6 +177,14 @@ CREATE TABLE Kontak_Umkm (
         ON DELETE CASCADE
 );
 
+CREATE TABLE Komentar (
+    komentar_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    nama TEXT NOT NULL,
+    surel TEXT NOT NULL,
+    isi TEXT NOT NULL,
+    waktu_upload BIGINT NOT NULL
+);
+
 INSERT INTO Profil (
     deskripsi_sekilas,
     kode_desa,
