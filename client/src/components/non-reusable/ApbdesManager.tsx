@@ -93,6 +93,7 @@ const ApbdesManager = () => {
           onChangeHandler={handleFileChange}
           accept="*"
           fileName={inputFile?.name}
+          placeholder="Unggah dokumen APBDes"
         />
         <Button variant="black" onClick={handleAddApbdesFile}>Lampirkan</Button>
       </div>

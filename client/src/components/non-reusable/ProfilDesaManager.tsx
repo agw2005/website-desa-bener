@@ -81,7 +81,6 @@ const ProfilDesaManager = () => {
   const [inputDeskripsiSekilas, setInputDeskripsiSekilas] = useState("");
   const [inputSejarah, setInputSejarah] = useState("");
   const [inputPeta, setInputPeta] = useState<null | File>(null);
-  const [inputPetaFilename, setInputPetaFilename] = useState("");
   const [previewPetaUrl, setPreviewPetaUrl] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
@@ -117,13 +116,8 @@ const ProfilDesaManager = () => {
 
   const handlePetaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setInputPetaFilename(file.name);
-      setInputPeta(file);
-    } else {
-      setInputPetaFilename("");
-      setInputPeta(null);
-    }
+    if (file) setInputPeta(file);
+    else setInputPeta(null);
   };
 
   const handleSave = async () => {
@@ -149,7 +143,6 @@ const ProfilDesaManager = () => {
       if (response.ok) {
         setSaveMessage("Profil desa berhasil disimpan.");
         setInputPeta(null);
-        setInputPetaFilename("");
         refetchProfil();
       } else {
         setSaveMessage("Gagal menyimpan profil desa.");
@@ -217,16 +210,14 @@ const ProfilDesaManager = () => {
 
         <div className="flex flex-col gap-2">
           <h3 className="font-bold text-lg">Peta Desa</h3>
-          <p className="text-xs font-bold text-red-700">
-            (png, jpg, jpeg) — kosongkan jika tidak ingin mengganti peta
-          </p>
           <OneFileInput
             label="Peta"
             name="peta"
             id="peta-profil"
             onChangeHandler={handlePetaChange}
             accept=".png, .jpg, .jpeg"
-            fileName={inputPetaFilename}
+            fileName={inputPeta?.name}
+            placeholder="(png, jpg, jpeg) — kosongkan jika tidak ingin mengganti peta"
           />
           {previewPetaUrl && (
             <div className="mt-2 mb-4 border rounded p-2 w-max">

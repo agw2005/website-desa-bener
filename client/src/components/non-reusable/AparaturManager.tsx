@@ -22,7 +22,6 @@ const AparaturManager = () => {
   const [inputKonfirmasiSandiAparatur, setInputKonfirmasiSandiAparatur] =
     useState("");
   const [inputFotoAparatur, setInputFotoAparatur] = useState<null | File>(null);
-  const [inputFilenameAparatur, setInputFilenameAparatur] = useState("");
   const [aparaturTerkonfirmasi, setAparaturTerkonfirmasi] = useState(false);
   const [previewFotoUrl, setPreviewFotoUrl] = useState<string | null>(null);
 
@@ -41,10 +40,8 @@ const AparaturManager = () => {
   const handleAparaturFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setInputFilenameAparatur(file.name);
       setInputFotoAparatur(file);
     } else {
-      setInputFilenameAparatur("");
       setInputFotoAparatur(null);
     }
   };
@@ -56,7 +53,6 @@ const AparaturManager = () => {
     setInputKataSandiAparatur("");
     setInputKonfirmasiSandiAparatur("");
     setInputFotoAparatur(null);
-    setInputFilenameAparatur("");
   };
 
   const handleAddAparatur = async () => {
@@ -139,7 +135,8 @@ const AparaturManager = () => {
             id="foto-aparatur"
             onChangeHandler={handleAparaturFotoChange}
             accept=".png, .jpg, .jpeg"
-            fileName={inputFilenameAparatur}
+            fileName={inputFotoAparatur?.name}
+            placeholder="(png, jpg, jpeg) Disarankan memakai foto dengan rasio 2x3"
           />
           {previewFotoUrl && (
             <div className="mt-2 mb-4 border rounded p-2 w-max">
