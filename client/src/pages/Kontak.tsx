@@ -6,9 +6,15 @@ import RoundedSection from "../components/reusable/RoundedSection.tsx";
 import Schedule from "../components/reusable/Schedule.tsx";
 import useFetch from "../hooks/useFetch.tsx";
 import type { Aparatur } from "../types/Aparatur.d.ts";
+import TextInput from "../components/reusable/inputs/TextInput.tsx";
+import { isValidEmail } from "../helpers/isValidEmail.ts";
 
 const Kontak = () => {
   const [indexAparaturDesa, setIndexAparaturDesa] = useState(0);
+  const [inputNama, setInputNama] = useState("");
+  const [inputSurel, setInputSurel] = useState("");
+  const [namaIsEmpty, setNamaIsEmpty] = useState(false);
+  const [emailIsNotValid, setEmailisNotValid] = useState(false);
   const jumlahKomentar = 16;
 
   const {
@@ -68,39 +74,53 @@ const Kontak = () => {
               title={`KOMENTAR`}
               contentClassName="flex flex-col gap-3"
             >
-              <label className="flex">
-                <div className="border px-4 py-2 text-white font-bold border-black bg-black rounded-l-2xl select-none">
-                  NAMA
-                </div>
-                <input
-                  className="border outline-none w-full px-4 py-2 rounded-r-2xl bg-white"
-                  type="text"
-                  name="nama"
-                  id="nama"
-                />
-              </label>
-              <label className="flex">
-                <div className="border px-4 py-2 text-white font-bold border-black bg-black rounded-l-2xl select-none">
-                  SUREL
-                </div>
-                <input
-                  className="border outline-none w-full px-4 py-2 rounded-r-2xl bg-white"
-                  type="text"
-                  name="surel"
-                  id="surel"
-                />
-              </label>
-              <label>
-                <textarea
-                  name="komentar"
-                  id="komentar"
-                  className="border outline-none w-full px-4 py-2 rounded-2xl bg-white min-h-32"
-                >
-                </textarea>
-              </label>
-              <Button variant="black">
+              <TextInput
+                label="NAMA"
+                name="nama-komentator"
+                id="nama-komentator"
+                value={inputNama}
+                onChangeHandler={(e) => {
+                  setInputNama(e.target.value);
+                }}
+              />
+              <TextInput
+                label="SUREL"
+                name="surel-komentator"
+                id="surel-komentator"
+                value={inputSurel}
+                onChangeHandler={(e) => {
+                  setInputSurel(e.target.value);
+                }}
+              />
+              <Button
+                variant="black"
+                onClick={() => {
+                  setNamaIsEmpty(false);
+                  setEmailisNotValid(false);
+                  if (inputNama.trim() === "") {
+                    setNamaIsEmpty(true);
+                    return;
+                  }
+
+                  if (!isValidEmail(inputSurel)) {
+                    setEmailisNotValid(true);
+                    return;
+                  }
+                }}
+              >
                 UNGGAH
               </Button>
+
+              {namaIsEmpty && (
+                <div className="bg-red-500 text-white font-bold px-4 py-2 text-center rounded-2xl">
+                  Nama wajib diisi
+                </div>
+              )}
+              {emailIsNotValid && (
+                <div className="bg-red-500 text-white font-bold px-4 py-2 text-center rounded-2xl">
+                  Surel tidak valid
+                </div>
+              )}
             </RoundedSection>
           </div>
           <RoundedSection
