@@ -118,7 +118,7 @@ export const postDusun = async (ctx: RouterContext<"/">) => {
     const result = await connection.queryObject<{ dusun_id: number }>(
       `INSERT INTO
        Dusun (nama, rt, populasi, keluarga, laki, perempuan, umkm, islam, protestanisme, katolisisme, hinduisme, buddhisme, konfusianisme, tunadaksa, tunanetra, tunarungu, tunawicara, tunagrahita, tunalaras, kps, ks_satu, ks_dua, ks_tiga, ks_tiga_plus)
-       VALUES ($1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+       VALUES ($1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null)
        RETURNING dusun_id`,
       [nama],
     );
@@ -129,46 +129,6 @@ export const postDusun = async (ctx: RouterContext<"/">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data dusun." };
-  } finally {
-    connection.release();
-  }
-};
-
-export const postUmum = async (ctx: RouterContext<"/">) => {
-  const form = await ctx.request.body.formData();
-  const nama = form.get("nama");
-  const nik = form.get("nik");
-  const kataSandi = form.get("kata_sandi");
-
-  if (
-    typeof nama !== "string" || nama.trim() === "" ||
-    typeof nik !== "string" || nik.trim() === "" ||
-    typeof kataSandi !== "string" || kataSandi.trim() === ""
-  ) {
-    ctx.response.status = 400;
-    ctx.response.body = {
-      error: "Field nama, nik, dan kata_sandi wajib diisi.",
-    };
-    return;
-  }
-
-  const connection = await pool.connect();
-
-  try {
-    const result = await connection.queryObject<{ umum_id: number }>(
-      `INSERT INTO
-       Umum (nama, nik, kata_sandi)
-       VALUES ($1, $2, $3)
-       RETURNING umum_id`,
-      [nama, nik, kataSandi],
-    );
-
-    ctx.response.status = 201;
-    ctx.response.body = { umum_id: result.rows[0].umum_id };
-  } catch (err) {
-    console.error(err);
-    ctx.response.status = 500;
-    ctx.response.body = { error: "Gagal menyimpan data warga umum." };
   } finally {
     connection.release();
   }
@@ -188,35 +148,36 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
   if (
     typeof nama !== "string" || nama.trim() === "" ||
     typeof jabatan !== "string" || jabatan.trim() === "" ||
-    typeof telepon !== "string" || telepon.trim() === "" ||
     typeof kataSandi !== "string" || kataSandi.trim() === ""
   ) {
     ctx.response.status = 400;
     ctx.response.body = {
-      error: "Field nama, jabatan, telepon, dan kata_sandi wajib diisi.",
+      error: "Field nama, jabatan, dan kata_sandi wajib diisi.",
     };
     return;
   }
 
-  if (!(foto instanceof File)) {
+  let fotoBytes = null;
+
+  if (
+    foto instanceof File && !ALLOWED_IMAGE_TYPES.includes(foto.type)
+  ) {
     ctx.response.status = 400;
-    ctx.response.body = { error: "Field foto wajib berupa file." };
+    ctx.response.body = {
+      error: "Foto harus berformat JPEG, PNG, atau WebP.",
+    };
     return;
   }
 
-  if (!ALLOWED_IMAGE_TYPES.includes(foto.type)) {
-    ctx.response.status = 400;
-    ctx.response.body = { error: "Foto harus berformat JPEG, PNG, atau WebP." };
-    return;
-  }
-
-  if (foto.size > MAX_FILE_SIZE) {
+  if (foto instanceof File && foto.size > MAX_FILE_SIZE) {
     ctx.response.status = 400;
     ctx.response.body = { error: "Ukuran foto maksimal 5MB." };
     return;
   }
 
-  const fotoBytes = new Uint8Array(await foto.arrayBuffer());
+  fotoBytes = foto instanceof File
+    ? new Uint8Array(await foto.arrayBuffer())
+    : null;
 
   const connection = await pool.connect();
 

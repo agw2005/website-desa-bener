@@ -115,13 +115,15 @@ const Data = () => {
                         key={index}
                         className="border-b border-slate-200 odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                       >
-                        <td className="px-4 py-2">{dusun.nama}</td>
-                        <td className="px-4 py-2">{dusun.rt}</td>
-                        <td className="px-4 py-2">{dusun.populasi}</td>
-                        <td className="px-4 py-2">{dusun.keluarga}</td>
-                        <td className="px-4 py-2">{dusun.laki}</td>
-                        <td className="px-4 py-2">{dusun.perempuan}</td>
-                        <td className="px-4 py-2">{dusun.umkm}</td>
+                        <td className="px-4 py-2">{dusun.nama || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.rt || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.populasi || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.keluarga || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.laki || "N/A"}</td>
+                        <td className="px-4 py-2">
+                          {dusun.perempuan || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">{dusun.umkm || "N/A"}</td>
                       </tr>
                     );
                   })}
@@ -129,12 +131,12 @@ const Data = () => {
                 <tfoot>
                   <tr className="odd:bg-white even:bg-slate-50 hover:bg-slate-100 font-bold">
                     <td className="px-4 py-2">Total</td>
-                    <td className="px-4 py-2">{totals.rt}</td>
-                    <td className="px-4 py-2">{totals.populasi}</td>
-                    <td className="px-4 py-2">{totals.keluarga}</td>
-                    <td className="px-4 py-2">{totals.laki}</td>
-                    <td className="px-4 py-2">{totals.perempuan}</td>
-                    <td className="px-4 py-2">{totals.umkm}</td>
+                    <td className="px-4 py-2">{totals.rt || 0}</td>
+                    <td className="px-4 py-2">{totals.populasi || 0}</td>
+                    <td className="px-4 py-2">{totals.keluarga || 0}</td>
+                    <td className="px-4 py-2">{totals.laki || 0}</td>
+                    <td className="px-4 py-2">{totals.perempuan || 0}</td>
+                    <td className="px-4 py-2">{totals.umkm || 0}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -176,14 +178,24 @@ const Data = () => {
                         key={index}
                         className="border-b border-slate-200 odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                       >
-                        <td className="px-4 py-2">{dusun.nama}</td>
-                        <td className="px-4 py-2">{dusun.populasi}</td>
-                        <td className="px-4 py-2">{dusun.islam}</td>
-                        <td className="px-4 py-2">{dusun.protestanisme}</td>
-                        <td className="px-4 py-2">{dusun.katolisisme}</td>
-                        <td className="px-4 py-2">{dusun.hinduisme}</td>
-                        <td className="px-4 py-2">{dusun.buddhisme}</td>
-                        <td className="px-4 py-2">{dusun.konfusianisme}</td>
+                        <td className="px-4 py-2">{dusun.nama || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.populasi || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.islam || "N/A"}</td>
+                        <td className="px-4 py-2">
+                          {dusun.protestanisme || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.katolisisme || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.hinduisme || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.buddhisme || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.konfusianisme || "N/A"}
+                        </td>
                       </tr>
                     );
                   })}
@@ -191,13 +203,13 @@ const Data = () => {
                 <tfoot>
                   <tr className="odd:bg-white even:bg-slate-50 hover:bg-slate-100 font-bold">
                     <td className="px-4 py-2">Total</td>
-                    <td className="px-4 py-2">{totals.populasi}</td>
-                    <td className="px-4 py-2">{totals.islam}</td>
-                    <td className="px-4 py-2">{totals.protestanisme}</td>
-                    <td className="px-4 py-2">{totals.katolisisme}</td>
-                    <td className="px-4 py-2">{totals.hinduisme}</td>
-                    <td className="px-4 py-2">{totals.buddhisme}</td>
-                    <td className="px-4 py-2">{totals.konfusianisme}</td>
+                    <td className="px-4 py-2">{totals.populasi || 0}</td>
+                    <td className="px-4 py-2">{totals.islam || 0}</td>
+                    <td className="px-4 py-2">{totals.protestanisme || 0}</td>
+                    <td className="px-4 py-2">{totals.katolisisme || 0}</td>
+                    <td className="px-4 py-2">{totals.hinduisme || 0}</td>
+                    <td className="px-4 py-2">{totals.buddhisme || 0}</td>
+                    <td className="px-4 py-2">{totals.konfusianisme || 0}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -236,13 +248,25 @@ const Data = () => {
                         key={index}
                         className="border-b border-slate-200 odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                       >
-                        <td className="px-4 py-2">{dusun.nama}</td>
-                        <td className="px-4 py-2">{dusun.tunadaksa}</td>
-                        <td className="px-4 py-2">{dusun.tunanetra}</td>
-                        <td className="px-4 py-2">{dusun.tunarungu}</td>
-                        <td className="px-4 py-2">{dusun.tunawicara}</td>
-                        <td className="px-4 py-2">{dusun.tunagrahita}</td>
-                        <td className="px-4 py-2">{dusun.tunalaras}</td>
+                        <td className="px-4 py-2">{dusun.nama || "N/A"}</td>
+                        <td className="px-4 py-2">
+                          {dusun.tunadaksa || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.tunanetra || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.tunarungu || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.tunawicara || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.tunagrahita || "N/A"}
+                        </td>
+                        <td className="px-4 py-2">
+                          {dusun.tunalaras || "N/A"}
+                        </td>
                       </tr>
                     );
                   })}
@@ -250,12 +274,12 @@ const Data = () => {
                 <tfoot>
                   <tr className="odd:bg-white even:bg-slate-50 hover:bg-slate-100 font-bold">
                     <td className="px-4 py-2">Total</td>
-                    <td className="px-4 py-2">{totals.tunadaksa}</td>
-                    <td className="px-4 py-2">{totals.tunanetra}</td>
-                    <td className="px-4 py-2">{totals.tunarungu}</td>
-                    <td className="px-4 py-2">{totals.tunawicara}</td>
-                    <td className="px-4 py-2">{totals.tunagrahita}</td>
-                    <td className="px-4 py-2">{totals.tunalaras}</td>
+                    <td className="px-4 py-2">{totals.tunadaksa || 0}</td>
+                    <td className="px-4 py-2">{totals.tunanetra || 0}</td>
+                    <td className="px-4 py-2">{totals.tunarungu || 0}</td>
+                    <td className="px-4 py-2">{totals.tunawicara || 0}</td>
+                    <td className="px-4 py-2">{totals.tunagrahita || 0}</td>
+                    <td className="px-4 py-2">{totals.tunalaras || 0}</td>
                   </tr>
                 </tfoot>
               </table>
@@ -291,12 +315,14 @@ const Data = () => {
                         key={index}
                         className="border-b border-slate-200 odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                       >
-                        <td className="px-4 py-2">{dusun.nama}</td>
-                        <td className="px-4 py-2">{dusun.kps}</td>
-                        <td className="px-4 py-2">{dusun.ks_satu}</td>
-                        <td className="px-4 py-2">{dusun.ks_dua}</td>
-                        <td className="px-4 py-2">{dusun.ks_tiga}</td>
-                        <td className="px-4 py-2">{dusun.ks_tiga_plus}</td>
+                        <td className="px-4 py-2">{dusun.nama || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.kps || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.ks_satu || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.ks_dua || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.ks_tiga || "N/A"}</td>
+                        <td className="px-4 py-2">
+                          {dusun.ks_tiga_plus || "N/A"}
+                        </td>
                       </tr>
                     );
                   })}
@@ -304,11 +330,11 @@ const Data = () => {
                 <tfoot>
                   <tr className="odd:bg-white even:bg-slate-50 hover:bg-slate-100 font-bold">
                     <td className="px-4 py-2">Total</td>
-                    <td className="px-4 py-2">{totals.kps}</td>
-                    <td className="px-4 py-2">{totals.ks_satu}</td>
-                    <td className="px-4 py-2">{totals.ks_dua}</td>
-                    <td className="px-4 py-2">{totals.ks_tiga}</td>
-                    <td className="px-4 py-2">{totals.ks_tiga_plus}</td>
+                    <td className="px-4 py-2">{totals.kps || 0}</td>
+                    <td className="px-4 py-2">{totals.ks_satu || 0}</td>
+                    <td className="px-4 py-2">{totals.ks_dua || 0}</td>
+                    <td className="px-4 py-2">{totals.ks_tiga || 0}</td>
+                    <td className="px-4 py-2">{totals.ks_tiga_plus || 0}</td>
                   </tr>
                 </tfoot>
               </table>

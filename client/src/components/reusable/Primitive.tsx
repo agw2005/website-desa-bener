@@ -80,7 +80,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
             <Link to={LINKS.kalender}>
               <Button className="bottom-shadow">KALENDER</Button>
             </Link>
-            {isLoggedIn && !authIsLoading && authInfo.type === "aparatur" && (
+            {isLoggedIn && !authIsLoading && (
               <Link to={LINKS.manajemen}>
                 <Button className="bottom-shadow">MANAJEMEN</Button>
               </Link>

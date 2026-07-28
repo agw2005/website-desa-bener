@@ -2,43 +2,32 @@ import { useState } from "react";
 import Button from "../components/reusable/Button.tsx";
 import Primitive from "../components/reusable/Primitive.tsx";
 import TextInput from "../components/reusable/inputs/TextInput.tsx";
-import NumberInput from "../components/reusable/inputs/NumberInput.tsx";
 import PasswordInput from "../components/reusable/inputs/PasswordInput.tsx";
 import { useNavigate } from "react-router";
 import type { LoginInfo } from "../types/Login.d.ts";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [nik, setNik] = useState("");
-  const [passwordUmum, setPasswordUmum] = useState("");
   const [nama, setNama] = useState("");
   const [passwordAparatur, setPasswordAparatur] = useState("");
 
   const [aparaturInputIsEmpty, setAparaturInputIsEmpty] = useState(false);
   const [aparaturInputIsWrong, setAparaturInputIsWrong] = useState(false);
-  const [umumInputIsEmpty, setUmumInputIsEmpty] = useState(false);
-  const [umumInputIsWrong, setUmumInputIsWrong] = useState(false);
 
-  const handleLogin = async (type: "aparatur" | "umum") => {
+  const handleLogin = async () => {
     setAparaturInputIsEmpty(false);
     setAparaturInputIsWrong(false);
-    setUmumInputIsEmpty(false);
-    setUmumInputIsWrong(false);
 
-    const identifier = type === "aparatur" ? nama : nik;
-    const password = type === "aparatur" ? passwordAparatur : passwordUmum;
-
-    if (identifier === "" || password === "") {
-      if (type === "aparatur") setAparaturInputIsEmpty(true);
-      else setUmumInputIsEmpty(true);
+    if (nama === "" || passwordAparatur === "") {
+      setAparaturInputIsEmpty(true);
     } else {
       const payload: LoginInfo = {
-        identifier: identifier,
-        kata_sandi: password,
+        identifier: nama,
+        kata_sandi: passwordAparatur,
       };
       try {
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/${type}/login`,
+          `http://${globalThis.location.hostname}:8000/aparatur/login`,
           {
             method: "POST",
             headers: {
@@ -53,8 +42,7 @@ const Login = () => {
           localStorage.setItem("local_token", responseBody.jwt);
           navigate("/");
         } else {
-          if (type === "aparatur") setAparaturInputIsWrong(true);
-          else setUmumInputIsWrong(true);
+          setAparaturInputIsWrong(true);
         }
       } catch (err) {
         console.error(err);
@@ -64,50 +52,8 @@ const Login = () => {
 
   return (
     <Primitive>
-      <div className="flex mx-32 gap-16">
-        <form className="flex-1">
-          <div className="bg-amber-500 w-max px-4 py-2 rounded-t-2xl text-white font-bold text-lg">
-            Sebagai warga umum
-          </div>
-          <div className="bg-amber-300 py-8 px-4 rounded-b-2xl rounded-tr-2xl flex flex-col gap-4">
-            <NumberInput
-              label="NIK"
-              name="nik-umum"
-              id="nik-umum"
-              value={nik}
-              onChangeHandler={(e) => setNik(e.currentTarget.value)}
-            />
-            <PasswordInput
-              label="Kata Sandi"
-              name="password-umum"
-              id="password-umum"
-              value={passwordUmum}
-              onChangeHandler={(e) => setPasswordUmum(e.currentTarget.value)}
-            />
-
-            <div className="flex gap-2">
-              <Button
-                className="w-max"
-                onClick={() => {
-                  handleLogin("umum");
-                }}
-                variant="black"
-              >
-                Login
-              </Button>
-              {umumInputIsEmpty && (
-                <div className="w-max rounded-2xl bg-red-500 px-4 py-2 text-white font-bold">
-                  NIK dan kata sandi tidak boleh kosong
-                </div>
-              )}
-              {umumInputIsWrong && (
-                <div className="w-max rounded-2xl bg-red-500 px-4 py-2 text-white font-bold">
-                  NIK atau kata sandi yang anda masukan salah
-                </div>
-              )}
-            </div>
-          </div>
-        </form>
+      <div className="flex gap-16">
+        <div className="flex-1"></div>
         <form className="flex-1">
           <div className="bg-amber-500 w-max px-4 py-2 rounded-t-2xl text-white font-bold text-lg">
             Sebagai apartur desa
@@ -133,7 +79,7 @@ const Login = () => {
               <Button
                 className="w-max"
                 onClick={() => {
-                  handleLogin("aparatur");
+                  handleLogin();
                 }}
                 variant="black"
               >
@@ -152,6 +98,7 @@ const Login = () => {
             </div>
           </div>
         </form>
+        <div className="flex-1"></div>
       </div>
     </Primitive>
   );

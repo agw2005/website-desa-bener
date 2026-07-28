@@ -28,6 +28,10 @@ const ManualCarousel = (
   const [index, setIndex] = useState(0);
   const [visibleCards, setVisibleCards] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
+  const cacheBuster = useRef(`?cb=${Date.now()}`);
+  const fallbackImage = "/tidak-ada-gambar-4x5.png";
+  const imageSrc = (photo: string) =>
+    photo ? `${photo}${cacheBuster.current}` : fallbackImage;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -82,7 +86,11 @@ const ManualCarousel = (
           const content = (
             <>
               <img
-                src={item.photo}
+                src={imageSrc(item.photo)}
+                onError={(e) => {
+                  e.currentTarget.src = fallbackImage;
+                  e.currentTarget.onerror = null;
+                }}
                 alt={item.subtitle}
                 className="w-full h-full object-cover"
               />

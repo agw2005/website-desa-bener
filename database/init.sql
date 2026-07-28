@@ -2,68 +2,26 @@ CREATE TABLE Aparatur (
     aparatur_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama TEXT NOT NULL,
     jabatan TEXT NOT NULL,
-    telepon TEXT NOT NULL,
-    foto BYTEA NOT NULL,
-    kata_sandi TEXT NOT NULL
-);
-
-CREATE TABLE Umum (
-    umum_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama TEXT NOT NULL,
-    nik TEXT NOT NULL,
+    telepon TEXT,
+    foto BYTEA,
     kata_sandi TEXT NOT NULL
 );
 
 CREATE TABLE Pelayanan (
     pelayanan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama TEXT
+    judul TEXT
 );
 
-CREATE TABLE Pengajuan (
-    pengajuan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    pengaju INT,
-    jenis_pelayanan INT,
-    status VARCHAR(20) CHECK (status in ('dalam antrian', 'disetujui', 'ditolak')),
-    alasan_penolakan TEXT NOT NULL,
-    ditolak_oleh INT,
-    waktu_upload INT NOT NULL,
+CREATE TABLE Syarat_Pelayanan (
+    syarat_pelayanan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    pelayanan_id INT,
+    isi TEXT,
+    tautan TEXT,
 
-    CONSTRAINT jenis_pelayanan_ajuan 
-        FOREIGN KEY (jenis_pelayanan) 
+    CONSTRAINT syarat_dari_pelayanan 
+        FOREIGN KEY (pelayanan_id) 
         REFERENCES Pelayanan(pelayanan_id) 
-        ON DELETE CASCADE,
-
-    CONSTRAINT pengaju_ajuan 
-        FOREIGN KEY (pengaju)
-        REFERENCES Umum(umum_id) 
-        ON DELETE CASCADE,
-
-    CONSTRAINT aparatur_penolak 
-        FOREIGN KEY (ditolak_oleh)
-        REFERENCES Aparatur(aparatur_id) 
-        ON DELETE SET NULL
-);
-
-CREATE TABLE Lampiran_Pengajuan (
-    lampiran_pengajuan_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    pengajuan_id INT,
-    nama_file TEXT NOT NULL,
-    besar_file INT NOT NULL,
-    isi_file BYTEA NOT NULL,
-    deskripsi TEXT NOT NULL,
-
-    CONSTRAINT lampiran_suatu_ajuan 
-        FOREIGN KEY (pengajuan_id) 
-        REFERENCES Pengajuan(pengajuan_id) 
         ON DELETE CASCADE
-);
-
-CREATE TABLE Komentar (
-    komentar_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    nama TEXT NOT NULL,
-    surel TEXT NOT NULL,
-    isi TEXT NOT NULL,
-    waktu_upload INT NOT NULL
 );
 
 CREATE TABLE Label (
@@ -109,29 +67,29 @@ CREATE TABLE Lampiran_Artikel (
 CREATE TABLE Dusun (
     dusun_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     nama TEXT NOT NULL,
-    rt INT NOT NULL,
-    populasi INT NOT NULL,
-    keluarga INT NOT NULL,
-    laki INT NOT NULL,
-    perempuan INT NOT NULL,
-    umkm INT NOT NULL,
-    islam INT NOT NULL,
-    protestanisme INT NOT NULL,
-    katolisisme INT NOT NULL,
-    hinduisme INT NOT NULL,
-    buddhisme INT NOT NULL,
-    konfusianisme INT NOT NULL,
-    tunadaksa INT NOT NULL,
-    tunanetra INT NOT NULL,
-    tunarungu INT NOT NULL,
-    tunawicara INT NOT NULL,
-    tunagrahita INT NOT NULL,
-    tunalaras INT NOT NULL,
-    kps INT NOT NULL,
-    ks_satu INT NOT NULL,
-    ks_dua INT NOT NULL,
-    ks_tiga INT NOT NULL,
-    ks_tiga_plus INT NOT NULL
+    rt INT,
+    populasi INT,
+    keluarga INT,
+    laki INT,
+    perempuan INT,
+    umkm INT,
+    islam INT,
+    protestanisme INT,
+    katolisisme INT,
+    hinduisme INT,
+    buddhisme INT,
+    konfusianisme INT,
+    tunadaksa INT,
+    tunanetra INT,
+    tunarungu INT,
+    tunawicara INT,
+    tunagrahita INT,
+    tunalaras INT,
+    kps INT,
+    ks_satu INT,
+    ks_dua INT,
+    ks_tiga INT,
+    ks_tiga_plus INT
 );
 
 -- 
@@ -257,14 +215,4 @@ INSERT INTO Profil (
     NULL,
     NULL,
     NULL
-);
-
-INSERT INTO Umum (
-    nama,
-    nik,
-    kata_sandi
-) VALUES (
-    'Danial Al-Ghazali Walangadi',
-    '2304130143',
-    '1234567890'
 );

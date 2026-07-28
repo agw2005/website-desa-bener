@@ -30,11 +30,11 @@ const Kontak = () => {
                 contentClassName="flex flex-col gap-3 items-center"
               >
                 <AparaturDesa
-                  name={aparaturDesa[indexAparaturDesa].nama}
-                  position={aparaturDesa[indexAparaturDesa].jabatan}
-                  phone={aparaturDesa[indexAparaturDesa].telepon}
+                  name={aparaturDesa[indexAparaturDesa]?.nama}
+                  position={aparaturDesa[indexAparaturDesa]?.jabatan}
+                  phone={aparaturDesa[indexAparaturDesa]?.telepon}
                   photo={`http://${globalThis.location.hostname}:8000/aparatur/foto/${
-                    aparaturDesa[indexAparaturDesa].aparatur_id
+                    aparaturDesa[indexAparaturDesa]?.aparatur_id
                   }`}
                 />
                 <p>{indexAparaturDesa + 1}/{aparaturDesa.length}</p>

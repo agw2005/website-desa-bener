@@ -1,10 +1,6 @@
 import { Application } from "@oak/oak/application";
 import { Router, type RouterContext } from "@oak/oak/router";
-import {
-  requestJwtAparatur,
-  requestJwtWargaUmum,
-  verifyJwt,
-} from "./handlers/login.ts";
+import { requestJwtAparatur, verifyJwt } from "./handlers/login.ts";
 import {
   aparaturDesa,
   deskripsiSekilas,
@@ -28,7 +24,6 @@ import {
   postApbdesFileAtYear,
   postDusun,
   postMisi,
-  postUmum,
   postVisi,
 } from "./handlers/post.ts";
 import { patchDusun, patchProfil } from "./handlers/patch.ts";
@@ -39,7 +34,6 @@ const app = new Application();
 const root = new Router();
 const aparatur = new Router();
 const profil = new Router();
-const umum = new Router();
 const dusun = new Router();
 const visi = new Router();
 const misi = new Router();
@@ -81,10 +75,6 @@ profil
   .get("/peta", petaDesa)
   .get("/", getProfil);
 
-umum
-  .post("/", postUmum)
-  .post("/login", requestJwtWargaUmum);
-
 dusun
   .post("/", postDusun)
   .get("/nama", namaDusun)
@@ -95,7 +85,6 @@ dusun
 root
   .use("/aparatur", aparatur.routes(), aparatur.allowedMethods())
   .use("/profil", profil.routes(), profil.allowedMethods())
-  .use("/umum", umum.routes(), umum.allowedMethods())
   .use("/dusun", dusun.routes(), dusun.allowedMethods())
   .use("/visi", visi.routes(), visi.allowedMethods())
   .use("/misi", misi.routes(), misi.allowedMethods())

@@ -8,5 +8,4 @@ export interface LoggedInInfo {
   exp: number;
   id: number;
   identifier: string;
-  type: "aparatur" | "umum";
 }

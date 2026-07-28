@@ -26,6 +26,8 @@ const AparaturManager = () => {
   const [aparaturTerkonfirmasi, setAparaturTerkonfirmasi] = useState(false);
   const [previewFotoUrl, setPreviewFotoUrl] = useState<string | null>(null);
 
+  const [requiredInputIsMissing, setRequiredInputIsMissing] = useState(false);
+
   useEffect(() => {
     if (!inputFotoAparatur) {
       setPreviewFotoUrl(null);
@@ -58,7 +60,14 @@ const AparaturManager = () => {
   };
 
   const handleAddAparatur = async () => {
-    if (!inputFotoAparatur) return;
+    setRequiredInputIsMissing(false);
+    if (
+      inputNamaAparatur.trim() === "" || inputJabatanAparatur.trim() === "" ||
+      inputKataSandiAparatur.trim() === ""
+    ) {
+      setRequiredInputIsMissing(true);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("nama", inputNamaAparatur);
@@ -173,6 +182,11 @@ const AparaturManager = () => {
           {aparaturTerkonfirmasi && (
             <div className="w-max px-4 py-2 bg-red-600 text-white font-bold rounded-2xl">
               Kata Sandi tidak sesuai
+            </div>
+          )}
+          {requiredInputIsMissing && (
+            <div className="w-max px-4 py-2 bg-red-600 text-white font-bold rounded-2xl">
+              Nama, Jabatan, dan Kata sandi wajib diisi
             </div>
           )}
         </div>
