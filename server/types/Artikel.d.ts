@@ -4,3 +4,7 @@ export interface Artikel {
   isi: string;
   waktu_upload: number;
 }
+
+export interface ArtikelWithLabel extends Artikel {
+  labels: { label_id: number; nama: string }[];
+}

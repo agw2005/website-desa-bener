@@ -9,12 +9,13 @@ import { pool } from "../dbpool.ts";
 import { getExtension } from "../helpers/getExtension.ts";
 import { contentType } from "@std/media-types/content-type";
 import { Label } from "../types/Label.d.ts";
-import { Artikel } from "../types/Artikel.d.ts";
+import { ArtikelWithLabel } from "../types/Artikel.d.ts";
 
 export const getArtikels = async (ctx: RouterContext<"/">) => {
   const url = new URL(ctx.request.url);
   const cursorParam = url.searchParams.get("cursor");
   const limitParam = url.searchParams.get("limit");
+  const labelIdParam = url.searchParams.get("label_id"); // new: optional filter
 
   const limit = limitParam ? Number(limitParam) : 9;
 
@@ -34,39 +35,73 @@ export const getArtikels = async (ctx: RouterContext<"/">) => {
     }
   }
 
+  let labelIdFilter: number | null = null;
+  if (labelIdParam !== null) {
+    labelIdFilter = Number(labelIdParam);
+    if (!Number.isInteger(labelIdFilter) || labelIdFilter <= 0) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Parameter label_id tidak valid." };
+      return;
+    }
+  }
+
   const connection = await pool.connect();
   try {
-    const result = cursor === null
-      ? await connection.queryObject<Artikel>(
-        `SELECT artikel_id, judul, isi, waktu_upload
-         FROM Artikel
-         ORDER BY artikel_id DESC
-         LIMIT $1`,
-        [limit + 1],
-      )
-      : await connection.queryObject<{
-        artikel_id: number;
-        judul: string;
-        isi: string;
-        waktu_upload: number;
-      }>(
-        `SELECT artikel_id, judul, isi, waktu_upload
-         FROM Artikel
-         WHERE artikel_id < $1
-         ORDER BY artikel_id DESC
-         LIMIT $2`,
-        [cursor, limit + 1],
+    const whereClauses: string[] = [];
+    const values: unknown[] = [];
+    let paramIndex = 1;
+
+    if (labelIdFilter !== null) {
+      whereClauses.push(
+        `EXISTS (SELECT 1 FROM Label_Artikel la WHERE la.artikel_id = Artikel.artikel_id AND la.label_id = $${paramIndex})`,
       );
+      values.push(labelIdFilter);
+      paramIndex++;
+    }
+
+    if (cursor !== null) {
+      whereClauses.push(`Artikel.artikel_id < $${paramIndex}`);
+      values.push(cursor);
+      paramIndex++;
+    }
+
+    const whereSql = whereClauses.length > 0
+      ? `WHERE ${whereClauses.join(" AND ")}`
+      : "";
+
+    values.push(limit + 1);
+    const limitParamIndex = paramIndex;
+
+    const result = await connection.queryObject<ArtikelWithLabel>(
+      `
+      SELECT
+        Artikel.artikel_id,
+        Artikel.judul,
+        Artikel.isi,
+        Artikel.waktu_upload,
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object('label_id', Label.label_id, 'nama', Label.nama))
+            FROM Label_Artikel
+            JOIN Label ON Label.label_id = Label_Artikel.label_id
+            WHERE Label_Artikel.artikel_id = Artikel.artikel_id
+          ),
+          '[]'
+        ) AS labels
+      FROM Artikel
+      ${whereSql}
+      ORDER BY Artikel.artikel_id DESC
+      LIMIT $${limitParamIndex}
+      `,
+      values,
+    );
 
     const hasNextPage = result.rows.length > limit;
     const items = hasNextPage ? result.rows.slice(0, limit) : result.rows;
     const nextCursor = hasNextPage ? items[items.length - 1].artikel_id : null;
 
     ctx.response.status = 200;
-    ctx.response.body = {
-      items,
-      next_cursor: nextCursor,
-    };
+    ctx.response.body = { items, next_cursor: nextCursor };
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
