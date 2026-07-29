@@ -7,6 +7,8 @@ import {
   fotoAparaturDesa,
   getApbdesAtYear,
   getApbdesFile,
+  getArtikelById,
+  getArtikelLampiran,
   getArtikels,
   getDusun,
   getKalender,
@@ -19,6 +21,7 @@ import {
   getVisi,
   namaDusun,
   petaDesa,
+  thumbnail,
 } from "./handlers/get.ts";
 import {
   postAparatur,
@@ -61,55 +64,58 @@ root
   .get("/verifikasi", verifyJwt);
 
 komentar
+  .delete("/:id", deleteKomentar)
   .get("/", getKomentars)
-  .post("/", postKomentar)
-  .delete("/:id", deleteKomentar);
+  .post("/", postKomentar);
 
 artikel
+  .get("/lampiran/:id", getArtikelLampiran)
+  .get("/thumbnail/:id", thumbnail)
+  .get("/:id", getArtikelById)
   .post("/", postArtikel)
   .get("/", getArtikels);
 
 label
+  .delete("/:id", deleteLabel)
   .get("/", getLabel)
-  .post("/", postLabel)
-  .delete("/:id", deleteLabel);
+  .post("/", postLabel);
 
 apbdes
+  .get("/file/:id", getApbdesFile)
   .get("/:year", getApbdesAtYear)
-  .post("/:year", postApbdesFileAtYear)
-  .get("/file/:id", getApbdesFile);
+  .post("/:year", postApbdesFileAtYear);
 
 misi
+  .delete("/:id", deleteMisi)
   .get("/", getMisi)
-  .post("/", postMisi)
-  .delete("/:id", deleteMisi);
+  .post("/", postMisi);
 
 visi
+  .delete("/:id", deleteVisi)
   .get("/", getVisi)
-  .post("/", postVisi)
-  .delete("/:id", deleteVisi);
+  .post("/", postVisi);
 
 aparatur
-  .post("/", postAparatur)
-  .post("/login", requestJwtAparatur)
-  .get("/", aparaturDesa)
   .get("/foto/:id", fotoAparaturDesa)
-  .delete("/:id", deleteAparatur);
+  .delete("/:id", deleteAparatur)
+  .post("/login", requestJwtAparatur)
+  .post("/", postAparatur)
+  .get("/", aparaturDesa);
 
 profil
-  .patch("/", patchProfil)
   .get("/deskripsi", deskripsiSekilas)
   .get("/data", getProfilDesa)
   .get("/peta", petaDesa)
-  .get("/", getProfil)
-  .get("/kalender", getKalender);
+  .get("/kalender", getKalender)
+  .patch("/", patchProfil)
+  .get("/", getProfil);
 
 dusun
-  .post("/", postDusun)
   .get("/nama", namaDusun)
   .get("/:id", getOneDusun)
-  .get("/", getDusun)
-  .patch("/:id", patchDusun);
+  .patch("/:id", patchDusun)
+  .post("/", postDusun)
+  .get("/", getDusun);
 
 root
   .use("/aparatur", aparatur.routes(), aparatur.allowedMethods())

@@ -13,6 +13,160 @@ import { ArtikelWithLabel } from "../types/Artikel.d.ts";
 import { Komentar } from "../types/Komentar.d.ts";
 import { bigintToNumber } from "../helpers/bigintToNumber.ts";
 
+export const getArtikelLampiran = async (
+  ctx: RouterContext<"/lampiran/:id">,
+) => {
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID lampiran tidak valid." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<
+      { nama_file: string; isi_file: Uint8Array }
+    >(
+      "SELECT nama_file, isi_file FROM Lampiran_Artikel WHERE lampiran_artikel_id = $1",
+      [id],
+    );
+
+    if (result.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Lampiran tidak ditemukan." };
+      return;
+    }
+
+    const { nama_file, isi_file } = result.rows[0];
+    const extension = getExtension(nama_file);
+    const fileContentType = contentType(extension) ??
+      "application/octet-stream";
+
+    ctx.response.status = 200;
+    ctx.response.headers.set("Content-Type", fileContentType);
+    ctx.response.headers.set(
+      "Content-Disposition",
+      `inline; filename="${encodeURIComponent(nama_file)}"`,
+    );
+    ctx.response.body = isi_file;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil lampiran." };
+  } finally {
+    connection.release();
+  }
+};
+
+export const getArtikelById = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID artikel tidak valid." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<ArtikelWithLabel>(
+      `
+      SELECT
+        Artikel.artikel_id,
+        Artikel.judul,
+        Artikel.isi,
+        Artikel.waktu_upload,
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object('label_id', Label.label_id, 'nama', Label.nama))
+            FROM Label_Artikel
+            JOIN Label ON Label.label_id = Label_Artikel.label_id
+            WHERE Label_Artikel.artikel_id = Artikel.artikel_id
+          ),
+          '[]'
+        ) AS labels,
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object(
+              'lampiran_artikel_id', Lampiran_Artikel.lampiran_artikel_id,
+              'nama_file', Lampiran_Artikel.nama_file,
+              'besar_file', Lampiran_Artikel.besar_file
+            ))
+            FROM Lampiran_Artikel
+            WHERE Lampiran_Artikel.artikel_id = Artikel.artikel_id
+          ),
+          '[]'
+        ) AS lampiran
+      FROM Artikel
+      WHERE Artikel.artikel_id = $1
+      `,
+      [id],
+    );
+
+    if (result.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Artikel tidak ditemukan." };
+      return;
+    }
+
+    const item = bigintToNumber(result.rows[0], ["waktu_upload"]);
+
+    ctx.response.status = 200;
+    ctx.response.body = item;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data artikel." };
+  } finally {
+    connection.release();
+  }
+};
+
+export const thumbnail = async (ctx: RouterContext<"/thumbnail/:id">) => {
+  const id = ctx.params.id;
+
+  if (!id) {
+    ctx.response.status = 400;
+    ctx.response.body = { message: "Missing id parameter" };
+    return;
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<
+      { isi_file: Uint8Array | null }
+    >(
+      "SELECT isi_file FROM Lampiran_Artikel WHERE artikel_id = $1;",
+      [id],
+    );
+
+    if (result.rows.length === 0 || !result.rows[0].isi_file) {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Foto not found" };
+      return;
+    }
+
+    const foto = result.rows[0].isi_file;
+
+    const contentType = foto[0] === 0xFF && foto[1] === 0xD8 && foto[2] === 0xFF
+      ? "image/jpeg"
+      : "image/png";
+
+    ctx.response.status = 200;
+    ctx.response.headers.set("Content-Type", contentType);
+    ctx.response.headers.set(
+      "Cache-Control",
+      "public, max-age=31536000, immutable",
+    );
+    ctx.response.body = foto;
+  } finally {
+    connection.release();
+  }
+};
+
 export const getKomentars = async (ctx: RouterContext<"/">) => {
   const url = new URL(ctx.request.url);
   const cursorParam = url.searchParams.get("cursor");
