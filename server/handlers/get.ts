@@ -11,6 +11,7 @@ import { contentType } from "@std/media-types/content-type";
 import { Label } from "../types/Label.d.ts";
 import { ArtikelWithLabel } from "../types/Artikel.d.ts";
 import { Komentar } from "../types/Komentar.d.ts";
+import { bigintToNumber } from "../helpers/bigintToNumber.ts";
 
 export const getKomentars = async (ctx: RouterContext<"/">) => {
   const url = new URL(ctx.request.url);
@@ -68,10 +69,7 @@ export const getKomentars = async (ctx: RouterContext<"/">) => {
 
     const hasNextPage = result.rows.length > limit;
     const rawItems = hasNextPage ? result.rows.slice(0, limit) : result.rows;
-    const items = rawItems.map((row) => ({
-      ...row,
-      waktu_upload: Number(row.waktu_upload),
-    }));
+    const items = rawItems.map((row) => bigintToNumber(row, ["waktu_upload"]));
 
     const nextCursor = hasNextPage ? items[items.length - 1].komentar_id : null;
 
@@ -90,9 +88,9 @@ export const getArtikels = async (ctx: RouterContext<"/">) => {
   const url = new URL(ctx.request.url);
   const cursorParam = url.searchParams.get("cursor");
   const limitParam = url.searchParams.get("limit");
-  const labelIdParam = url.searchParams.get("label_id"); // new: optional filter
+  const labelIdParam = url.searchParams.get("label_id");
 
-  const limit = limitParam ? Number(limitParam) : 9;
+  const limit = Number(limitParam) ? Number(limitParam) : 9;
 
   if (!Number.isInteger(limit) || limit <= 0 || limit > 50) {
     ctx.response.status = 400;
@@ -172,7 +170,8 @@ export const getArtikels = async (ctx: RouterContext<"/">) => {
     );
 
     const hasNextPage = result.rows.length > limit;
-    const items = hasNextPage ? result.rows.slice(0, limit) : result.rows;
+    const rawItems = hasNextPage ? result.rows.slice(0, limit) : result.rows;
+    const items = rawItems.map((row) => bigintToNumber(row, ["waktu_upload"]));
     const nextCursor = hasNextPage ? items[items.length - 1].artikel_id : null;
 
     ctx.response.status = 200;
