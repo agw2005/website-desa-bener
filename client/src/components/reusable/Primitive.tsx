@@ -33,7 +33,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
           <div className="flex gap-4 items-center">
             <div className="w-24 h-24 p-2 bg-white rounded-2xl flex justify-center items-center overflow-hidden">
               <img
-                src="logo-kabupaten-semarang.png"
+                src="/logo-kabupaten-semarang.png"
                 alt="logo-desa-bener"
                 className="w-full h-full object-contain"
               />
@@ -126,7 +126,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
             <div className="border-4 border-black rounded-full aspect-square size-40 flex items-center justify-center bg-white font-bold overflow-hidden">
               <img
                 className="w-full h-full object-contain p-4"
-                src="logo-kabupaten-semarang.png"
+                src="/logo-kabupaten-semarang.png"
                 alt="logo-desa-bener"
               />
             </div>

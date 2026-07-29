@@ -12,6 +12,7 @@ import Login from "./pages/Login.tsx";
 import { loginLoader } from "./helpers/loginLoader.ts";
 import Manajemen from "./pages/Manajemen.tsx";
 import { manajemenLoader } from "./helpers/manajemenLoader.ts";
+import Artikel from "./pages/Artikel.tsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
@@ -24,6 +25,7 @@ const router = createBrowserRouter([
   { path: "/kalender", element: <Kalender /> },
   { path: "/manajemen", element: <Manajemen />, loader: manajemenLoader },
   { path: "/login", element: <Login />, loader: loginLoader },
+  { path: "/pengumuman/:id", element: <Artikel /> },
 ]);
 
 function App() {

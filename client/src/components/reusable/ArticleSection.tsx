@@ -16,7 +16,9 @@ const ArticleSection = (
     <section className="flex flex-col">
       <div className="flex flex-col gap-4 bg-amber-300 p-8 rounded-3xl">
         <div className="flex flex-col gap-2">
-          <Link to={`${globalThis.location.pathname}/${articleId}`}>
+          <Link
+            to={`http://${globalThis.location.hostname}:5173/pengumuman/${articleId}`}
+          >
             <img
               src={`http://${globalThis.location.hostname}:8000/artikel/thumbnail/${articleId}`}
               alt={`Image for article ${title}`}

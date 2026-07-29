@@ -37,6 +37,7 @@ import { patchDusun, patchProfil } from "./handlers/patch.ts";
 import type { Next } from "@oak/oak/middleware";
 import {
   deleteAparatur,
+  deleteArtikel,
   deleteKomentar,
   deleteLabel,
   deleteMisi,
@@ -72,6 +73,7 @@ artikel
   .get("/lampiran/:id", getArtikelLampiran)
   .get("/thumbnail/:id", thumbnail)
   .get("/:id", getArtikelById)
+  .delete("/:id", deleteArtikel)
   .post("/", postArtikel)
   .get("/", getArtikels);
 
