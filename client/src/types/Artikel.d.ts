@@ -16,5 +16,5 @@ export interface LampiranArtikelMetadata {
 }
 
 export interface ArtikelDetail extends ArtikelWithLabel {
-  lampiran: LampiranArtikelMeta[];
+  lampiran: LampiranArtikelMetadata[];
 }

@@ -1,5 +1,5 @@
 import type { RouterContext } from "@oak/oak/router";
-import type { DeskripsiSekilas, ProfilDesaData } from "../types/Profil.d.ts";
+import type { Profil } from "../types/Profil.d.ts";
 import type { Aparatur } from "../types/Aparatur.d.ts";
 import type { Dusun } from "../types/Dusun.d.ts";
 import type { Visi } from "../types/Visi.d.ts";
@@ -9,9 +9,45 @@ import { pool } from "../dbpool.ts";
 import { getExtension } from "../helpers/getExtension.ts";
 import { contentType } from "@std/media-types/content-type";
 import { Label } from "../types/Label.d.ts";
-import { ArtikelWithLabel } from "../types/Artikel.d.ts";
+import { Artikel, ArtikelWithLabel } from "../types/Artikel.d.ts";
 import { Komentar } from "../types/Komentar.d.ts";
 import { bigintToNumber } from "../helpers/bigintToNumber.ts";
+import { fetchArtikelDetailById } from "../helpers/fetchArtikelDetailById.ts";
+
+export const getArtikelTerbaru = async (ctx: RouterContext<"/terbaru">) => {
+  const connection = await pool.connect();
+  try {
+    const latest = await connection.queryObject<Pick<Artikel, "artikel_id">>(
+      "SELECT artikel_id FROM Artikel ORDER BY artikel_id DESC LIMIT 1",
+    );
+
+    if (latest.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Belum ada artikel." };
+      return;
+    }
+
+    const item = await fetchArtikelDetailById(
+      connection,
+      latest.rows[0].artikel_id,
+    );
+
+    if (!item) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Artikel tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = item;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil artikel terbaru." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const getArtikelLampiran = async (
   ctx: RouterContext<"/lampiran/:id">,
@@ -71,47 +107,13 @@ export const getArtikelById = async (ctx: RouterContext<"/:id">) => {
 
   const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<ArtikelWithLabel>(
-      `
-      SELECT
-        Artikel.artikel_id,
-        Artikel.judul,
-        Artikel.isi,
-        Artikel.waktu_upload,
-        COALESCE(
-          (
-            SELECT json_agg(json_build_object('label_id', Label.label_id, 'nama', Label.nama))
-            FROM Label_Artikel
-            JOIN Label ON Label.label_id = Label_Artikel.label_id
-            WHERE Label_Artikel.artikel_id = Artikel.artikel_id
-          ),
-          '[]'
-        ) AS labels,
-        COALESCE(
-          (
-            SELECT json_agg(json_build_object(
-              'lampiran_artikel_id', Lampiran_Artikel.lampiran_artikel_id,
-              'nama_file', Lampiran_Artikel.nama_file,
-              'besar_file', Lampiran_Artikel.besar_file
-            ))
-            FROM Lampiran_Artikel
-            WHERE Lampiran_Artikel.artikel_id = Artikel.artikel_id
-          ),
-          '[]'
-        ) AS lampiran
-      FROM Artikel
-      WHERE Artikel.artikel_id = $1
-      `,
-      [id],
-    );
+    const item = await fetchArtikelDetailById(connection, id);
 
-    if (result.rows.length === 0) {
+    if (!item) {
       ctx.response.status = 404;
       ctx.response.body = { error: "Artikel tidak ditemukan." };
       return;
     }
-
-    const item = bigintToNumber(result.rows[0], ["waktu_upload"]);
 
     ctx.response.status = 200;
     ctx.response.body = item;
@@ -352,7 +354,9 @@ export const getLabel = async (ctx: RouterContext<"/">) => {
 
 export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
   const connection = await pool.connect();
-  const result = await connection.queryObject<DeskripsiSekilas>(
+  const result = await connection.queryObject<
+    Pick<Profil, "deskripsi_sekilas">
+  >(
     "SELECT deskripsi_sekilas FROM Profil LIMIT 1;",
   );
   ctx.response.status = 200;
@@ -362,7 +366,7 @@ export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
 
 export const getKalender = async (ctx: RouterContext<"/kalender">) => {
   const connection = await pool.connect();
-  const result = await connection.queryObject<{ tautan_kalender: string }>(
+  const result = await connection.queryObject<Pick<Profil, "tautan_kalender">>(
     "SELECT tautan_kalender FROM Profil LIMIT 1;",
   );
 
@@ -396,7 +400,7 @@ export const fotoAparaturDesa = async (ctx: RouterContext<"/foto/:id">) => {
   const connection = await pool.connect();
 
   try {
-    const result = await connection.queryObject<{ foto: Uint8Array | null }>(
+    const result = await connection.queryObject<Pick<Aparatur, "foto">>(
       "SELECT foto FROM Aparatur WHERE aparatur_id = $1;",
       [id],
     );
@@ -468,7 +472,9 @@ export const getOneDusun = async (ctx: RouterContext<"/:id">) => {
 export const getProfilDesa = async (ctx: RouterContext<"/data">) => {
   const connection = await pool.connect();
 
-  const result = await connection.queryObject<ProfilDesaData>(
+  const result = await connection.queryObject<
+    Omit<Profil, "deskripsi_sekilas" | "peta" | "tautan_kalender">
+  >(
     "SELECT kode_desa, kecamatan, kabupaten_kota, provinsi, tahun_pembentukan, luas, koordinat, tipologi, klasifikasi, kategori, batas_timur, batas_barat, batas_selatan batas_utara, sejarah FROM Profil LIMIT 1;",
   );
 
@@ -512,8 +518,8 @@ export const petaDesa = async (ctx: RouterContext<"/peta">) => {
 export const getProfil = async (ctx: RouterContext<"/">) => {
   const connection = await pool.connect();
 
-  const result = await connection.queryObject<ProfilDesaData>(
-    "SELECT profil_id, deskripsi_sekilas, kode_desa, kecamatan, kabupaten_kota, provinsi, tahun_pembentukan, luas, koordinat, tipologi, klasifikasi, kategori, batas_timur, batas_barat, batas_selatan batas_utara, sejarah, tautan_kalender FROM Profil LIMIT 1;",
+  const result = await connection.queryObject<Omit<Profil, "peta">>(
+    "SELECT profil_id, deskripsi_sekilas, kode_desa, kecamatan, kabupaten_kota, provinsi, tahun_pembentukan, luas, koordinat, tipologi, klasifikasi, kategori, batas_timur, batas_barat, batas_selatan, batas_utara, sejarah, tautan_kalender FROM Profil LIMIT 1;",
   );
 
   ctx.response.status = 200;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { ArtikelDetail } from "../types/Artikel.d.ts";
 
-const useArticle = (id: number) => {
+const useArticle = (id?: number) => {
   const [data, setData] = useState<ArtikelDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState<Error | null>(null);
@@ -14,11 +14,14 @@ const useArticle = (id: number) => {
   useEffect(() => {
     const abortController = new AbortController();
     setIsLoading(true);
+    setIsError(null);
 
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/artikel/${id}`,
+          `http://${globalThis.location.hostname}:8000/artikel/${
+            id !== undefined ? id : "terbaru"
+          }`,
           {
             signal: abortController.signal,
             cache: "no-cache",

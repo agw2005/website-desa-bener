@@ -10,6 +10,7 @@ import {
   getArtikelById,
   getArtikelLampiran,
   getArtikels,
+  getArtikelTerbaru,
   getDusun,
   getKalender,
   getKomentars,
@@ -72,6 +73,7 @@ komentar
 artikel
   .get("/lampiran/:id", getArtikelLampiran)
   .get("/thumbnail/:id", thumbnail)
+  .get("/terbaru", getArtikelTerbaru)
   .get("/:id", getArtikelById)
   .delete("/:id", deleteArtikel)
   .post("/", postArtikel)
