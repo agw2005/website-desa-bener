@@ -12,6 +12,7 @@ import {
   getArtikels,
   getArtikelTerbaru,
   getDusun,
+  getFotoTempatWisata,
   getKalender,
   getKomentars,
   getLabel,
@@ -19,6 +20,7 @@ import {
   getOneDusun,
   getProfil,
   getProfilDesa,
+  getTempatWisata,
   getVisi,
   namaDusun,
   petaDesa,
@@ -33,6 +35,7 @@ import {
   postLabel,
   postMisi,
   postVisi,
+  postWisata,
 } from "./handlers/post.ts";
 import { patchDusun, patchProfil } from "./handlers/patch.ts";
 import type { Next } from "@oak/oak/middleware";
@@ -57,6 +60,7 @@ const apbdes = new Router();
 const label = new Router();
 const artikel = new Router();
 const komentar = new Router();
+const wisata = new Router();
 
 root
   .get("/", (ctx: RouterContext<"/">) => {
@@ -64,6 +68,11 @@ root
     ctx.response.body = "Healthy";
   })
   .get("/verifikasi", verifyJwt);
+
+wisata
+  .get("/:id", getFotoTempatWisata)
+  .get("/", getTempatWisata)
+  .post("/", postWisata);
 
 komentar
   .delete("/:id", deleteKomentar)
@@ -130,7 +139,8 @@ root
   .use("/apbdes", apbdes.routes(), apbdes.allowedMethods())
   .use("/label", label.routes(), label.allowedMethods())
   .use("/artikel", artikel.routes(), artikel.allowedMethods())
-  .use("/komentar", komentar.routes(), komentar.allowedMethods());
+  .use("/komentar", komentar.routes(), komentar.allowedMethods())
+  .use("/wisata", wisata.routes(), wisata.allowedMethods());
 
 app
   .use(async (ctx, next: Next) => {

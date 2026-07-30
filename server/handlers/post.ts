@@ -3,6 +3,71 @@ import type { MisiPostPayload } from "../types/Misi.d.ts";
 import type { VisiPostPayload } from "../types/Visi.d.ts";
 import { pool } from "../dbpool.ts";
 import { Komentar } from "../types/Komentar.d.ts";
+import { Wisata } from "../types/Wisata.d.ts";
+
+export const postWisata = async (ctx: RouterContext<"/">) => {
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+
+  const form = await ctx.request.body.formData();
+  const nama = form.get("nama");
+  const deskripsi = form.get("deskripsi");
+  const foto = form.get("foto");
+
+  if (
+    typeof nama !== "string" || nama.trim() === "" ||
+    typeof deskripsi !== "string" || deskripsi.trim() === ""
+  ) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      error: "Field nama dan deskripsi wajib diisi.",
+    };
+    return;
+  }
+
+  let fotoBytes = null;
+
+  if (
+    foto instanceof File && !ALLOWED_IMAGE_TYPES.includes(foto.type)
+  ) {
+    ctx.response.status = 400;
+    ctx.response.body = {
+      error: "Foto harus berformat JPEG, PNG, atau WebP.",
+    };
+    return;
+  }
+
+  if (foto instanceof File && foto.size > MAX_FILE_SIZE) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Ukuran foto maksimal 5MB." };
+    return;
+  }
+
+  fotoBytes = foto instanceof File
+    ? new Uint8Array(await foto.arrayBuffer())
+    : null;
+
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<Pick<Wisata, "wisata_id">>(
+      `INSERT INTO
+       Wisata (nama, deskripsi, foto)
+       VALUES ($1, $2, $3)
+       RETURNING wisata_id`,
+      [nama, deskripsi, fotoBytes],
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = { wisata_id: result.rows[0].wisata_id };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data tempat wisata." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const postKomentar = async (ctx: RouterContext<"/">) => {
   const body: Omit<Komentar, "komentar_id" | "waktu_upload"> = await ctx.request

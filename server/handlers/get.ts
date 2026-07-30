@@ -13,6 +13,76 @@ import { Artikel, ArtikelWithLabel } from "../types/Artikel.d.ts";
 import { Komentar } from "../types/Komentar.d.ts";
 import { bigintToNumber } from "../helpers/bigintToNumber.ts";
 import { fetchArtikelDetailById } from "../helpers/fetchArtikelDetailById.ts";
+import { Wisata } from "../types/Wisata.d.ts";
+
+export const getFotoTempatWisata = async (
+  ctx: RouterContext<"/:id">,
+) => {
+  const id = ctx.params.id;
+
+  if (!id) {
+    ctx.response.status = 400;
+    ctx.response.body = { message: "Missing id parameter" };
+    return;
+  }
+
+  const connection = await pool.connect();
+
+  try {
+    const result = await connection.queryObject<
+      Pick<Wisata, "foto"> | null
+    >(
+      "SELECT foto FROM Wisata WHERE wisata_id = $1;",
+      [id],
+    );
+
+    if (result.rows.length === 0 || !result.rows[0]?.foto) {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Foto not found" };
+      return;
+    }
+
+    const foto = result.rows[0].foto;
+
+    const contentType = foto[0] === 0xFF && foto[1] === 0xD8 && foto[2] === 0xFF
+      ? "image/jpeg"
+      : "image/png";
+
+    ctx.response.status = 200;
+    ctx.response.headers.set("Content-Type", contentType);
+    ctx.response.headers.set(
+      "Cache-Control",
+      "public, max-age=31536000, immutable",
+    );
+    ctx.response.body = foto;
+  } finally {
+    connection.release();
+  }
+};
+
+export const getTempatWisata = async (ctx: RouterContext<"/">) => {
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<Omit<Wisata, "foto">>(
+      "SELECT wisata_id, nama, deskripsi FROM Wisata;",
+    );
+
+    if (result.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Belum ada tempat wisata." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = result.rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data tempat wisata." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const getArtikelTerbaru = async (ctx: RouterContext<"/terbaru">) => {
   const connection = await pool.connect();
