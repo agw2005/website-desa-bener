@@ -26,6 +26,7 @@ const Home = () => {
   );
 
   const aparaturItems = aparaturDesa?.map((aparatur) => ({
+    id: aparatur.aparatur_id,
     title: aparatur.nama,
     subtitle: aparatur.jabatan,
     photo:

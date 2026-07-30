@@ -45,6 +45,7 @@ import {
   deleteKomentar,
   deleteLabel,
   deleteMisi,
+  deleteTempatWisata,
   deleteVisi,
 } from "./handlers/delete.ts";
 
@@ -71,6 +72,7 @@ root
 
 wisata
   .get("/:id", getFotoTempatWisata)
+  .delete("/:id", deleteTempatWisata)
   .get("/", getTempatWisata)
   .post("/", postWisata);
 

@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import Button from "./Button.tsx";
 
 interface CarouselItem {
+  id: number;
   title: string;
   subtitle: string;
   photo: string;
@@ -14,6 +16,8 @@ interface ManualCarouselProps {
   minCardWidth?: number; // e.g. 200 — used to derive how many cards fit
   maxVisibleCards?: number; // upper bound, e.g. 3
   aspectRatio?: string; // e.g. "2 / 3"
+  showDelete?: boolean;
+  onDelete?: (id: number) => void;
 }
 
 const ManualCarousel = (
@@ -23,6 +27,8 @@ const ManualCarousel = (
     minCardWidth = 180,
     maxVisibleCards = 3,
     aspectRatio = "2 / 3",
+    showDelete = false,
+    onDelete,
   }: ManualCarouselProps,
 ) => {
   const [index, setIndex] = useState(0);
@@ -73,7 +79,7 @@ const ManualCarousel = (
             `translateX(calc(-${index} * (100% / ${visibleCards} + ${pixelGap}px / ${visibleCards})))`,
         }}
       >
-        {items.map((item, i) => {
+        {items.map((item) => {
           const className =
             `shrink-0 relative rounded-2xl overflow-hidden border-2 border-white shadow block`;
           const style = {
@@ -83,8 +89,24 @@ const ManualCarousel = (
             aspectRatio,
           };
 
+          const deleteButton = showDelete && onDelete && (
+            <Button
+              variant="red"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onDelete(item.id);
+              }}
+              className="absolute top-2 right-2 z-2 text-sm"
+              aria-label={`Hapus ${item.subtitle}`}
+            >
+              Hapus
+            </Button>
+          );
+
           const content = (
             <>
+              {deleteButton}
               <img
                 src={imageSrc(item.photo)}
                 onError={(e) => {
@@ -96,9 +118,9 @@ const ManualCarousel = (
               />
               <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black to-transparent px-3 py-3 text-white">
                 <p className="font-bold text-sm leading-tight">
-                  {item.subtitle}
+                  {item.title}
                 </p>
-                <p className="text-xs">{item.title}</p>
+                <p className="text-xs">{item.subtitle}</p>
               </div>
             </>
           );
@@ -106,7 +128,7 @@ const ManualCarousel = (
           return item.link
             ? (
               <Link
-                key={i}
+                key={item.id}
                 to={item.link}
                 className={`${className} transition duration-300 ease-in-out hover:brightness-75`}
                 style={style}
@@ -115,7 +137,7 @@ const ManualCarousel = (
               </Link>
             )
             : (
-              <div key={i} className={className} style={style}>
+              <div key={item.id} className={className} style={style}>
                 {content}
               </div>
             );
