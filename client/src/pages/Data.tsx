@@ -63,22 +63,24 @@ const Data = () => {
                 </Button>
               </div>
               <ul className="list-disc list-inside w-max">
-                {apbdesTahun && apbdesTahun.map((apbdes, index) => {
-                  return (
-                    <a
-                      href={`http://${globalThis.location.hostname}:8000/apbdes/file/${apbdes.apbdes_file_id}`}
-                    >
-                      <li
-                        key={index}
-                        className="font-bold text-blue-600 hover:text-blue-900 active:text-blue-700"
+                {apbdesTahun?.length === 0
+                  ? `Tidak ada lampiran APBDes untuk tahun ${selectedYear}`
+                  : apbdesTahun && apbdesTahun.map((apbdes, index) => {
+                    return (
+                      <a
+                        href={`http://${globalThis.location.hostname}:8000/apbdes/file/${apbdes.apbdes_file_id}`}
                       >
-                        ({(apbdes.besar_file / (1024 * 1024)).toFixed(2)} MB)
-                        {" "}
-                        {apbdes.nama_file}
-                      </li>
-                    </a>
-                  );
-                })}
+                        <li
+                          key={index}
+                          className="font-bold text-blue-600 hover:text-blue-900 active:text-blue-700"
+                        >
+                          ({(apbdes.besar_file / (1024 * 1024)).toFixed(2)} MB)
+                          {" "}
+                          {apbdes.nama_file}
+                        </li>
+                      </a>
+                    );
+                  })}
               </ul>
             </div>
           </RoundedSection>
