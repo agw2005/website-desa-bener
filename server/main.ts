@@ -21,6 +21,9 @@ import {
   getProfil,
   getProfilDesa,
   getTempatWisata,
+  getUmkmById,
+  getUmkmFoto,
+  getUmkmList,
   getVisi,
   namaDusun,
   petaDesa,
@@ -34,6 +37,7 @@ import {
   postKomentar,
   postLabel,
   postMisi,
+  postUmkm,
   postVisi,
   postWisata,
 } from "./handlers/post.ts";
@@ -46,6 +50,7 @@ import {
   deleteLabel,
   deleteMisi,
   deleteTempatWisata,
+  deleteUmkm,
   deleteVisi,
 } from "./handlers/delete.ts";
 
@@ -62,6 +67,7 @@ const label = new Router();
 const artikel = new Router();
 const komentar = new Router();
 const wisata = new Router();
+const umkm = new Router();
 
 root
   .get("/", (ctx: RouterContext<"/">) => {
@@ -69,6 +75,13 @@ root
     ctx.response.body = "Healthy";
   })
   .get("/verifikasi", verifyJwt);
+
+umkm
+  .get("/foto/:id", getUmkmFoto)
+  .get("/:id", getUmkmById)
+  .get("/", getUmkmList)
+  .post("/", postUmkm)
+  .delete("/:id", deleteUmkm);
 
 wisata
   .get("/:id", getFotoTempatWisata)
@@ -142,7 +155,8 @@ root
   .use("/label", label.routes(), label.allowedMethods())
   .use("/artikel", artikel.routes(), artikel.allowedMethods())
   .use("/komentar", komentar.routes(), komentar.allowedMethods())
-  .use("/wisata", wisata.routes(), wisata.allowedMethods());
+  .use("/wisata", wisata.routes(), wisata.allowedMethods())
+  .use("/umkm", umkm.routes(), umkm.allowedMethods());
 
 app
   .use(async (ctx, next: Next) => {

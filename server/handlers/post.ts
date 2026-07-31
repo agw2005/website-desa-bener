@@ -4,6 +4,118 @@ import type { VisiPostPayload } from "../types/Visi.d.ts";
 import { pool } from "../dbpool.ts";
 import { Komentar } from "../types/Komentar.d.ts";
 import { Wisata } from "../types/Wisata.d.ts";
+import { Umkm } from "../types/Umkm.d.ts";
+
+export const postUmkm = async (ctx: RouterContext<"/">) => {
+  const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];
+  const MAX_FILE_SIZE = 5 * 1024 * 1024;
+
+  const form = await ctx.request.body.formData();
+
+  const nama = form.get("nama");
+  const deskripsi = form.get("deskripsi");
+  const dusunIdRaw = form.get("dusun_id");
+  const foto = form.get("foto");
+
+  if (typeof nama !== "string" || nama.trim() === "") {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Nama UMKM wajib diisi." };
+    return;
+  }
+
+  if (typeof deskripsi !== "string" || deskripsi.trim() === "") {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Deskripsi UMKM wajib diisi." };
+    return;
+  }
+
+  let dusunId: number | null = null;
+  if (typeof dusunIdRaw === "string" && dusunIdRaw.trim() !== "") {
+    dusunId = Number(dusunIdRaw);
+    if (!Number.isInteger(dusunId)) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "ID dusun tidak valid." };
+      return;
+    }
+  }
+
+  if (!(foto instanceof File)) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Foto UMKM wajib diunggah." };
+    return;
+  }
+
+  if (!ALLOWED_IMAGE_TYPES.includes(foto.type)) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Foto harus berformat JPEG, PNG, atau JPG." };
+    return;
+  }
+
+  if (foto.size > MAX_FILE_SIZE) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Ukuran foto maksimal 5MB." };
+    return;
+  }
+
+  const jenisKontakList = form.getAll("jenis_kontak");
+  const isiKontakList = form.getAll("isi_kontak");
+  const tautanKontakList = form.getAll("tautan_kontak");
+
+  if (
+    jenisKontakList.length !== isiKontakList.length ||
+    jenisKontakList.length !== tautanKontakList.length
+  ) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Data kontak tidak konsisten." };
+    return;
+  }
+
+  const fotoBytes = new Uint8Array(await foto.arrayBuffer());
+
+  const connection = await pool.connect();
+  try {
+    await connection.queryObject("BEGIN");
+
+    const created = await connection.queryObject<Pick<Umkm, "umkm_id">>(
+      `INSERT INTO Umkm (nama, dusun_id, deskripsi, foto)
+       VALUES ($1, $2, $3, $4)
+       RETURNING umkm_id`,
+      [nama.trim(), dusunId, deskripsi.trim(), fotoBytes],
+    );
+    const umkmId = created.rows[0].umkm_id;
+
+    for (let i = 0; i < jenisKontakList.length; i++) {
+      const jenisKontak = jenisKontakList[i];
+      const isiKontak = isiKontakList[i];
+      const tautanKontak = tautanKontakList[i];
+
+      if (
+        typeof jenisKontak !== "string" || typeof isiKontak !== "string" ||
+        typeof tautanKontak !== "string"
+      ) {
+        throw new Error("Format data kontak tidak valid.");
+      }
+
+      await connection.queryObject(
+        `INSERT INTO Kontak_Umkm (umkm_id, jenis_kontak, isi, tautan)
+         VALUES ($1, $2, $3, $4)`,
+        [umkmId, jenisKontak, isiKontak, tautanKontak],
+      );
+    }
+
+    await connection.queryObject("COMMIT");
+
+    ctx.response.status = 201;
+    ctx.response.body = { umkm_id: umkmId };
+  } catch (err) {
+    await connection.queryObject("ROLLBACK");
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data UMKM." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const postWisata = async (ctx: RouterContext<"/">) => {
   const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];

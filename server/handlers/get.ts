@@ -14,6 +14,123 @@ import { Komentar } from "../types/Komentar.d.ts";
 import { bigintToNumber } from "../helpers/bigintToNumber.ts";
 import { fetchArtikelDetailById } from "../helpers/fetchArtikelDetailById.ts";
 import { Wisata } from "../types/Wisata.d.ts";
+import { Umkm, UmkmDetail } from "../types/Umkm.d.ts";
+
+export const getUmkmList = async (ctx: RouterContext<"/">) => {
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<Omit<Umkm, "foto">>(
+      "SELECT umkm_id, nama, deskripsi, dusun_id FROM Umkm ORDER BY umkm_id DESC",
+    );
+
+    ctx.response.status = 200;
+    ctx.response.body = result.rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data UMKM." };
+  } finally {
+    connection.release();
+  }
+};
+
+export const getUmkmById = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID UMKM tidak valid." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<Omit<UmkmDetail, "foto">>(
+      `
+      SELECT
+        Umkm.umkm_id,
+        Umkm.nama,
+        Umkm.deskripsi,
+        Umkm.dusun_id,
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object(
+              'kontak_umkm_id', Kontak_Umkm.kontak_umkm_id,
+              'jenis_kontak', Kontak_Umkm.jenis_kontak,
+              'isi', Kontak_Umkm.isi,
+              'tautan', Kontak_Umkm.tautan
+            ))
+            FROM Kontak_Umkm
+            WHERE Kontak_Umkm.umkm_id = Umkm.umkm_id
+          ),
+          '[]'
+        ) AS kontak
+      FROM Umkm
+      WHERE Umkm.umkm_id = $1
+      `,
+      [id],
+    );
+
+    if (result.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "UMKM tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = result.rows[0];
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data UMKM." };
+  } finally {
+    connection.release();
+  }
+};
+
+export const getUmkmFoto = async (ctx: RouterContext<"/foto/:id">) => {
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID UMKM tidak valid." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<Pick<Umkm, "foto">>(
+      "SELECT foto FROM Umkm WHERE umkm_id = $1",
+      [id],
+    );
+
+    if (result.rows.length === 0 || !result.rows[0]?.foto) {
+      ctx.response.status = 404;
+      ctx.response.body = { message: "Foto tidak ditemukan" };
+      return;
+    }
+
+    const foto = result.rows[0].foto;
+
+    const contentType = foto[0] === 0xFF && foto[1] === 0xD8 && foto[2] === 0xFF
+      ? "image/jpeg"
+      : "image/png";
+
+    ctx.response.status = 200;
+    ctx.response.headers.set("Content-Type", contentType);
+    ctx.response.headers.set(
+      "Cache-Control",
+      "public, max-age=31536000, immutable",
+    );
+    ctx.response.body = foto;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil foto." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const getFotoTempatWisata = async (
   ctx: RouterContext<"/:id">,
