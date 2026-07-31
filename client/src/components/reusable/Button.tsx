@@ -10,7 +10,7 @@ const variantStyles = {
   black:
     "bg-black hover:bg-black/70 active:bg-black/85 disabled:hover:bg-black disabled:active:bg-black text-white",
   red:
-    "text-white hover:text-white bg-red-700 hover:bg-red-700/70 active:bg-red-700/85 disabled:hover:bg-red-700 disabled:active:bg-red-700",
+    "text-white bg-red-700 disabled:hover:bg-red-700 brightness-100 transition duration-300 ease-in-out hover:brightness-75",
 };
 
 const Button = ({

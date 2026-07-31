@@ -5,6 +5,7 @@ import DropdownInput from "../reusable/inputs/DropdownInput.tsx";
 import Button from "../reusable/Button.tsx";
 import useFetch from "../../hooks/useFetch.tsx";
 import DusunEditForm from "./DusunEditForm.tsx";
+import type { Dusun } from "../../types/Dusun.d.ts";
 
 const DusunManager = () => {
   const [inputNamaDusun, setInputNamaDusun] = useState("");
@@ -14,7 +15,7 @@ const DusunManager = () => {
   const {
     data: namaDusun,
     refetch: refetchNamaDusun,
-  } = useFetch<{ dusun_id: number; nama: string }>(
+  } = useFetch<Pick<Dusun, "dusun_id" | "nama">>(
     `http://${globalThis.location.hostname}:8000/dusun/nama`,
   );
 

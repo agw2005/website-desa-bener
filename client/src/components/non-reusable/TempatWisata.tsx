@@ -44,7 +44,8 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
 
     if (
       inputNamaTempatWisata.trim() === "" ||
-      inputDeskripsiTempatWisata.trim() === "", inputFotoTempatWisata === null
+      inputDeskripsiTempatWisata.trim() === "" ||
+      inputFotoTempatWisata === null
     ) {
       setWisataPostMessage("Nama, Deskripsi, dan Foto perlu diisi");
       setIsLoading(false);
@@ -116,7 +117,7 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
             placeholder="Pondok Al-Manar"
           />
           <TextInput
-            label="Deskripsi"
+            label="Deskripsi Pendek"
             name="deskripsi-tempat-wisata-baru"
             id="deskripsi-tempat-wisata-baru"
             value={inputDeskripsiTempatWisata}

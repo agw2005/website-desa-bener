@@ -81,7 +81,7 @@ const ManualCarousel = (
       >
         {items.map((item) => {
           const className =
-            `shrink-0 relative rounded-2xl overflow-hidden border-2 border-white shadow block`;
+            `shrink-0 relative rounded-2xl overflow-hidden border-2 border-white shadow block group`;
           const style = {
             width: `calc((100% - ${
               pixelGap * (visibleCards - 1)
@@ -106,22 +106,30 @@ const ManualCarousel = (
 
           const content = (
             <>
-              {deleteButton}
-              <img
-                src={imageSrc(item.photo)}
-                onError={(e) => {
-                  e.currentTarget.src = fallbackImage;
-                  e.currentTarget.onerror = null;
-                }}
-                alt={item.subtitle}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black to-transparent px-3 py-3 text-white">
-                <p className="font-bold text-sm leading-tight">
-                  {item.title}
-                </p>
-                <p className="text-xs">{item.subtitle}</p>
+              <div
+                className={`w-full h-full ${
+                  item.link
+                    ? "transition duration-300 ease-in-out group-hover:brightness-75"
+                    : ""
+                }`}
+              >
+                <img
+                  src={imageSrc(item.photo)}
+                  onError={(e) => {
+                    e.currentTarget.src = fallbackImage;
+                    e.currentTarget.onerror = null;
+                  }}
+                  alt={item.subtitle}
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-linear-to-t from-black to-transparent px-3 py-3 text-white">
+                  <p className="font-bold text-sm leading-tight">
+                    {item.title}
+                  </p>
+                  <p className="text-xs">{item.subtitle}</p>
+                </div>
               </div>
+              {deleteButton}
             </>
           );
 
@@ -130,7 +138,7 @@ const ManualCarousel = (
               <Link
                 key={item.id}
                 to={item.link}
-                className={`${className} transition duration-300 ease-in-out hover:brightness-75`}
+                className={className}
                 style={style}
               >
                 {content}
