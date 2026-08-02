@@ -5,6 +5,7 @@ import useFetch from "../../hooks/useFetch.tsx";
 import type { Visi } from "../../types/Visi.d.ts";
 import type { Misi } from "../../types/Misi.d.ts";
 import Button from "../reusable/Button.tsx";
+import { authFetch } from "../../helpers/authFetch.ts";
 
 const VisiMisiManager = () => {
   const [inputVisi, setInputVisi] = useState("");
@@ -20,7 +21,7 @@ const VisiMisiManager = () => {
   );
 
   const handleDelete = async (id: number, type: "visi" | "misi") => {
-    const response = await fetch(
+    const response = await authFetch(
       `http://${globalThis.location.hostname}:8000/${type}/${id}`,
       { method: "DELETE" },
     );
@@ -39,7 +40,7 @@ const VisiMisiManager = () => {
       return;
     }
 
-    const response = await fetch(
+    const response = await authFetch(
       `http://${globalThis.location.hostname}:8000/${type}`,
       {
         method: "POST",

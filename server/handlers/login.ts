@@ -7,9 +7,9 @@ import {
 } from "@zaubrik/djwt";
 import type { LoggedInInfo, LoginInfo } from "../types/Login.d.ts";
 import type { RouterContext } from "@oak/oak/router";
-import { decodeBase64 } from "@std/encoding/base64";
 import type { Aparatur } from "../types/Aparatur.d.ts";
 import { pool } from "../dbpool.ts";
+import { getJwtKey } from "../helpers/getJwtKey.ts";
 
 const getAparaturByName = async (nama: string): Promise<Aparatur | null> => {
   const connection = await pool.connect();
@@ -46,7 +46,6 @@ export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
   }
 
   const aparaturCandidate = await getAparaturByName(namaAparatur);
-
   const passwordMatches = aparaturCandidate?.kata_sandi === kataSandi;
 
   if (!aparaturCandidate || !passwordMatches) {
@@ -55,21 +54,11 @@ export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
     return;
   }
 
-  const jwtKeyString = Deno.env.get("JWT_KEY");
-  if (!jwtKeyString) throw new Error("JWT_KEY environment variable is missing");
-  const jwtKeyBytes = decodeBase64(jwtKeyString);
-  const jwtKey = await crypto.subtle.importKey(
-    "raw",
-    jwtKeyBytes,
-    { name: "HMAC", hash: "SHA-512" },
-    true,
-    ["sign", "verify"],
-  );
-
+  const jwtKey = await getJwtKey();
   const jwtHeader: Header = { alg: "HS512", typ: "JWT" };
   const jwtPayload: Payload = {
     iss: "System",
-    exp: getNumericDate(60 * 60 * 9), // 9 hours
+    exp: getNumericDate(60 * 60 * 9),
     id: aparaturCandidate.aparatur_id,
     identifier: aparaturCandidate.nama,
   };
@@ -81,49 +70,31 @@ export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {
 };
 
 export const verifyJwt = async (ctx: RouterContext<"/verifikasi">) => {
-  const jwtKeyString = Deno.env.get("JWT_KEY");
-  if (!jwtKeyString) throw new Error("JWT_KEY environment variable is missing");
-  const jwtKeyBytes = decodeBase64(jwtKeyString);
-
-  const jwtKey = await crypto.subtle.importKey(
-    "raw",
-    jwtKeyBytes,
-    { name: "HMAC", hash: "SHA-512" },
-    true,
-    ["sign", "verify"],
-  );
-
-  const headers = ctx.request.headers;
-  const authHeader = headers.get("Authorization");
+  const authHeader = ctx.request.headers.get("Authorization");
 
   if (!authHeader) {
     ctx.response.status = 401;
-    ctx.response.body = { message: "No authorization detected" };
+    ctx.response.body = { error: "Tidak ada token otorisasi." };
     return;
   }
 
-  const clientJwtToken = authHeader.split(" ")[1];
+  const [scheme, token] = authHeader.split(" ");
 
-  if (!clientJwtToken) {
+  if (scheme !== "Bearer" || !token) {
     ctx.response.status = 401;
-    ctx.response.body = { message: "Invalid JWT" };
+    ctx.response.body = { error: "Format token tidak valid." };
     return;
   }
 
   try {
-    const decoded = (await verify(
-      clientJwtToken,
-      jwtKey,
-    ) as unknown) as LoggedInInfo;
+    const jwtKey = await getJwtKey();
+    const decoded = await verify(token, jwtKey) as unknown as LoggedInInfo;
 
-    if (decoded) {
-      ctx.response.status = 200;
-      ctx.response.body = decoded;
-    } else {
-      ctx.response.status = 401;
-      ctx.response.body = { message: "JWT is no longer valid" };
-    }
+    ctx.response.status = 200;
+    ctx.response.body = decoded;
   } catch (err) {
     console.error(err);
+    ctx.response.status = 401;
+    ctx.response.body = { error: "Token tidak valid atau kedaluwarsa." };
   }
 };

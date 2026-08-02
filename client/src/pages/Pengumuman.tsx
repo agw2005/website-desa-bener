@@ -11,6 +11,7 @@ import ManyFileInput from "../components/reusable/inputs/ManyFileInput.tsx";
 import type { Label } from "../types/Label.d.ts";
 import type { ArtikelWithLabel } from "../types/Artikel.d.ts";
 import useAuth from "../hooks/useAuth.tsx";
+import { authFetch } from "../helpers/authFetch.ts";
 
 const Pengumuman = () => {
   const { isLoggedIn, authIsLoading: __, authInfo: _ } = useAuth();
@@ -78,7 +79,7 @@ const Pengumuman = () => {
     }
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://${globalThis.location.hostname}:8000/artikel`,
         { method: "POST", body: formData },
       );

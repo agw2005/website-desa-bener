@@ -6,6 +6,7 @@ import Button from "../reusable/Button.tsx";
 import useFetch from "../../hooks/useFetch.tsx";
 import DusunEditForm from "./DusunEditForm.tsx";
 import type { Dusun } from "../../types/Dusun.d.ts";
+import { authFetch } from "../../helpers/authFetch.ts";
 
 const DusunManager = () => {
   const [inputNamaDusun, setInputNamaDusun] = useState("");
@@ -27,7 +28,7 @@ const DusunManager = () => {
       return;
     }
 
-    const response = await fetch(
+    const response = await authFetch(
       `http://${globalThis.location.hostname}:8000/dusun?nama=${inputNamaDusun}`,
       {
         method: "POST",

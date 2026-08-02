@@ -6,6 +6,7 @@ import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
 import Button from "../reusable/Button.tsx";
 import type { Wisata } from "../../types/Wisata.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
+import { authFetch } from "../../helpers/authFetch.ts";
 
 interface TempatWisataProps {
   isLoggedIn: boolean;
@@ -30,7 +31,7 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
   );
 
   const handleDeleteWisata = async (id: number) => {
-    const response = await fetch(
+    const response = await authFetch(
       `http://${globalThis.location.hostname}:8000/wisata/${id}`,
       { method: "DELETE" },
     );
@@ -58,7 +59,7 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
     formData.append("foto", inputFotoTempatWisata);
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://${globalThis.location.hostname}:8000/wisata`,
         { method: "POST", body: formData },
       );

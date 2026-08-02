@@ -18,6 +18,8 @@ import {
   getLabel,
   getMisi,
   getOneDusun,
+  getPelayananById,
+  getPelayananList,
   getProfil,
   getProfilDesa,
   getTempatWisata,
@@ -37,6 +39,7 @@ import {
   postKomentar,
   postLabel,
   postMisi,
+  postPelayanan,
   postUmkm,
   postVisi,
   postWisata,
@@ -51,10 +54,12 @@ import {
   deleteLabel,
   deleteLampiranApbdes,
   deleteMisi,
+  deletePelayanan,
   deleteTempatWisata,
   deleteUmkm,
   deleteVisi,
 } from "./handlers/delete.ts";
+import { requireAuth } from "./middlewares/requireAuth.ts";
 
 const port = 8000;
 const app = new Application();
@@ -70,6 +75,7 @@ const artikel = new Router();
 const komentar = new Router();
 const wisata = new Router();
 const umkm = new Router();
+const pelayanan = new Router();
 
 root
   .get("/", (ctx: RouterContext<"/">) => {
@@ -78,21 +84,27 @@ root
   })
   .get("/verifikasi", verifyJwt);
 
+pelayanan
+  .get("/:id", getPelayananById)
+  .delete("/:id", requireAuth, deletePelayanan)
+  .get("/", getPelayananList)
+  .post("/", requireAuth, postPelayanan);
+
 umkm
   .get("/foto/:id", getUmkmFoto)
   .get("/:id", getUmkmById)
   .get("/", getUmkmList)
-  .post("/", postUmkm)
-  .delete("/:id", deleteUmkm);
+  .post("/", requireAuth, postUmkm)
+  .delete("/:id", requireAuth, deleteUmkm);
 
 wisata
   .get("/:id", getFotoTempatWisata)
-  .delete("/:id", deleteTempatWisata)
+  .delete("/:id", requireAuth, deleteTempatWisata)
   .get("/", getTempatWisata)
-  .post("/", postWisata);
+  .post("/", requireAuth, postWisata);
 
 komentar
-  .delete("/:id", deleteKomentar)
+  .delete("/:id", requireAuth, deleteKomentar)
   .get("/", getKomentars)
   .post("/", postKomentar);
 
@@ -101,36 +113,36 @@ artikel
   .get("/thumbnail/:id", thumbnail)
   .get("/terbaru", getArtikelTerbaru)
   .get("/:id", getArtikelById)
-  .delete("/:id", deleteArtikel)
-  .post("/", postArtikel)
+  .delete("/:id", requireAuth, deleteArtikel)
+  .post("/", requireAuth, postArtikel)
   .get("/", getArtikels);
 
 label
-  .delete("/:id", deleteLabel)
+  .delete("/:id", requireAuth, deleteLabel)
   .get("/", getLabel)
-  .post("/", postLabel);
+  .post("/", requireAuth, postLabel);
 
 apbdes
   .get("/file/:id", getApbdesFile)
-  .delete("/:id", deleteLampiranApbdes)
+  .delete("/:id", requireAuth, deleteLampiranApbdes)
   .get("/:year", getApbdesAtYear)
-  .post("/:year", postApbdesFileAtYear);
+  .post("/:year", requireAuth, postApbdesFileAtYear);
 
 misi
-  .delete("/:id", deleteMisi)
+  .delete("/:id", requireAuth, deleteMisi)
   .get("/", getMisi)
-  .post("/", postMisi);
+  .post("/", requireAuth, postMisi);
 
 visi
-  .delete("/:id", deleteVisi)
+  .delete("/:id", requireAuth, deleteVisi)
   .get("/", getVisi)
-  .post("/", postVisi);
+  .post("/", requireAuth, postVisi);
 
 aparatur
   .get("/foto/:id", fotoAparaturDesa)
-  .delete("/:id", deleteAparatur)
+  .delete("/:id", requireAuth, deleteAparatur)
   .post("/login", requestJwtAparatur)
-  .post("/", postAparatur)
+  .post("/", requireAuth, postAparatur)
   .get("/", aparaturDesa);
 
 profil
@@ -138,15 +150,15 @@ profil
   .get("/data", getProfilDesa)
   .get("/peta", petaDesa)
   .get("/kalender", getKalender)
-  .patch("/", patchProfil)
+  .patch("/", requireAuth, patchProfil)
   .get("/", getProfil);
 
 dusun
   .get("/nama", namaDusun)
   .get("/:id", getOneDusun)
-  .patch("/:id", patchDusun)
-  .delete("/:id", deleteDusun)
-  .post("/", postDusun)
+  .patch("/:id", requireAuth, patchDusun)
+  .delete("/:id", requireAuth, deleteDusun)
+  .post("/", requireAuth, postDusun)
   .get("/", getDusun);
 
 root
@@ -160,7 +172,8 @@ root
   .use("/artikel", artikel.routes(), artikel.allowedMethods())
   .use("/komentar", komentar.routes(), komentar.allowedMethods())
   .use("/wisata", wisata.routes(), wisata.allowedMethods())
-  .use("/umkm", umkm.routes(), umkm.allowedMethods());
+  .use("/umkm", umkm.routes(), umkm.allowedMethods())
+  .use("/pelayanan", pelayanan.routes(), pelayanan.allowedMethods());
 
 app
   .use(async (ctx, next: Next) => {

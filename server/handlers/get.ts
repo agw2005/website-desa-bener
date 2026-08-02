@@ -15,6 +15,76 @@ import { bigintToNumber } from "../helpers/bigintToNumber.ts";
 import { fetchArtikelDetailById } from "../helpers/fetchArtikelDetailById.ts";
 import { Wisata } from "../types/Wisata.d.ts";
 import { Umkm, UmkmDetail } from "../types/Umkm.d.ts";
+import { Pelayanan, PelayananDetail } from "../types/Pelayanan.d.ts";
+
+export const getPelayananById = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID pelayanan tidak valid." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<PelayananDetail>(
+      `
+      SELECT
+        Pelayanan.pelayanan_id,
+        Pelayanan.judul,
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object(
+              'syarat_pelayanan_id', Syarat_Pelayanan.syarat_pelayanan_id,
+              'isi', Syarat_Pelayanan.isi,
+              'tautan', Syarat_Pelayanan.tautan
+            ))
+            FROM Syarat_Pelayanan
+            WHERE Syarat_Pelayanan.pelayanan_id = Pelayanan.pelayanan_id
+          ),
+          '[]'
+        ) AS syarat
+      FROM Pelayanan
+      WHERE Pelayanan.pelayanan_id = $1
+      `,
+      [id],
+    );
+
+    if (result.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Pelayanan tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = result.rows[0];
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data pelayanan." };
+  } finally {
+    connection.release();
+  }
+};
+
+export const getPelayananList = async (ctx: RouterContext<"/">) => {
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<Pelayanan>(
+      "SELECT pelayanan_id, judul FROM Pelayanan ORDER BY pelayanan_id DESC",
+    );
+
+    ctx.response.status = 200;
+    ctx.response.body = result.rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data pelayanan." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const getUmkmList = async (ctx: RouterContext<"/">) => {
   const connection = await pool.connect();

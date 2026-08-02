@@ -5,6 +5,76 @@ import { pool } from "../dbpool.ts";
 import { Komentar } from "../types/Komentar.d.ts";
 import { Wisata } from "../types/Wisata.d.ts";
 import { Umkm } from "../types/Umkm.d.ts";
+import { Pelayanan } from "../types/Pelayanan.d.ts";
+
+export const postPelayanan = async (ctx: RouterContext<"/">) => {
+  const form = await ctx.request.body.formData();
+
+  const judul = form.get("judul");
+
+  if (typeof judul !== "string" || judul.trim() === "") {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Judul pelayanan wajib diisi." };
+    return;
+  }
+
+  const isiSyaratList = form.getAll("isi_syarat");
+  const tautanSyaratList = form.getAll("tautan_syarat");
+
+  if (isiSyaratList.length !== tautanSyaratList.length) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Data syarat tidak konsisten." };
+    return;
+  }
+
+  for (const isi of isiSyaratList) {
+    if (typeof isi !== "string" || isi.trim() === "") {
+      ctx.response.status = 400;
+      ctx.response.body = { error: "Setiap syarat wajib memiliki isi." };
+      return;
+    }
+  }
+
+  const connection = await pool.connect();
+  try {
+    await connection.queryObject("BEGIN");
+
+    const created = await connection.queryObject<
+      Pick<Pelayanan, "pelayanan_id">
+    >(
+      "INSERT INTO Pelayanan (judul) VALUES ($1) RETURNING pelayanan_id",
+      [judul.trim()],
+    );
+    const pelayananId = created.rows[0].pelayanan_id;
+
+    for (let i = 0; i < isiSyaratList.length; i++) {
+      const isi = isiSyaratList[i];
+      const tautan = tautanSyaratList[i];
+
+      if (typeof isi !== "string" || typeof tautan !== "string") {
+        throw new Error("Format data syarat tidak valid.");
+      }
+
+      await connection.queryObject(
+        `INSERT INTO Syarat_Pelayanan (pelayanan_id, isi, tautan)
+         VALUES ($1, $2, $3)`,
+        [pelayananId, isi.trim(), tautan.trim() === "" ? null : tautan.trim()],
+      );
+    }
+
+    await connection.queryObject("COMMIT");
+
+    ctx.response.status = 201;
+    ctx.response.body = { pelayanan_id: pelayananId };
+  } catch (err) {
+    await connection.queryObject("ROLLBACK");
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data pelayanan." };
+  } finally {
+    connection.release();
+  }
+};
 
 export const postUmkm = async (ctx: RouterContext<"/">) => {
   const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/jpg"];

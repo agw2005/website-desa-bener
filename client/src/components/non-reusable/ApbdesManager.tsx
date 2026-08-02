@@ -3,6 +3,7 @@ import Button from "../reusable/Button.tsx";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
 import useApbdes from "../../hooks/useApbdes.tsx";
+import { authFetch } from "../../helpers/authFetch.ts";
 
 const ApbdesManager = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -37,7 +38,7 @@ const ApbdesManager = () => {
     formData.append("file", inputFile);
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://${globalThis.location.hostname}:8000/apbdes/${selectedYear}`,
         { method: "POST", body: formData },
       );
@@ -57,7 +58,7 @@ const ApbdesManager = () => {
 
   const handleDeleteApbdes = async (id: number) => {
     setIsLoading(true);
-    const response = await fetch(
+    const response = await authFetch(
       `http://${globalThis.location.hostname}:8000/apbdes/${id}`,
       { method: "DELETE" },
     );

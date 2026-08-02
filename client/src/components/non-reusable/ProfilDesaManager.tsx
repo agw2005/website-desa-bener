@@ -6,6 +6,7 @@ import Button from "../reusable/Button.tsx";
 import useFetch from "../../hooks/useFetch.tsx";
 import type { Profil } from "../../types/Profil.d.ts";
 import TextAreaInput from "../reusable/inputs/TextAreaInput.tsx";
+import { authFetch } from "../../helpers/authFetch.ts";
 
 type ProfilTextField = Exclude<
   keyof Profil,
@@ -135,7 +136,7 @@ const ProfilDesaManager = () => {
     }
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://${globalThis.location.hostname}:8000/profil`,
         { method: "PATCH", body: formData },
       );

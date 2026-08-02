@@ -4,6 +4,7 @@ import useArticle from "../hooks/useArticle.tsx";
 import { dateToText } from "../helpers/dateToText.ts";
 import Button from "../components/reusable/Button.tsx";
 import useAuth from "../hooks/useAuth.tsx";
+import { authFetch } from "../helpers/authFetch.ts";
 
 const Artikel = () => {
   const { isLoggedIn } = useAuth();
@@ -47,7 +48,7 @@ const Artikel = () => {
               <Button
                 variant="red"
                 onClick={async () => {
-                  await fetch(
+                  await authFetch(
                     `http://${globalThis.location.hostname}:8000/artikel/${data.artikel_id}`,
                     {
                       method: "DELETE",

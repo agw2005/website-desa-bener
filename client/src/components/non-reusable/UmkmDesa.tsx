@@ -8,6 +8,7 @@ import type { Umkm } from "../../types/Umkm.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
 import DropdownInput from "../reusable/inputs/DropdownInput.tsx";
 import type { Dusun } from "../../types/Dusun.d.ts";
+import { authFetch } from "../../helpers/authFetch.ts";
 
 interface UmkmDesaProps {
   isLoggedIn: boolean;
@@ -42,7 +43,7 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
   );
 
   const handleDeleteUmkm = async (id: number) => {
-    const response = await fetch(
+    const response = await authFetch(
       `http://${globalThis.location.hostname}:8000/umkm/${id}`,
       { method: "DELETE" },
     );
@@ -89,7 +90,7 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
     }
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://${globalThis.location.hostname}:8000/umkm`,
         { method: "POST", body: formData },
       );

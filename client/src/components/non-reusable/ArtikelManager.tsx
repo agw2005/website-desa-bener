@@ -3,6 +3,7 @@ import Button from "../reusable/Button.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import useFetch from "../../hooks/useFetch.tsx";
+import { authFetch } from "../../helpers/authFetch.ts";
 
 const ArtikelManager = () => {
   const [inputLabel, setInputLabel] = useState("");
@@ -23,7 +24,7 @@ const ArtikelManager = () => {
       return;
     }
 
-    const response = await fetch(
+    const response = await authFetch(
       `http://${globalThis.location.hostname}:8000/label?nama=${inputLabel}`,
       {
         method: "POST",
@@ -39,7 +40,7 @@ const ArtikelManager = () => {
   };
 
   const handleDelete = async (id: number) => {
-    const response = await fetch(
+    const response = await authFetch(
       `http://${globalThis.location.hostname}:8000/label/${id}`,
       { method: "DELETE" },
     );

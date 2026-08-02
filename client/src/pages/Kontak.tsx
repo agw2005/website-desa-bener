@@ -11,6 +11,7 @@ import { isValidEmail } from "../helpers/isValidEmail.ts";
 import type { Komentar } from "../types/Komentar.d.ts";
 import TextAreaInput from "../components/reusable/inputs/TextAreaInput.tsx";
 import useAuth from "../hooks/useAuth.tsx";
+import { authFetch } from "../helpers/authFetch.ts";
 
 const Kontak = () => {
   const { isLoggedIn, authIsLoading: __, authInfo: _ } = useAuth();
@@ -144,7 +145,7 @@ const Kontak = () => {
     setDeletingKomentarId(id);
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://${globalThis.location.hostname}:8000/komentar/${id}`,
         { method: "DELETE" },
       );

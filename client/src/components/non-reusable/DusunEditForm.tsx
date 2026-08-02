@@ -3,6 +3,7 @@ import type { Dusun } from "../../types/Dusun.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";
 import Button from "../reusable/Button.tsx";
+import { authFetch } from "../../helpers/authFetch.ts";
 
 type NumericDusunField = Exclude<keyof Dusun, "dusun_id" | "nama">;
 
@@ -103,7 +104,7 @@ const DusunEditForm = (
     setSaveMessage(null);
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://${globalThis.location.hostname}:8000/dusun/${dusunId}`,
         {
           method: "PATCH",
@@ -130,7 +131,7 @@ const DusunEditForm = (
     setSaveMessage(null);
 
     try {
-      const response = await fetch(
+      const response = await authFetch(
         `http://${globalThis.location.hostname}:8000/dusun/${dusunId}`,
         { method: "DELETE" },
       );
