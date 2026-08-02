@@ -7,22 +7,32 @@ const Kalender = () => {
     `http://${globalThis.location.hostname}:8000/profil/kalender`,
   );
 
+  const kalenderId = tautanKalender?.[0]?.tautan_kalender;
+  const hasValidKalender = typeof kalenderId === "string" &&
+    kalenderId.trim() !== "";
+
   return (
     <Primitive>
       <div className="flex w-view h-256">
-        {tautanKalender && tautanKalender.length > 0 && (
-          <iframe
-            className="w-full"
-            // 1. Added src=
-            // 2. Wrapped the value in encodeURIComponent()
-            src={`https://calendar.google.com/calendar/embed?src=${
-              encodeURIComponent(
-                tautanKalender[0]?.tautan_kalender,
-              )
-            }&ctz=Asia/Jakarta`}
-          >
-          </iframe>
-        )}
+        {hasValidKalender
+          ? (
+            <iframe
+              className="w-full"
+              src={`https://calendar.google.com/calendar/embed?src=${
+                encodeURIComponent(kalenderId)
+              }&ctz=Asia/Jakarta`}
+            >
+            </iframe>
+          )
+          : (
+            <div className="flex flex-col items-center justify-center gap-4 w-full text-center px-8">
+              <h2 className="text-2xl font-bold">Kalender Belum Tersedia</h2>
+              <p className="text-gray-600 max-w-md">
+                Kalender kegiatan desa belum diatur oleh admin. Silakan hubungi
+                perangkat desa untuk informasi jadwal kegiatan.
+              </p>
+            </div>
+          )}
       </div>
     </Primitive>
   );
