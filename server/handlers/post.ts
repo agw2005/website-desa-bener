@@ -7,6 +7,57 @@ import { Wisata } from "../types/Wisata.d.ts";
 import { Umkm } from "../types/Umkm.d.ts";
 import { Pelayanan } from "../types/Pelayanan.d.ts";
 
+export const postSyaratPelayanan = async (
+  ctx: RouterContext<"/:id/syarat">,
+) => {
+  const pelayananId = Number(ctx.params.id);
+
+  if (!Number.isInteger(pelayananId) || pelayananId <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID pelayanan tidak valid." };
+    return;
+  }
+
+  const form = await ctx.request.body.formData();
+  const isi = form.get("isi");
+  const tautan = form.get("tautan");
+
+  if (typeof isi !== "string" || isi.trim() === "") {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Isi syarat wajib diisi." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<
+      { syarat_pelayanan_id: number }
+    >(
+      `INSERT INTO Syarat_Pelayanan (pelayanan_id, isi, tautan)
+       VALUES ($1, $2, $3)
+       RETURNING syarat_pelayanan_id`,
+      [
+        pelayananId,
+        isi.trim(),
+        typeof tautan === "string" && tautan.trim() !== ""
+          ? tautan.trim()
+          : null,
+      ],
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = {
+      syarat_pelayanan_id: result.rows[0].syarat_pelayanan_id,
+    };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menambahkan syarat." };
+  } finally {
+    connection.release();
+  }
+};
+
 export const postPelayanan = async (ctx: RouterContext<"/">) => {
   const form = await ctx.request.body.formData();
 

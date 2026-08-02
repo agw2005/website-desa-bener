@@ -1,0 +1,150 @@
+import { useState } from "react";
+import TextInput from "../reusable/inputs/TextInput.tsx";
+import Button from "../reusable/Button.tsx";
+import usePelayanan from "../../hooks/usePelayanan.tsx";
+import { authFetch } from "../../helpers/authFetch.ts";
+
+interface PelayananEditFormProps {
+  pelayananId: number;
+  refetchPelayananList: () => void;
+  onDelete: () => void;
+}
+
+const PelayananEditForm = (
+  { pelayananId, refetchPelayananList, onDelete }: PelayananEditFormProps,
+) => {
+  const { data: pelayanan, refetch: refetchPelayanan } = usePelayanan(
+    pelayananId,
+  );
+
+  const [inputIsiSyarat, setInputIsiSyarat] = useState("");
+  const [inputTautanSyarat, setInputTautanSyarat] = useState("");
+  const [postMessage, setPostMessage] = useState("");
+
+  const handleAddSyarat = async () => {
+    setPostMessage("");
+
+    if (inputIsiSyarat.trim() === "") {
+      setPostMessage("Isi syarat wajib diisi.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("isi", inputIsiSyarat);
+    formData.append("tautan", inputTautanSyarat);
+
+    const response = await authFetch(
+      `http://${globalThis.location.hostname}:8000/pelayanan/${pelayananId}/syarat`,
+      { method: "POST", body: formData },
+    );
+
+    if (response.ok) {
+      setInputIsiSyarat("");
+      setInputTautanSyarat("");
+      refetchPelayanan();
+      refetchPelayananList();
+    } else {
+      setPostMessage("Gagal menambahkan syarat.");
+      console.error(await response.json());
+    }
+  };
+
+  const handleDeleteSyarat = async (syaratId: number) => {
+    const response = await authFetch(
+      `http://${globalThis.location.hostname}:8000/syarat/${syaratId}`,
+      { method: "DELETE" },
+    );
+    if (!response.ok) console.error(await response.json());
+    refetchPelayanan();
+    refetchPelayananList();
+  };
+
+  if (!pelayanan) return <p>Memuat data pelayanan...</p>;
+
+  return (
+    <div className="flex flex-col gap-4 border-3 rounded-2xl p-6">
+      <div className="flex justify-between items-center">
+        <h3 className="font-bold text-xl">{pelayanan.judul}</h3>
+        <Button variant="red" onClick={onDelete}>
+          Hapus Pelayanan
+        </Button>
+      </div>
+
+      <table className="w-full text-left border-collapse">
+        <thead>
+          <tr className="bg-amber-700 text-white">
+            <th className="py-2 px-4 font-bold border border-black text-center">
+              No
+            </th>
+            <th className="py-2 px-4 font-bold border border-black text-center">
+              Syarat
+            </th>
+            <th className="py-2 px-4 font-bold border border-black text-center">
+              Tautan
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {pelayanan.syarat.map((s, index) => (
+            <tr key={s.syarat_pelayanan_id} className="border">
+              <td className="border border-black py-2 px-4 text-center">
+                {index + 1}
+              </td>
+              <td className="border border-black py-2 px-4">{s.isi}</td>
+              <td className="border border-black py-2 px-4">
+                {s.tautan
+                  ? (
+                    <a
+                      href={s.tautan}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 underline"
+                    >
+                      Tautan
+                    </a>
+                  )
+                  : <span className="text-gray-400">-</span>}
+              </td>
+              <td
+                onClick={() =>
+                  handleDeleteSyarat(s.syarat_pelayanan_id)}
+                className="border border-black py-2 px-4 select-none bg-red-700 hover:bg-red-900 active:bg-red-600 text-white font-bold text-center cursor-pointer"
+              >
+                Hapus
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      <div className="flex flex-col gap-2">
+        <TextInput
+          label="Isi Syarat"
+          name="isi-syarat-baru"
+          id="isi-syarat-baru"
+          value={inputIsiSyarat}
+          onChangeHandler={(e) => setInputIsiSyarat(e.target.value)}
+          placeholder="Contoh: Fotokopi KTP"
+        />
+        <TextInput
+          label="Tautan (opsional)"
+          name="tautan-syarat-baru"
+          id="tautan-syarat-baru"
+          value={inputTautanSyarat}
+          onChangeHandler={(e) => setInputTautanSyarat(e.target.value)}
+          placeholder="Contoh: tautan formulir unduhan"
+        />
+        <Button variant="black" className="w-max" onClick={handleAddSyarat}>
+          Tambah Syarat
+        </Button>
+        {postMessage && (
+          <div className="px-4 py-2 bg-red-600 text-white font-bold rounded-2xl w-max">
+            {postMessage}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default PelayananEditForm;

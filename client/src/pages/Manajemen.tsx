@@ -5,6 +5,7 @@ import ProfilDesaManager from "../components/non-reusable/ProfilDesaManager.tsx"
 import VisiMisiManager from "../components/non-reusable/VisiMisiManager.tsx";
 import ApbdesManager from "../components/non-reusable/ApbdesManager.tsx";
 import ArtikelManager from "../components/non-reusable/ArtikelManager.tsx";
+import PelayananManager from "../components/non-reusable/PelayananManager.tsx";
 
 const Manajemen = () => {
   return (
@@ -16,6 +17,7 @@ const Manajemen = () => {
         <VisiMisiManager />
         <ApbdesManager />
         <ArtikelManager />
+        <PelayananManager />
       </div>
     </Primitive>
   );

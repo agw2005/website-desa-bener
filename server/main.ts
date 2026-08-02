@@ -40,6 +40,7 @@ import {
   postLabel,
   postMisi,
   postPelayanan,
+  postSyaratPelayanan,
   postUmkm,
   postVisi,
   postWisata,
@@ -55,6 +56,7 @@ import {
   deleteLampiranApbdes,
   deleteMisi,
   deletePelayanan,
+  deleteSyaratPelayanan,
   deleteTempatWisata,
   deleteUmkm,
   deleteVisi,
@@ -76,6 +78,7 @@ const komentar = new Router();
 const wisata = new Router();
 const umkm = new Router();
 const pelayanan = new Router();
+const syarat = new Router();
 
 root
   .get("/", (ctx: RouterContext<"/">) => {
@@ -84,7 +87,11 @@ root
   })
   .get("/verifikasi", verifyJwt);
 
+syarat
+  .delete("/:id", requireAuth, deleteSyaratPelayanan);
+
 pelayanan
+  .post("/:id/syarat", requireAuth, postSyaratPelayanan)
   .get("/:id", getPelayananById)
   .delete("/:id", requireAuth, deletePelayanan)
   .get("/", getPelayananList)

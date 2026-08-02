@@ -1,6 +1,39 @@
 import type { RouterContext } from "@oak/oak/router";
 import { pool } from "../dbpool.ts";
 
+export const deleteSyaratPelayanan = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID syarat tidak valid." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject(
+      "DELETE FROM Syarat_Pelayanan WHERE syarat_pelayanan_id = $1",
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Syarat tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Syarat berhasil dihapus." };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menghapus syarat." };
+  } finally {
+    connection.release();
+  }
+};
+
 export const deletePelayanan = async (ctx: RouterContext<"/:id">) => {
   const id = Number(ctx.params.id);
 
