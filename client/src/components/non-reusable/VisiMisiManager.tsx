@@ -2,13 +2,14 @@ import { useState } from "react";
 import TextAreaInput from "../reusable/inputs/TextAreaInput.tsx";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import useFetch from "../../hooks/useFetch.tsx";
-import type { Visi, VisiPostPayload } from "../../types/Visi.d.ts";
-import type { Misi, MisiPostPayload } from "../../types/Misi.d.ts";
+import type { Visi } from "../../types/Visi.d.ts";
+import type { Misi } from "../../types/Misi.d.ts";
 import Button from "../reusable/Button.tsx";
 
 const VisiMisiManager = () => {
   const [inputVisi, setInputVisi] = useState("");
   const [inputMisi, setInputMisi] = useState("");
+  const [postMessage, setPostMessage] = useState("");
 
   const { data: visi, refetch: refetchVisi } = useFetch<Visi>(
     `http://${globalThis.location.hostname}:8000/visi`,
@@ -27,8 +28,34 @@ const VisiMisiManager = () => {
     refetchVisi();
   };
 
+  const handleSubmit = async (type: "visi" | "misi") => {
+    setPostMessage("");
+    const payload: { isi: string } = type === "visi"
+      ? { isi: inputVisi }
+      : { isi: inputMisi };
+
+    if (payload.isi.trim() === "") {
+      setPostMessage(`Isi ${type} tidak boleh kosong.`);
+      return;
+    }
+
+    const response = await fetch(
+      `http://${globalThis.location.hostname}:8000/${type}`,
+      {
+        method: "POST",
+        body: JSON.stringify(payload),
+      },
+    );
+    if (response.ok) {
+      type === "visi" ? refetchVisi() : refetchMisi();
+      type === "visi" ? setInputVisi("") : setInputMisi("");
+    } else {
+      console.error(response.body);
+    }
+  };
+
   return (
-    <RoundedSection title="Visi & Misi">
+    <RoundedSection title="Visi & Misi" contentClassName="gap-4">
       <div className="flex gap-4">
         <div className="flex flex-col flex-1 gap-4">
           <div className="flex-1 overflow-x-auto">
@@ -79,20 +106,7 @@ const VisiMisiManager = () => {
           <Button
             variant="black"
             onClick={async () => {
-              const payload: VisiPostPayload = { isi: inputVisi };
-              const response = await fetch(
-                `http://${globalThis.location.hostname}:8000/visi`,
-                {
-                  method: "POST",
-                  body: JSON.stringify(payload),
-                },
-              );
-              if (response.ok) {
-                refetchVisi();
-                setInputVisi("");
-              } else {
-                console.error(response.body);
-              }
+              await handleSubmit("visi");
             }}
           >
             Tambahkan Visi
@@ -147,26 +161,19 @@ const VisiMisiManager = () => {
           <Button
             variant="black"
             onClick={async () => {
-              const payload: MisiPostPayload = { isi: inputMisi };
-              const response = await fetch(
-                `http://${globalThis.location.hostname}:8000/misi`,
-                {
-                  method: "POST",
-                  body: JSON.stringify(payload),
-                },
-              );
-              if (response.ok) {
-                refetchMisi();
-                setInputMisi("");
-              } else {
-                console.error(response.body);
-              }
+              await handleSubmit("misi");
             }}
           >
             Tambahkan Misi
           </Button>
         </div>
       </div>
+
+      {postMessage && (
+        <div className="px-4 py-4 bg-red-700 font-bold rounded-2xl text-center text-white select-none">
+          {postMessage}
+        </div>
+      )}
     </RoundedSection>
   );
 };
