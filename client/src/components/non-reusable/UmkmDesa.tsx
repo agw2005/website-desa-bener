@@ -72,17 +72,20 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
     formData.append("foto", inputFotoUmkm);
 
     for (const kontak of kontakList) {
-      const jenisKontak = kontak.jenisKontak === ""
-        ? "N/A"
-        : kontak.jenisKontak;
-      const isiKontak = kontak.isiKontak === "" ? "N/A" : kontak.isiKontak;
-      const tautanKontak = kontak.tautanKontak === ""
-        ? "N/A"
-        : kontak.tautanKontak;
+      if (
+        kontak.jenisKontak === "" || kontak.isiKontak === "" ||
+        kontak.tautanKontak === ""
+      ) {
+        setUmkmPostMessage(
+          "Jenis kontak, Isi kontak, dan Tautan wajib diisi atau hapus informasi kontak",
+        );
+        setIsLoading(false);
+        return;
+      }
 
-      formData.append("jenis_kontak", jenisKontak);
-      formData.append("isi_kontak", isiKontak);
-      formData.append("tautan_kontak", tautanKontak);
+      formData.append("jenis_kontak", kontak.jenisKontak);
+      formData.append("isi_kontak", kontak.isiKontak);
+      formData.append("tautan_kontak", kontak.tautanKontak);
     }
 
     try {

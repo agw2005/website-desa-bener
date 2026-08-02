@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import Home from "./pages/Home.tsx";
 import Profil from "./pages/Profil.tsx";
@@ -13,6 +13,7 @@ import { loginLoader } from "./helpers/loginLoader.ts";
 import Manajemen from "./pages/Manajemen.tsx";
 import { manajemenLoader } from "./helpers/manajemenLoader.ts";
 import Artikel from "./pages/Artikel.tsx";
+import Umkm from "./pages/Umkm.tsx";
 
 const router = createBrowserRouter([
   { path: "/", element: <Home /> },
@@ -26,6 +27,8 @@ const router = createBrowserRouter([
   { path: "/manajemen", element: <Manajemen />, loader: manajemenLoader },
   { path: "/login", element: <Login />, loader: loginLoader },
   { path: "/pengumuman/:id", element: <Artikel /> },
+  { path: "/umkm/:id", element: <Umkm /> },
+  { path: "/umkm", loader: () => redirect("/wisata") },
 ]);
 
 function App() {

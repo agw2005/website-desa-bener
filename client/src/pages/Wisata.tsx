@@ -2,7 +2,6 @@ import TempatWisata from "../components/non-reusable/TempatWisata.tsx";
 import UmkmDesa from "../components/non-reusable/UmkmDesa.tsx";
 import Primitive from "../components/reusable/Primitive.tsx";
 import useAuth from "../hooks/useAuth.tsx";
-import type { Wisata } from "../types/Wisata.d.ts";
 
 const Wisata = () => {
   const { isLoggedIn } = useAuth();

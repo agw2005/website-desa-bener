@@ -11,6 +11,7 @@ const LABELS: Record<string, string> = {
   kalender: "Kalender",
   manajemen: "Manajemen",
   login: "Login",
+  umkm: "UMKM",
 };
 
 export const useBreadcrumbs = () => {

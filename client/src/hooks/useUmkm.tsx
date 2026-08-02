@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
+import type { UmkmDetail } from "../types/Umkm.d.ts";
 
-const useFetch = <T,>(url: string, param?: string | number) => {
-  const [data, setData] = useState<T[] | null>(null);
+const useUmkm = (id: number) => {
+  const [data, setData] = useState<UmkmDetail | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isError, setIsError] = useState<Error | null>(null);
   const [trigger, setTrigger] = useState(0);
@@ -13,17 +14,21 @@ const useFetch = <T,>(url: string, param?: string | number) => {
   useEffect(() => {
     const abortController = new AbortController();
     setIsLoading(true);
+    setIsError(null);
 
     const fetchData = async () => {
       try {
-        const response = await fetch(`${url}${param ? `/${param}` : ""}`, {
-          signal: abortController.signal,
-          cache: "no-cache",
-        });
+        const response = await fetch(
+          `http://${globalThis.location.hostname}:8000/umkm/${id}`,
+          {
+            signal: abortController.signal,
+            cache: "no-cache",
+          },
+        );
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        const responseJson: T[] = await response.json();
+        const responseJson: UmkmDetail = await response.json();
         setData(responseJson);
       } catch (err) {
         if (err instanceof Error && err.name === "AbortError") {
@@ -43,9 +48,9 @@ const useFetch = <T,>(url: string, param?: string | number) => {
     return () => {
       abortController.abort();
     };
-  }, [url, param, trigger]);
+  }, [id, trigger]);
 
   return { data, isLoading, isError, refetch };
 };
 
-export default useFetch;
+export default useUmkm;
