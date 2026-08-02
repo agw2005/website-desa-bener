@@ -4,7 +4,7 @@ import RoundedSection from "../components/reusable/RoundedSection.tsx";
 import useFetch from "../hooks/useFetch.tsx";
 import type { Dusun } from "../types/Dusun.d.ts";
 import Button from "../components/reusable/Button.tsx";
-import type { JoinedApbdes } from "../types/Apbdes.d.ts";
+import useApbdes from "../hooks/useApbdes.tsx";
 
 const Data = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -19,9 +19,7 @@ const Data = () => {
 
   const {
     data: apbdesTahun,
-  } = useFetch<JoinedApbdes>(
-    `http://${globalThis.location.hostname}:8000/apbdes/${selectedYear}`,
-  );
+  } = useApbdes(selectedYear);
 
   const totals = useMemo(() => {
     if (!dataSemuaDusun) return {} as Dusun;
@@ -62,26 +60,24 @@ const Data = () => {
                   +
                 </Button>
               </div>
-              <ul className="list-disc list-inside w-max">
-                {apbdesTahun?.length === 0
-                  ? `Tidak ada lampiran APBDes untuk tahun ${selectedYear}`
-                  : apbdesTahun && apbdesTahun.map((apbdes, index) => {
-                    return (
-                      <a
-                        href={`http://${globalThis.location.hostname}:8000/apbdes/file/${apbdes.apbdes_file_id}`}
-                      >
-                        <li
-                          key={index}
-                          className="font-bold text-blue-600 hover:text-blue-900 active:text-blue-700"
+              {apbdesTahun?.lampiran.length < 1
+                ? <p>Tidak ada lampiran untuk tahun {selectedYear}</p>
+                : (
+                  <ul className="list-disc list-inside w-max">
+                    {apbdesTahun?.lampiran.map((lampiran) => (
+                      <li key={lampiran.apbdes_file_id} className="font-bold">
+                        <a
+                          href={`http://${globalThis.location.hostname}:8000/apbdes/file/${lampiran.apbdes_file_id}`}
+                          className="text-blue-600 hover:text-blue-900 active:text-blue-700"
                         >
-                          ({(apbdes.besar_file / (1024 * 1024)).toFixed(2)} MB)
+                          ({(lampiran.besar_file / (1024 * 1024)).toFixed(2)}
                           {" "}
-                          {apbdes.nama_file}
-                        </li>
-                      </a>
-                    );
-                  })}
-              </ul>
+                          MB) {lampiran.nama_file}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                )}
             </div>
           </RoundedSection>
           <RoundedSection title="DATA UMUM">

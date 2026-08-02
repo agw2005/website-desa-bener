@@ -48,6 +48,7 @@ import {
   deleteArtikel,
   deleteKomentar,
   deleteLabel,
+  deleteLampiranApbdes,
   deleteMisi,
   deleteTempatWisata,
   deleteUmkm,
@@ -110,6 +111,7 @@ label
 
 apbdes
   .get("/file/:id", getApbdesFile)
+  .delete("/:id", deleteLampiranApbdes)
   .get("/:year", getApbdesAtYear)
   .post("/:year", postApbdesFileAtYear);
 

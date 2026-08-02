@@ -2,8 +2,7 @@ import { useState } from "react";
 import Button from "../reusable/Button.tsx";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
-import type { JoinedApbdes } from "../../types/Apbdes.d.ts";
-import useFetch from "../../hooks/useFetch.tsx";
+import useApbdes from "../../hooks/useApbdes.tsx";
 
 const ApbdesManager = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -18,9 +17,7 @@ const ApbdesManager = () => {
   const {
     data: apbdesTahun,
     refetch: refetchApbdesTahun,
-  } = useFetch<JoinedApbdes>(
-    `http://${globalThis.location.hostname}:8000/apbdes/${selectedYear}`,
-  );
+  } = useApbdes(selectedYear);
 
   const handleAddApbdesFile = async () => {
     if (!inputFile) return;
@@ -45,15 +42,22 @@ const ApbdesManager = () => {
     }
   };
 
+  const handleDeleteApbdes = async (id: number) => {
+    const response = await fetch(
+      `http://${globalThis.location.hostname}:8000/apbdes/${id}`,
+      { method: "DELETE" },
+    );
+    if (!response.ok) console.error(await response.json());
+    refetchApbdesTahun();
+  };
+
   return (
     <RoundedSection title="APBDes">
       <div className="flex flex-col gap-4">
         <div className="flex gap-2">
           <Button
             variant="black"
-            onClick={() => {
-              setSelectedYear((prev) => prev - 1);
-            }}
+            onClick={() => setSelectedYear((prev) => prev - 1)}
           >
             -
           </Button>
@@ -62,31 +66,35 @@ const ApbdesManager = () => {
           </div>
           <Button
             variant="black"
-            onClick={() => {
-              setSelectedYear((prev) => prev + 1);
-            }}
+            onClick={() => setSelectedYear((prev) => prev + 1)}
           >
             +
           </Button>
         </div>
-        <ul className="list-disc list-inside w-max">
-          {apbdesTahun && apbdesTahun.map((apbdes, index) => {
-            return (
-              <a
-                href={`http://${globalThis.location.hostname}:8000/apbdes/file/${apbdes.apbdes_file_id}`}
-                key={index}
-              >
-                <li
-                  key={index}
-                  className="font-bold text-blue-600 hover:text-blue-900 active:text-blue-700"
-                >
-                  ({(apbdes.besar_file / (1024 * 1024)).toFixed(2)} MB){" "}
-                  {apbdes.nama_file}
+        {apbdesTahun?.lampiran.length < 1
+          ? <p>Tidak ada lampiran untuk tahun {apbdesTahun?.tahun}</p>
+          : (
+            <ul className="list-disc list-inside w-max">
+              {apbdesTahun?.lampiran.map((lampiran) => (
+                <li key={lampiran.apbdes_file_id} className="font-bold">
+                  <a
+                    href={`http://${globalThis.location.hostname}:8000/apbdes/file/${lampiran.apbdes_file_id}`}
+                    className="text-blue-600 hover:text-blue-900 active:text-blue-700"
+                  >
+                    ({(lampiran.besar_file / (1024 * 1024)).toFixed(2)} MB){" "}
+                    {lampiran.nama_file}
+                  </a>
+                  <span
+                    className="text-red-600 hover:text-red-900 active:text-red-700 | mx-2 cursor-pointer"
+                    onClick={() =>
+                      handleDeleteApbdes(lampiran.apbdes_file_id)}
+                  >
+                    Hapus
+                  </span>
                 </li>
-              </a>
-            );
-          })}
-        </ul>
+              ))}
+            </ul>
+          )}
         <OneFileInput
           label="File"
           name="file-apbdes"

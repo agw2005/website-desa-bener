@@ -1,6 +1,39 @@
 import type { RouterContext } from "@oak/oak/router";
 import { pool } from "../dbpool.ts";
 
+export const deleteLampiranApbdes = async (ctx: RouterContext<"/:id">) => {
+  const id = Number(ctx.params.id);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "ID lampiran APBDes tidak valid." };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject(
+      "DELETE FROM Lampiran_Apbdes WHERE apbdes_file_id = $1",
+      [id],
+    );
+
+    if (result.rowCount === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: "Lampiran APBDes tidak ditemukan." };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = { message: "Lampiran APBDes berhasil dihapus." };
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menghapus lampiran APBDes." };
+  } finally {
+    connection.release();
+  }
+};
+
 export const deleteUmkm = async (ctx: RouterContext<"/:id">) => {
   const id = Number(ctx.params.id);
 

@@ -4,7 +4,7 @@ import type { Aparatur } from "../types/Aparatur.d.ts";
 import type { Dusun } from "../types/Dusun.d.ts";
 import type { Visi } from "../types/Visi.d.ts";
 import type { Misi } from "../types/Misi.d.ts";
-import type { JoinedApbdes } from "../types/Apbdes.d.ts";
+import type { ApbdesDetail } from "../types/Apbdes.d.ts";
 import { pool } from "../dbpool.ts";
 import { getExtension } from "../helpers/getExtension.ts";
 import { contentType } from "@std/media-types/content-type";
@@ -741,27 +741,52 @@ export const getMisi = async (ctx: RouterContext<"/">) => {
 export const getApbdesAtYear = async (ctx: RouterContext<"/:year">) => {
   const year = Number(ctx.params.year);
 
+  if (!Number.isInteger(year) || year <= 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Tahun tidak valid." };
+    return;
+  }
+
   const connection = await pool.connect();
-
-  const result = await connection.queryObject<JoinedApbdes>(
-    `
+  try {
+    const result = await connection.queryObject<ApbdesDetail>(
+      `
       SELECT
-        Apbdes.apbdes_id AS apbdes_id,
-        tahun,
-        apbdes_file_id,
-        nama_file,
-        besar_file
+        Apbdes.apbdes_id,
+        Apbdes.tahun,
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object(
+              'apbdes_file_id', Lampiran_Apbdes.apbdes_file_id,
+              'nama_file', Lampiran_Apbdes.nama_file,
+              'besar_file', Lampiran_Apbdes.besar_file
+            ))
+            FROM Lampiran_Apbdes
+            WHERE Lampiran_Apbdes.apbdes_id = Apbdes.apbdes_id
+          ),
+          '[]'
+        ) AS lampiran
       FROM Apbdes
-      LEFT JOIN Lampiran_Apbdes
-        ON Apbdes.apbdes_id = Lampiran_Apbdes.apbdes_id
-      WHERE Apbdes.tahun = $1;
-    `,
-    [year],
-  );
+      WHERE Apbdes.tahun = $1
+      `,
+      [year],
+    );
 
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+    // No Apbdes row yet for this year — not an error, just "nothing uploaded yet."
+    const item = result.rows[0] ??
+      { apbdes_id: null, tahun: year, lampiran: [] };
+
+    ctx.response.status = 200;
+    ctx.response.body = item;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = {
+      error: `Gagal mengambil data APBDes pada tahun ${year}.`,
+    };
+  } finally {
+    connection.release();
+  }
 };
 
 export const getApbdesFile = async (ctx: RouterContext<"/file/:id">) => {
