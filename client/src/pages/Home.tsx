@@ -65,6 +65,10 @@ const Home = () => {
                 className="rounded-2xl object-cover max-w-1/2 float-left mr-4 | transition duration-300 ease-in-out hover:brightness-75"
                 src={`http://${globalThis.location.hostname}:8000/artikel/thumbnail/${artikelTerbaru.artikel_id}`}
                 alt="foto-cover-artikel-terkini"
+                onError={(e) => {
+                  e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                  e.currentTarget.onerror = null;
+                }}
               />
             </Link>
             <div>

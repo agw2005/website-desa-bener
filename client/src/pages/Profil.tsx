@@ -151,6 +151,10 @@ const Profil = () => {
               src={`http://${globalThis.location.hostname}:8000/profil/peta` ||
                 "tidak-ada-gambar-box.png"}
               alt="peta-desa"
+              onError={(e) => {
+                e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                e.currentTarget.onerror = null;
+              }}
             />
           </RoundedSection>
           {profilDesa && (

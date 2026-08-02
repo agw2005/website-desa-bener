@@ -226,6 +226,10 @@ const ProfilDesaManager = () => {
                 src={previewPetaUrl}
                 alt="Pratinjau peta desa"
                 className="w-64 h-40 object-cover rounded shadow-sm"
+                onError={(e) => {
+                  e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                  e.currentTarget.onerror = null;
+                }}
               />
             </div>
           )}

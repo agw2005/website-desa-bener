@@ -145,6 +145,10 @@ const AparaturManager = () => {
                 src={previewFotoUrl}
                 alt="Pratinjau upload aparatur"
                 className="w-32 h-48 object-cover rounded shadow-sm"
+                onError={(e) => {
+                  e.currentTarget.src = "/tidak-ada-gambar-2x3.png";
+                  e.currentTarget.onerror = null;
+                }}
               />
             </div>
           )}

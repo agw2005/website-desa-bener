@@ -23,6 +23,10 @@ const ArticleSection = (
               src={`http://${globalThis.location.hostname}:8000/artikel/thumbnail/${articleId}`}
               alt={`Image for article ${title}`}
               className="w-full max-h-98 object-cover rounded-xl | transition duration-300 ease-in-out hover:brightness-75"
+              onError={(e) => {
+                e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                e.currentTarget.onerror = null;
+              }}
             />
           </Link>
           <Link

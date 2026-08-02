@@ -36,6 +36,10 @@ const Primitive = ({ children }: PrimitiveProps) => {
                 src="/logo-kabupaten-semarang.png"
                 alt="logo-desa-bener"
                 className="w-full h-full object-contain"
+                onError={(e) => {
+                  e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                  e.currentTarget.onerror = null;
+                }}
               />
             </div>
             <div className="flex flex-col">
@@ -128,6 +132,10 @@ const Primitive = ({ children }: PrimitiveProps) => {
                 className="w-full h-full object-contain p-4"
                 src="/logo-kabupaten-semarang.png"
                 alt="logo-desa-bener"
+                onError={(e) => {
+                  e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                  e.currentTarget.onerror = null;
+                }}
               />
             </div>
             <div className="flex flex-col gap-16">

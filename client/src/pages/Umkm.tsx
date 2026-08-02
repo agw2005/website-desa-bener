@@ -22,6 +22,10 @@ const Umkm = () => {
               src={`http://${globalThis.location.hostname}:8000/umkm/foto/${data.umkm_id}`}
               alt={`Gambar UMKM dengan ID ${data.umkm_id}`}
               className="h-max w-max max-h-128 max-w-1/2 float-left mr-4 rounded-2xl"
+              onError={(e) => {
+                e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                e.currentTarget.onerror = null;
+              }}
             />
             <div className="flex flex-col gap-4">
               <ul>

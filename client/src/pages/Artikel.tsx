@@ -19,6 +19,10 @@ const Artikel = () => {
             <img
               src={`http://${globalThis.location.hostname}:8000/artikel/thumbnail/${data.artikel_id}`}
               alt={`thumbnail-artikel-${data.artikel_id}`}
+              onError={(e) => {
+                e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                e.currentTarget.onerror = null;
+              }}
             />
             <h2 className="font-bold text-4xl">{data.judul}</h2>
             {data.labels.length > 0 && (
