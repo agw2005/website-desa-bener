@@ -17,6 +17,42 @@ import { Wisata } from "../types/Wisata.d.ts";
 import { Umkm, UmkmDetail } from "../types/Umkm.d.ts";
 import { Pelayanan, PelayananDetail } from "../types/Pelayanan.d.ts";
 
+export const getPelayananLengkap = async (ctx: RouterContext<"/lengkap">) => {
+  const connection = await pool.connect();
+  try {
+    const result = await connection.queryObject<PelayananDetail>(
+      `
+      SELECT
+        Pelayanan.pelayanan_id,
+        Pelayanan.judul,
+        COALESCE(
+          (
+            SELECT json_agg(json_build_object(
+              'syarat_pelayanan_id', Syarat_Pelayanan.syarat_pelayanan_id,
+              'isi', Syarat_Pelayanan.isi,
+              'tautan', Syarat_Pelayanan.tautan
+            ))
+            FROM Syarat_Pelayanan
+            WHERE Syarat_Pelayanan.pelayanan_id = Pelayanan.pelayanan_id
+          ),
+          '[]'
+        ) AS syarat
+      FROM Pelayanan
+      ORDER BY Pelayanan.pelayanan_id DESC
+      `,
+    );
+
+    ctx.response.status = 200;
+    ctx.response.body = result.rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data pelayanan." };
+  } finally {
+    connection.release();
+  }
+};
+
 export const getPelayananById = async (ctx: RouterContext<"/:id">) => {
   const id = Number(ctx.params.id);
 

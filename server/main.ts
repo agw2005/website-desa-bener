@@ -19,6 +19,7 @@ import {
   getMisi,
   getOneDusun,
   getPelayananById,
+  getPelayananLengkap,
   getPelayananList,
   getProfil,
   getProfilDesa,
@@ -91,6 +92,7 @@ syarat
   .delete("/:id", requireAuth, deleteSyaratPelayanan);
 
 pelayanan
+  .get("/lengkap", getPelayananLengkap)
   .post("/:id/syarat", requireAuth, postSyaratPelayanan)
   .get("/:id", getPelayananById)
   .delete("/:id", requireAuth, deletePelayanan)
