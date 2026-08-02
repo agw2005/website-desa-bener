@@ -65,7 +65,15 @@ const FIELD_LABELS: Record<NumericDusunField, string> = {
   ks_tiga_plus: "KS-3 Plus",
 };
 
-const DusunEditForm = ({ dusunId }: { dusunId: number }) => {
+interface DusunEditFormProps {
+  dusunId: number;
+  refetchDusun: () => void;
+  dusunSetter: React.Dispatch<React.SetStateAction<number | "">>;
+}
+
+const DusunEditForm = (
+  { dusunId, refetchDusun, dusunSetter }: DusunEditFormProps,
+) => {
   const { data: dusunRows } = useFetch<Dusun>(
     `http://${globalThis.location.hostname}:8000/dusun/${dusunId}`,
   );
@@ -117,6 +125,29 @@ const DusunEditForm = ({ dusunId }: { dusunId: number }) => {
     }
   };
 
+  const handleDelete = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+
+    try {
+      const response = await fetch(
+        `http://${globalThis.location.hostname}:8000/dusun/${dusunId}`,
+        { method: "DELETE" },
+      );
+
+      setSaveMessage(
+        response.ok ? "Dusun berhasil di hapus." : "Gagal menghapus dusun.",
+      );
+      refetchDusun();
+      dusunSetter("");
+    } catch (err) {
+      console.error(err);
+      setSaveMessage("Gagal menghapus dusun.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   if (!dusun) return <p>Memuat data dusun...</p>;
 
   return (
@@ -150,6 +181,9 @@ const DusunEditForm = ({ dusunId }: { dusunId: number }) => {
 
       <Button variant="black" onClick={handleSave} disabled={isSaving}>
         {isSaving ? "Menyimpan..." : "Simpan Perubahan"}
+      </Button>
+      <Button variant="red" onClick={handleDelete} disabled={isSaving}>
+        Hapus Dusun
       </Button>
       {saveMessage && <p className="font-semibold">{saveMessage}</p>}
     </div>

@@ -81,7 +81,12 @@ const DusunManager = () => {
             />
           )}
           {selectedDusun !== "" && (
-            <DusunEditForm key={selectedDusun} dusunId={selectedDusun} />
+            <DusunEditForm
+              key={selectedDusun}
+              dusunId={selectedDusun}
+              refetchDusun={refetchNamaDusun}
+              dusunSetter={setSelectedDusun}
+            />
           )}
         </div>
       </div>

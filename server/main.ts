@@ -46,6 +46,7 @@ import type { Next } from "@oak/oak/middleware";
 import {
   deleteAparatur,
   deleteArtikel,
+  deleteDusun,
   deleteKomentar,
   deleteLabel,
   deleteLampiranApbdes,
@@ -144,6 +145,7 @@ dusun
   .get("/nama", namaDusun)
   .get("/:id", getOneDusun)
   .patch("/:id", patchDusun)
+  .delete("/:id", deleteDusun)
   .post("/", postDusun)
   .get("/", getDusun);
 
