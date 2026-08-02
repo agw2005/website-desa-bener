@@ -7,11 +7,15 @@ import useApbdes from "../../hooks/useApbdes.tsx";
 const ApbdesManager = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
   const [inputFile, setInputFile] = useState<null | File>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isEmpty, setIsEmpty] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setIsLoading(true);
     const file = e.target.files?.[0];
     if (file) setInputFile(file);
     else setInputFile(null);
+    setIsLoading(false);
   };
 
   const {
@@ -20,7 +24,14 @@ const ApbdesManager = () => {
   } = useApbdes(selectedYear);
 
   const handleAddApbdesFile = async () => {
-    if (!inputFile) return;
+    setIsEmpty(false);
+    setIsLoading(true);
+
+    if (!inputFile) {
+      setIsLoading(false);
+      setIsEmpty(true);
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", inputFile);
@@ -39,16 +50,20 @@ const ApbdesManager = () => {
       }
     } catch (error) {
       console.error("Error submitting form:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDeleteApbdes = async (id: number) => {
+    setIsLoading(true);
     const response = await fetch(
       `http://${globalThis.location.hostname}:8000/apbdes/${id}`,
       { method: "DELETE" },
     );
     if (!response.ok) console.error(await response.json());
     refetchApbdesTahun();
+    setIsLoading(false);
   };
 
   return (
@@ -104,7 +119,14 @@ const ApbdesManager = () => {
           fileName={inputFile?.name}
           placeholder="Unggah dokumen APBDes"
         />
-        <Button variant="black" onClick={handleAddApbdesFile}>Lampirkan</Button>
+        <Button
+          variant="black"
+          onClick={handleAddApbdesFile}
+          disabled={isLoading}
+        >
+          {isLoading ? "Mohon ditunggu..." : "Lampirkan"}
+        </Button>
+        {isEmpty && <p className="font-bold">Belum melampirkan sebuah file</p>}
       </div>
     </RoundedSection>
   );
