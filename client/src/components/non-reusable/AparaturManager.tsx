@@ -220,7 +220,7 @@ const AparaturManager = () => {
                       handleDeleteAparatur(aparatur.aparatur_id)}
                     className="border border-black py-2 px-4 select-none bg-red-700 hover:bg-red-900 active:bg-red-600 text-white font-bold text-center cursor-pointer"
                   >
-                    Delete
+                    Hapus
                   </td>
                 </tr>
               ))}
