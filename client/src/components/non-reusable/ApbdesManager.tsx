@@ -74,6 +74,7 @@ const ApbdesManager = () => {
             return (
               <a
                 href={`http://${globalThis.location.hostname}:8000/apbdes/file/${apbdes.apbdes_file_id}`}
+                key={index}
               >
                 <li
                   key={index}
