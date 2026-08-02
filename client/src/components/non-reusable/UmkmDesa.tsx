@@ -140,7 +140,7 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
     subtitle: umkm.deskripsi,
     photo:
       `http://${globalThis.location.hostname}:8000/umkm/foto/${umkm.umkm_id}`,
-    link: `http://${globalThis.location.origin}/umkm/${umkm.umkm_id}`,
+    link: `/umkm/${umkm.umkm_id}`,
   })) ?? [];
 
   return (
