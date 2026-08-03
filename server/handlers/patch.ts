@@ -1,5 +1,6 @@
 import type { RouterContext } from "@oak/oak/router";
 import { pool } from "../dbpool.ts";
+import { safeDecodeURI } from "../helpers/safeDecodeURI.ts";
 
 export const patchDusun = async (ctx: RouterContext<"/:id">) => {
   const DUSUN_TEXT_FIELDS = ["nama"] as const;
@@ -155,7 +156,12 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
   for (const field of PROFIL_TEXT_FIELDS) {
     const value = form.get(field);
     if (typeof value === "string" && value.trim() !== "") {
-      addField(field, value.trim());
+      addField(
+        field,
+        field === "tautan_kalender"
+          ? safeDecodeURI(value.trim())
+          : value.trim(),
+      );
     }
   }
 
