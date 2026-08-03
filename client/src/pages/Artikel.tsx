@@ -13,12 +13,15 @@ const Artikel = () => {
   const { data } = useArticle(Number(params.id));
   const nav = useNavigate();
 
+  console.log(data);
+
   return (
     <Primitive>
       {data && (
         <div className="flex justify-center">
           <div className="flex flex-col gap-4 bg-amber-400 rounded-2xl p-8 max-w-4xl">
             <img
+              className="rounded-2xl"
               src={serverApi.get.artikel.thumbnail(data.artikel_id)}
               alt={`thumbnail-artikel-${data.artikel_id}`}
               onError={(e) => {
@@ -45,6 +48,21 @@ const Artikel = () => {
             <p className="text-justify whitespace-pre-line">
               {data.isi}
             </p>
+            <h3 className="font-bold text-3xl">Lampiran</h3>
+            {data.lampiran.map((l) => {
+              return (
+                <img
+                  key={l.lampiran_artikel_id}
+                  className="rounded-2xl"
+                  src={serverApi.get.artikel.attachment(l.lampiran_artikel_id)}
+                  alt={`thumbnail-artikel-${l.lampiran_artikel_id}`}
+                  onError={(e) => {
+                    e.currentTarget.src = "/tidak-ada-gambar-box.png";
+                    e.currentTarget.onerror = null;
+                  }}
+                />
+              );
+            })}
             {isLoggedIn && (
               <Button
                 variant="red"

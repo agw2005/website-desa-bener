@@ -4,94 +4,94 @@ const buildUrl = (path: string): string => `${serverRoot}${path}`;
 
 export const serverApi = {
   get: {
-    health: () => buildUrl("/"), // NOT USED BUT KEEP
-    verify: () => buildUrl("/verifikasi"), // USED (2)
+    health: () => buildUrl("/"),
+    verify: () => buildUrl("/verifikasi"),
     pelayanan: {
-      one: (id: number | string) => buildUrl(`/pelayanan/${id}`), // USED
-      all: () => buildUrl("/pelayanan/lengkap"), // USED (2)
+      one: (id: number | string) => buildUrl(`/pelayanan/${id}`),
+      all: () => buildUrl("/pelayanan/lengkap"),
     },
     umkm: {
-      one: (id: number | string) => buildUrl(`/umkm/${id}`), // USED
-      all: () => buildUrl("/umkm"), // USED
-      photo: (id: number | string) => buildUrl(`/umkm/foto/${id}`), // USED (2)
+      one: (id: number | string) => buildUrl(`/umkm/${id}`),
+      all: () => buildUrl("/umkm"),
+      photo: (id: number | string) => buildUrl(`/umkm/foto/${id}`),
     },
     wisata: {
-      photo: (id: number | string) => buildUrl(`/wisata/${id}`), // USED
-      all: () => buildUrl("/wisata"), // USED
+      photo: (id: number | string) => buildUrl(`/wisata/${id}`),
+      all: () => buildUrl("/wisata"),
     },
     komentar: {
-      all: () => buildUrl("/komentar"), // USED
+      all: () => buildUrl("/komentar"),
     },
     artikel: {
-      one: (id: number | string) => buildUrl(`/artikel/${id}`), // USED
-      all: () => buildUrl("/artikel"), // USED
-      latest: () => buildUrl("/artikel/terbaru"), // USED
-      thumbnail: (id: number | string) => buildUrl(`/artikel/thumbnail/${id}`), // USED (3)
-      attachments: (id: number | string) => buildUrl(`/artikel/lampiran/${id}`), // NOT USED (NOT IMPLEMENTED)
+      one: (id: number | string) => buildUrl(`/artikel/${id}`),
+      all: () => buildUrl("/artikel"),
+      latest: () => buildUrl("/artikel/terbaru"),
+      thumbnail: (id: number | string) => buildUrl(`/artikel/thumbnail/${id}`),
+      attachment: (id: number | string) => buildUrl(`/artikel/lampiran/${id}`),
     },
     label: {
-      all: () => buildUrl("/label"), // USED (2)
+      all: () => buildUrl("/label"),
     },
     apbdes: {
-      one: (year: number | string) => buildUrl(`/apbdes/${year}`), // USED
-      attachments: (id: number | string) => buildUrl(`/apbdes/file/${id}`), // USED (2)
+      one: (year: number | string) => buildUrl(`/apbdes/${year}`),
+      attachments: (id: number | string) => buildUrl(`/apbdes/file/${id}`),
     },
-    misi: () => buildUrl("/misi"), // USED (2)
-    visi: () => buildUrl("/visi"), // USED (2)
+    misi: () => buildUrl("/misi"),
+    visi: () => buildUrl("/visi"),
     aparatur: {
-      all: () => buildUrl("/aparatur"), // USED (3)
-      photo: (id: number | string) => buildUrl(`/aparatur/foto/${id}`), // USED (2)
+      all: () => buildUrl("/aparatur"),
+      photo: (id: number | string) => buildUrl(`/aparatur/foto/${id}`),
     },
     profil: {
-      all: () => buildUrl("/profil"), // USED
-      calendar: () => buildUrl("/profil/kalender"), // USED
-      map: () => buildUrl("/profil/peta"), // USED
-      data: () => buildUrl("/profil/data"), // USED
-      description: () => buildUrl("/profil/deskripsi"), // USED
+      all: () => buildUrl("/profil"),
+      calendar: () => buildUrl("/profil/kalender"),
+      map: () => buildUrl("/profil/peta"),
+      data: () => buildUrl("/profil/data"),
+      description: () => buildUrl("/profil/deskripsi"),
     },
     dusun: {
-      all: () => buildUrl("/dusun"), // USED (2)
-      one: (id: number | string) => buildUrl(`/dusun/${id}`), // USED
-      names: () => buildUrl("/dusun/nama"), // USED
+      all: () => buildUrl("/dusun"),
+      one: (id: number | string) => buildUrl(`/dusun/${id}`),
+      names: () => buildUrl("/dusun/nama"),
     },
   },
   post: {
     pelayanan: {
-      parent: () => buildUrl("/pelayanan"), // USED
-      children: (id: number | string) => buildUrl(`/pelayanan/${id}/syarat`), // USED
+      parent: () => buildUrl("/pelayanan"),
+      children: (id: number | string) => buildUrl(`/pelayanan/${id}/syarat`),
     },
-    umkm: () => buildUrl("/umkm"), // USED
-    wisata: () => buildUrl("/wisata"), // USED
-    komentar: () => buildUrl("/komentar"), // USED
-    artikel: () => buildUrl("/artikel"), // USED
-    label: (nama: string) => buildUrl(`/label?nama=${nama}`), // USED
-    apbdes: (year: number | string) => buildUrl(`/apbdes/${year}`), // USED
-    misi: () => buildUrl("/misi"), // USED
-    visi: () => buildUrl("/visi"), // USED
+    umkm: () => buildUrl("/umkm"),
+    wisata: () => buildUrl("/wisata"),
+    komentar: () => buildUrl("/komentar"),
+    artikel: () => buildUrl("/artikel"),
+    label: (nama: string) => buildUrl(`/label?nama=${nama}`),
+    apbdes: (year: number | string) => buildUrl(`/apbdes/${year}`),
+    misi: () => buildUrl("/misi"),
+    visi: () => buildUrl("/visi"),
     aparatur: {
-      new: () => buildUrl("/aparatur"), // USED
-      login: () => buildUrl("/aparatur/login"), // USED
+      new: () => buildUrl("/aparatur"),
+      login: () => buildUrl("/aparatur/login"),
     },
-    dusun: (nama: string) => buildUrl(`/dusun?nama=${nama}`), // USED
+    dusun: (nama: string) => buildUrl(`/dusun?nama=${nama}`),
   },
   delete: {
     pelayanan: {
-      syarat: (id: number | string) => buildUrl(`/syarat/${id}`), // USED
-      one: (id: number | string) => buildUrl(`/pelayanan/${id}`), // USED
+      syarat: (id: number | string) => buildUrl(`/syarat/${id}`),
+      one: (id: number | string) => buildUrl(`/pelayanan/${id}`),
     },
-    umkm: (id: number | string) => buildUrl(`/umkm/${id}`), // USED
-    wisata: (id: number | string) => buildUrl(`/wisata/${id}`), // USED
-    komentar: (id: number | string) => buildUrl(`/komentar/${id}`), // USED
-    artikel: (id: number | string) => buildUrl(`/artikel/${id}`), // USED
-    label: (id: number | string) => buildUrl(`/label/${id}`), // USED
-    apbdes: (id: number | string) => buildUrl(`/apbdes/${id}`), // USED
-    misi: (id: number | string) => buildUrl(`/misi/${id}`), // USED
-    visi: (id: number | string) => buildUrl(`/visi/${id}`), // USED
-    aparatur: (id: number | string) => buildUrl(`/aparatur/${id}`), // USED
-    dusun: (id: number | string) => buildUrl(`/dusun/${id}`), // USED
+    umkm: (id: number | string) => buildUrl(`/umkm/${id}`),
+    wisata: (id: number | string) => buildUrl(`/wisata/${id}`),
+    komentar: (id: number | string) => buildUrl(`/komentar/${id}`),
+    artikel: (id: number | string) => buildUrl(`/artikel/${id}`),
+    label: (id: number | string) => buildUrl(`/label/${id}`),
+    apbdes: (id: number | string) => buildUrl(`/apbdes/${id}`),
+    misi: (id: number | string) => buildUrl(`/misi/${id}`),
+    visi: (id: number | string) => buildUrl(`/visi/${id}`),
+    aparatur: (id: number | string) => buildUrl(`/aparatur/${id}`),
+    dusun: (id: number | string) => buildUrl(`/dusun/${id}`),
   },
   patch: {
-    profil: () => buildUrl("/profil"), // USED
-    dusun: (id: number | string) => buildUrl(`/dusun/${id}`), // USED
+    profil: () => buildUrl("/profil"),
+    dusun: (id: number | string) => buildUrl(`/dusun/${id}`),
   },
 };
