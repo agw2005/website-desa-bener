@@ -59,7 +59,7 @@ const Home = () => {
         <SimpleSection subtitle="ARTIKEL TERKINI">
           <div className="my-4 flow-root">
             <Link
-              to={`${globalThis.location.origin}/pengumuman/${artikelTerbaru.artikel_id}`}
+              to={`/pengumuman/${artikelTerbaru.artikel_id}`}
             >
               <img
                 className="rounded-2xl object-cover max-w-1/2 float-left mr-4 | transition duration-300 ease-in-out hover:brightness-75"
@@ -74,7 +74,7 @@ const Home = () => {
             <div>
               <div className="mb-4">
                 <Link
-                  to={`${globalThis.location.origin}/pengumuman/${artikelTerbaru.artikel_id}`}
+                  to={`/pengumuman/${artikelTerbaru.artikel_id}`}
                   className="font-bold text-2xl"
                 >
                   <h2 className="text-black hover:text-blue-900 active:text-blue-800">

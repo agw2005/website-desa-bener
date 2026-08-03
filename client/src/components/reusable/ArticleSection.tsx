@@ -31,7 +31,7 @@ const ArticleSection = (
             />
           </Link>
           <Link
-            to={`${globalThis.location.pathname}/${articleId}`}
+            to={`/pengumuman/${articleId}`}
             className="font-bold text-2xl"
           >
             <h2 className="text-black hover:text-blue-900 active:text-blue-800">
