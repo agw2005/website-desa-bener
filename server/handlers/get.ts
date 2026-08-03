@@ -750,7 +750,23 @@ export const getProfilDesa = async (ctx: RouterContext<"/data">) => {
   const result = await connection.queryObject<
     Omit<Profil, "deskripsi_sekilas" | "peta" | "tautan_kalender">
   >(
-    "SELECT kode_desa, kecamatan, kabupaten_kota, provinsi, tahun_pembentukan, luas, koordinat, tipologi, klasifikasi, kategori, batas_timur, batas_barat, batas_selatan batas_utara, sejarah FROM Profil LIMIT 1;",
+    `SELECT
+      kode_desa,
+      kecamatan,
+      kabupaten_kota,
+      provinsi,
+      tahun_pembentukan,
+      luas,
+      koordinat,
+      tipologi,
+      klasifikasi,
+      kategori,
+      batas_timur,
+      batas_barat,
+      batas_selatan,
+      batas_utara,
+      sejarah
+    FROM Profil LIMIT 1;`,
   );
 
   ctx.response.status = 200;
