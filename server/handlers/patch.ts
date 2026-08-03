@@ -152,15 +152,17 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
     paramIndex++;
   };
 
-  // Text fields: skip if missing OR empty string after trimming
   for (const field of PROFIL_TEXT_FIELDS) {
     const value = form.get(field);
-    if (typeof value === "string" && value.trim() !== "") {
+    if (typeof value === "string") {
+      const trimmed = value.trim();
       addField(
         field,
-        field === "tautan_kalender"
-          ? safeDecodeURI(value.trim())
-          : value.trim(),
+        trimmed === ""
+          ? null
+          : field === "tautan_kalender"
+          ? safeDecodeURI(trimmed)
+          : trimmed,
       );
     }
   }
