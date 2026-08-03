@@ -1,4 +1,5 @@
 import type { LoggedInInfo } from "../types/Login.d.ts";
+import { serverApi } from "./serverApi.ts";
 
 export const checkAuth = async (): Promise<null | LoggedInInfo> => {
   const storedToken = localStorage.getItem("local_token");
@@ -6,7 +7,7 @@ export const checkAuth = async (): Promise<null | LoggedInInfo> => {
 
   try {
     const response = await fetch(
-      `http://${globalThis.location.hostname}:8000/verifikasi`,
+      serverApi.get.verify(),
       {
         method: "GET",
         headers: { Authorization: `Bearer ${storedToken}` },

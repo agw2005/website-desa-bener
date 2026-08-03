@@ -12,6 +12,7 @@ import type { Label } from "../types/Label.d.ts";
 import type { ArtikelWithLabel } from "../types/Artikel.d.ts";
 import useAuth from "../hooks/useAuth.tsx";
 import { authFetch } from "../helpers/authFetch.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const Pengumuman = () => {
   const { isLoggedIn, authIsLoading: __, authInfo: _ } = useAuth();
@@ -28,9 +29,7 @@ const Pengumuman = () => {
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [labelFilter, setLabelFilter] = useState<number | "">("");
 
-  const { data: label } = useFetch<Label>(
-    `http://${globalThis.location.hostname}:8000/label`,
-  );
+  const { data: label } = useFetch<Label>(serverApi.get.label.all());
 
   const availableLabels = label
     ? label.filter(
@@ -80,7 +79,7 @@ const Pengumuman = () => {
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/artikel`,
+        serverApi.post.artikel(),
         { method: "POST", body: formData },
       );
 
@@ -118,7 +117,7 @@ const Pengumuman = () => {
 
     try {
       const url = new URL(
-        `http://${globalThis.location.hostname}:8000/artikel`,
+        serverApi.get.artikel.all(),
       );
       if (cursor !== null) url.searchParams.set("cursor", String(cursor));
       url.searchParams.set("limit", "9");

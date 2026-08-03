@@ -224,3 +224,13 @@ INSERT INTO Profil (
     NULL,
     NULL
 );
+
+INSERT INTO Aparatur (
+    nama,
+    jabatan,
+    kata_sandi
+) VALUES (
+    'Admin',
+    'Admin',
+    '1234567890'
+);

@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { ArtikelDetail } from "../types/Artikel.d.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const useArticle = (id?: number) => {
   const [data, setData] = useState<ArtikelDetail | null>(null);
@@ -19,9 +20,9 @@ const useArticle = (id?: number) => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/artikel/${
-            id !== undefined ? id : "terbaru"
-          }`,
+          id !== undefined
+            ? serverApi.get.artikel.one(id)
+            : serverApi.get.artikel.latest(),
           {
             signal: abortController.signal,
             cache: "no-cache",

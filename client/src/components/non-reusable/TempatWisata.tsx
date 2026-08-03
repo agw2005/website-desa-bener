@@ -7,6 +7,7 @@ import Button from "../reusable/Button.tsx";
 import type { Wisata } from "../../types/Wisata.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 interface TempatWisataProps {
   isLoggedIn: boolean;
@@ -27,12 +28,12 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
     data: rawWisata,
     refetch: refetchWisata,
   } = useFetch<Omit<Wisata, "foto">>(
-    `http://${globalThis.location.hostname}:8000/wisata`,
+    serverApi.get.wisata.all(),
   );
 
   const handleDeleteWisata = async (id: number) => {
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/wisata/${id}`,
+      serverApi.delete.wisata(id),
       { method: "DELETE" },
     );
     if (!response.ok) console.error(await response.json());
@@ -60,7 +61,7 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/wisata`,
+        serverApi.post.wisata(),
         { method: "POST", body: formData },
       );
 
@@ -86,8 +87,7 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
     id: wisata.wisata_id,
     title: wisata.nama,
     subtitle: wisata.deskripsi,
-    photo:
-      `http://${globalThis.location.hostname}:8000/wisata/${wisata.wisata_id}`,
+    photo: serverApi.get.wisata.photo(wisata.wisata_id),
   })) ?? [];
 
   return (

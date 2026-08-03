@@ -6,6 +6,7 @@ import type { Visi } from "../../types/Visi.d.ts";
 import type { Misi } from "../../types/Misi.d.ts";
 import Button from "../reusable/Button.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 const VisiMisiManager = () => {
   const [inputVisi, setInputVisi] = useState("");
@@ -13,16 +14,16 @@ const VisiMisiManager = () => {
   const [postMessage, setPostMessage] = useState("");
 
   const { data: visi, refetch: refetchVisi } = useFetch<Visi>(
-    `http://${globalThis.location.hostname}:8000/visi`,
+    serverApi.get.visi(),
   );
 
   const { data: misi, refetch: refetchMisi } = useFetch<Misi>(
-    `http://${globalThis.location.hostname}:8000/misi`,
+    serverApi.get.misi(),
   );
 
   const handleDelete = async (id: number, type: "visi" | "misi") => {
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/${type}/${id}`,
+      serverApi.delete[type](id),
       { method: "DELETE" },
     );
     if (!response.ok) console.error(await response.json());
@@ -41,7 +42,7 @@ const VisiMisiManager = () => {
     }
 
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/${type}`,
+      serverApi.post[type](),
       {
         method: "POST",
         body: JSON.stringify(payload),

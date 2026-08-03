@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { PelayananDetail } from "../types/Pelayanan.d.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const usePelayanan = (id: number) => {
   const [data, setData] = useState<PelayananDetail | null>(null);
@@ -17,7 +18,7 @@ const usePelayanan = (id: number) => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/pelayanan/${id}`,
+          serverApi.get.pelayanan.one(id),
           { signal: abortController.signal, cache: "no-cache" },
         );
         if (!response.ok) {

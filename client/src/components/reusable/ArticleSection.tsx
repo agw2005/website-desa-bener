@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { dateToText } from "../../helpers/dateToText.ts";
 import { Link } from "react-router";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 interface ArticleSectionProps {
   title: string;
@@ -17,10 +18,10 @@ const ArticleSection = (
       <div className="flex flex-col gap-4 bg-amber-300 p-8 rounded-3xl">
         <div className="flex flex-col gap-2">
           <Link
-            to={`http://${globalThis.location.hostname}:5173/pengumuman/${articleId}`}
+            to={`/pengumuman/${articleId}`}
           >
             <img
-              src={`http://${globalThis.location.hostname}:8000/artikel/thumbnail/${articleId}`}
+              src={serverApi.get.artikel.thumbnail(articleId)}
               alt={`Image for article ${title}`}
               className="w-full max-h-98 object-cover rounded-xl | transition duration-300 ease-in-out hover:brightness-75"
               onError={(e) => {

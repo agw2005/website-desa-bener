@@ -7,13 +7,14 @@ import TextInput from "../reusable/inputs/TextInput.tsx";
 import PasswordInput from "../reusable/inputs/PasswordInput.tsx";
 import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 const AparaturManager = () => {
   const {
     data: aparaturDesa,
     refetch: refetchAparaturDesa,
   } = useFetch<Omit<Aparatur, "kata_sandi" | "foto">>(
-    `http://${globalThis.location.hostname}:8000/aparatur`,
+    serverApi.get.aparatur.all(),
   );
 
   const [inputNamaAparatur, setInputNamaAparatur] = useState("");
@@ -75,7 +76,7 @@ const AparaturManager = () => {
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/aparatur`,
+        serverApi.post.aparatur.new(),
         { method: "POST", body: formData },
       );
 
@@ -92,7 +93,7 @@ const AparaturManager = () => {
 
   const handleDeleteAparatur = async (id: number) => {
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/aparatur/${id}`,
+      serverApi.delete.aparatur(id),
       { method: "DELETE" },
     );
     if (!response.ok) console.error(await response.json());

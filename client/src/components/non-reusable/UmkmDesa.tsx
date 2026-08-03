@@ -9,6 +9,7 @@ import useFetch from "../../hooks/useFetch.tsx";
 import DropdownInput from "../reusable/inputs/DropdownInput.tsx";
 import type { Dusun } from "../../types/Dusun.d.ts";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 interface UmkmDesaProps {
   isLoggedIn: boolean;
@@ -32,19 +33,19 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
   const {
     data: namaDusun,
   } = useFetch<Pick<Dusun, "dusun_id" | "nama">>(
-    `http://${globalThis.location.hostname}:8000/dusun/nama`,
+    serverApi.get.dusun.names(),
   );
 
   const {
     data: rawUmkm,
     refetch: refetchUmkm,
   } = useFetch<Omit<Umkm, "foto">>(
-    `http://${globalThis.location.hostname}:8000/umkm`,
+    serverApi.get.umkm.all(),
   );
 
   const handleDeleteUmkm = async (id: number) => {
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/umkm/${id}`,
+      serverApi.delete.umkm(id),
       { method: "DELETE" },
     );
     if (!response.ok) console.error(await response.json());
@@ -91,7 +92,7 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/umkm`,
+        serverApi.post.umkm(),
         { method: "POST", body: formData },
       );
 
@@ -142,8 +143,7 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
     id: umkm.umkm_id,
     title: umkm.nama,
     subtitle: umkm.deskripsi,
-    photo:
-      `http://${globalThis.location.hostname}:8000/umkm/foto/${umkm.umkm_id}`,
+    photo: serverApi.get.umkm.photo(umkm.umkm_id),
     link: `/umkm/${umkm.umkm_id}`,
   })) ?? [];
 

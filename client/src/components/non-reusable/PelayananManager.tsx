@@ -7,6 +7,7 @@ import useFetch from "../../hooks/useFetch.tsx";
 import type { Pelayanan } from "../../types/Pelayanan.d.ts";
 import { authFetch } from "../../helpers/authFetch.ts";
 import PelayananEditForm from "./PelayananEditForm.tsx";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 const PelayananManager = () => {
   const [inputJudulPelayanan, setInputJudulPelayanan] = useState("");
@@ -17,7 +18,7 @@ const PelayananManager = () => {
     data: pelayananList,
     refetch: refetchPelayananList,
   } = useFetch<Pelayanan>(
-    `http://${globalThis.location.hostname}:8000/pelayanan`,
+    serverApi.get.pelayanan.all(),
   );
 
   const handleAddPelayanan = async () => {
@@ -30,10 +31,9 @@ const PelayananManager = () => {
 
     const formData = new FormData();
     formData.append("judul", inputJudulPelayanan);
-    // no syarat rows at creation time — added afterward via PelayananEditForm
 
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/pelayanan`,
+      serverApi.post.pelayanan.parent(),
       { method: "POST", body: formData },
     );
 
@@ -47,7 +47,7 @@ const PelayananManager = () => {
 
   const handleDeletePelayanan = async (id: number) => {
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/pelayanan/${id}`,
+      serverApi.delete.pelayanan.one(id),
       { method: "DELETE" },
     );
     if (!response.ok) {

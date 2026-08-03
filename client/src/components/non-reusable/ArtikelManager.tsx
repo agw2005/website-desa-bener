@@ -4,6 +4,7 @@ import TextInput from "../reusable/inputs/TextInput.tsx";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import useFetch from "../../hooks/useFetch.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 const ArtikelManager = () => {
   const [inputLabel, setInputLabel] = useState("");
@@ -13,7 +14,7 @@ const ArtikelManager = () => {
     data: label,
     refetch: refetchLabel,
   } = useFetch<{ label_id: number; nama: string }>(
-    `http://${globalThis.location.hostname}:8000/label`,
+    serverApi.get.label.all(),
   );
 
   const handleAddLabel = async () => {
@@ -25,10 +26,8 @@ const ArtikelManager = () => {
     }
 
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/label?nama=${inputLabel}`,
-      {
-        method: "POST",
-      },
+      serverApi.post.label(inputLabel),
+      { method: "POST" },
     );
 
     if (response.ok) {
@@ -41,7 +40,7 @@ const ArtikelManager = () => {
 
   const handleDelete = async (id: number) => {
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/label/${id}`,
+      serverApi.delete.label(id),
       { method: "DELETE" },
     );
     if (!response.ok) console.error(await response.json());

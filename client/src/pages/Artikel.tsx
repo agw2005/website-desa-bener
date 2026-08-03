@@ -5,6 +5,7 @@ import { dateToText } from "../helpers/dateToText.ts";
 import Button from "../components/reusable/Button.tsx";
 import useAuth from "../hooks/useAuth.tsx";
 import { authFetch } from "../helpers/authFetch.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const Artikel = () => {
   const { isLoggedIn } = useAuth();
@@ -18,7 +19,7 @@ const Artikel = () => {
         <div className="flex justify-center">
           <div className="flex flex-col gap-4 bg-amber-400 rounded-2xl p-8 max-w-4xl">
             <img
-              src={`http://${globalThis.location.hostname}:8000/artikel/thumbnail/${data.artikel_id}`}
+              src={serverApi.get.artikel.thumbnail(data.artikel_id)}
               alt={`thumbnail-artikel-${data.artikel_id}`}
               onError={(e) => {
                 e.currentTarget.src = "/tidak-ada-gambar-box.png";
@@ -49,10 +50,8 @@ const Artikel = () => {
                 variant="red"
                 onClick={async () => {
                   await authFetch(
-                    `http://${globalThis.location.hostname}:8000/artikel/${data.artikel_id}`,
-                    {
-                      method: "DELETE",
-                    },
+                    serverApi.delete.artikel(data.artikel_id),
+                    { method: "DELETE" },
                   );
                   nav("/pengumuman");
                 }}

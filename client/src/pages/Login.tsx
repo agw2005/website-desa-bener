@@ -5,6 +5,7 @@ import TextInput from "../components/reusable/inputs/TextInput.tsx";
 import PasswordInput from "../components/reusable/inputs/PasswordInput.tsx";
 import { useNavigate } from "react-router";
 import type { LoginInfo } from "../types/Login.d.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Login = () => {
       };
       try {
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/aparatur/login`,
+          serverApi.post.aparatur.login(),
           {
             method: "POST",
             headers: {

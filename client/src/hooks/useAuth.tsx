@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { LoggedInInfo } from "../types/Login.d.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const useAuth = () => {
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
@@ -18,7 +19,7 @@ const useAuth = () => {
         }
 
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/verifikasi`,
+          serverApi.get.verify(),
           {
             method: "GET",
             headers: {

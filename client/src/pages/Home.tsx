@@ -7,6 +7,7 @@ import type { Aparatur } from "../types/Aparatur.d.ts";
 import { Link } from "react-router";
 import { dateToText } from "../helpers/dateToText.ts";
 import useArticle from "../hooks/useArticle.tsx";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const Home = () => {
   const {
@@ -14,7 +15,7 @@ const Home = () => {
     isLoading: _profilSekilasIsLoading,
     isError: _profilSekilasIsError,
   } = useFetch<DeskripsiSekilas>(
-    `http://${globalThis.location.hostname}:8000/profil/deskripsi`,
+    serverApi.get.profil.description(),
   );
 
   const {
@@ -22,15 +23,14 @@ const Home = () => {
     isLoading: _aparaturDesaIsLoading,
     isError: _aparaturDesaIsError,
   } = useFetch<Omit<Aparatur, "kata_sandi" | "foto">>(
-    `http://${globalThis.location.hostname}:8000/aparatur`,
+    serverApi.get.aparatur.all(),
   );
 
   const aparaturItems = aparaturDesa?.map((aparatur) => ({
     id: aparatur.aparatur_id,
     title: aparatur.nama,
     subtitle: aparatur.jabatan,
-    photo:
-      `http://${globalThis.location.hostname}:8000/aparatur/foto/${aparatur.aparatur_id}`,
+    photo: serverApi.get.aparatur.photo(aparatur.aparatur_id),
   })) ?? [];
 
   const { data: artikelTerbaru } = useArticle();
@@ -63,7 +63,7 @@ const Home = () => {
             >
               <img
                 className="rounded-2xl object-cover max-w-1/2 float-left mr-4 | transition duration-300 ease-in-out hover:brightness-75"
-                src={`http://${globalThis.location.hostname}:8000/artikel/thumbnail/${artikelTerbaru.artikel_id}`}
+                src={serverApi.get.artikel.thumbnail(artikelTerbaru.artikel_id)}
                 alt="foto-cover-artikel-terkini"
                 onError={(e) => {
                   e.currentTarget.src = "/tidak-ada-gambar-box.png";

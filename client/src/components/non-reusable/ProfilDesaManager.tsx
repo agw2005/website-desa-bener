@@ -7,6 +7,7 @@ import useFetch from "../../hooks/useFetch.tsx";
 import type { Profil } from "../../types/Profil.d.ts";
 import TextAreaInput from "../reusable/inputs/TextAreaInput.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 type ProfilTextField = Exclude<
   keyof Profil,
@@ -74,7 +75,7 @@ const ProfilDesaManager = () => {
   const { data: profilRows, refetch: refetchProfil } = useFetch<
     Omit<Profil, "peta">
   >(
-    `http://${globalThis.location.hostname}:8000/profil`,
+    serverApi.get.profil.all(),
   );
   const profil = profilRows?.[0] ?? null;
 
@@ -137,7 +138,7 @@ const ProfilDesaManager = () => {
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/profil`,
+        serverApi.patch.profil(),
         { method: "PATCH", body: formData },
       );
 

@@ -1,10 +1,11 @@
 import Primitive from "../components/reusable/Primitive.tsx";
+import { serverApi } from "../helpers/serverApi.ts";
 import useFetch from "../hooks/useFetch.tsx";
 import type { Profil } from "../types/Profil.d.ts";
 
 const Kalender = () => {
   const { data: tautanKalender } = useFetch<Pick<Profil, "tautan_kalender">>(
-    `http://${globalThis.location.hostname}:8000/profil/kalender`,
+    serverApi.get.profil.calendar(),
   );
 
   const kalenderId = tautanKalender?.[0]?.tautan_kalender;

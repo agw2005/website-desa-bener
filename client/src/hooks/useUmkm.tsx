@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import type { UmkmDetail } from "../types/Umkm.d.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const useUmkm = (id: number) => {
   const [data, setData] = useState<UmkmDetail | null>(null);
@@ -19,7 +20,7 @@ const useUmkm = (id: number) => {
     const fetchData = async () => {
       try {
         const response = await fetch(
-          `http://${globalThis.location.hostname}:8000/umkm/${id}`,
+          serverApi.get.umkm.one(id),
           {
             signal: abortController.signal,
             cache: "no-cache",

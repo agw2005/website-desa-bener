@@ -5,6 +5,7 @@ import useFetch from "../hooks/useFetch.tsx";
 import type { Dusun } from "../types/Dusun.d.ts";
 import Button from "../components/reusable/Button.tsx";
 import useApbdes from "../hooks/useApbdes.tsx";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const Data = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -13,9 +14,7 @@ const Data = () => {
     data: dataSemuaDusun,
     isLoading: _dataSemuaDusunIsLoading,
     isError: _dataSemuaDusunIsError,
-  } = useFetch<Dusun>(
-    `http://${globalThis.location.hostname}:8000/dusun`,
-  );
+  } = useFetch<Dusun>(serverApi.get.dusun.all());
 
   const {
     data: apbdesTahun,
@@ -67,7 +66,9 @@ const Data = () => {
                     {apbdesTahun?.lampiran.map((lampiran) => (
                       <li key={lampiran.apbdes_file_id} className="font-bold">
                         <a
-                          href={`http://${globalThis.location.hostname}:8000/apbdes/file/${lampiran.apbdes_file_id}`}
+                          href={serverApi.get.apbdes.attachments(
+                            lampiran.apbdes_file_id,
+                          )}
                           className="text-blue-600 hover:text-blue-900 active:text-blue-700"
                         >
                           ({(lampiran.besar_file / (1024 * 1024)).toFixed(2)}

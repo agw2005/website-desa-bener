@@ -1,11 +1,12 @@
 import Primitive from "../components/reusable/Primitive.tsx";
 import RoundedSection from "../components/reusable/RoundedSection.tsx";
+import { serverApi } from "../helpers/serverApi.ts";
 import useFetch from "../hooks/useFetch.tsx";
 import type { PelayananDetail } from "../types/Pelayanan.d.ts";
 
 const Layanan = () => {
   const { data: pelayananList } = useFetch<PelayananDetail>(
-    `http://${globalThis.location.hostname}:8000/pelayanan/lengkap`,
+    serverApi.get.pelayanan.all(),
   );
 
   return (

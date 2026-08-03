@@ -20,7 +20,6 @@ import {
   getOneDusun,
   getPelayananById,
   getPelayananLengkap,
-  getPelayananList,
   getProfil,
   getProfilDesa,
   getTempatWisata,
@@ -96,7 +95,6 @@ pelayanan
   .post("/:id/syarat", requireAuth, postSyaratPelayanan)
   .get("/:id", getPelayananById)
   .delete("/:id", requireAuth, deletePelayanan)
-  .get("/", getPelayananList)
   .post("/", requireAuth, postPelayanan);
 
 umkm

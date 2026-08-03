@@ -4,12 +4,13 @@ import useUmkm from "../hooks/useUmkm.tsx";
 import Button from "../components/reusable/Button.tsx";
 import useFetch from "../hooks/useFetch.tsx";
 import type { Dusun } from "../types/Dusun.d.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const Umkm = () => {
   const params = useParams();
   const { data } = useUmkm(Number(params.id));
   const { data: dusun } = useFetch<Dusun>(
-    `http://${globalThis.location.hostname}:8000/dusun`,
+    serverApi.get.dusun.all(),
     data?.dusun_id,
   );
 
@@ -19,7 +20,7 @@ const Umkm = () => {
         {data && (
           <div className="bg-amber-300 p-8 rounded-3xl flow-root">
             <img
-              src={`http://${globalThis.location.hostname}:8000/umkm/foto/${data.umkm_id}`}
+              src={serverApi.get.umkm.photo(data.umkm_id)}
               alt={`Gambar UMKM dengan ID ${data.umkm_id}`}
               className="h-max w-max max-h-128 max-w-1/2 float-left mr-4 rounded-2xl"
               onError={(e) => {

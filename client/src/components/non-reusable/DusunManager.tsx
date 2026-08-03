@@ -7,6 +7,7 @@ import useFetch from "../../hooks/useFetch.tsx";
 import DusunEditForm from "./DusunEditForm.tsx";
 import type { Dusun } from "../../types/Dusun.d.ts";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 const DusunManager = () => {
   const [inputNamaDusun, setInputNamaDusun] = useState("");
@@ -17,7 +18,7 @@ const DusunManager = () => {
     data: namaDusun,
     refetch: refetchNamaDusun,
   } = useFetch<Pick<Dusun, "dusun_id" | "nama">>(
-    `http://${globalThis.location.hostname}:8000/dusun/nama`,
+    serverApi.get.dusun.names(),
   );
 
   const handleAddDusun = async () => {
@@ -29,10 +30,8 @@ const DusunManager = () => {
     }
 
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/dusun?nama=${inputNamaDusun}`,
-      {
-        method: "POST",
-      },
+      serverApi.post.dusun(inputNamaDusun),
+      { method: "POST" },
     );
 
     if (response.ok) {

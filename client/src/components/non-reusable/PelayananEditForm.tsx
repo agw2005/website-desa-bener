@@ -3,6 +3,7 @@ import TextInput from "../reusable/inputs/TextInput.tsx";
 import Button from "../reusable/Button.tsx";
 import usePelayanan from "../../hooks/usePelayanan.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 interface PelayananEditFormProps {
   pelayananId: number;
@@ -34,7 +35,7 @@ const PelayananEditForm = (
     formData.append("tautan", inputTautanSyarat);
 
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/pelayanan/${pelayananId}/syarat`,
+      serverApi.post.pelayanan.children(pelayananId),
       { method: "POST", body: formData },
     );
 
@@ -51,7 +52,7 @@ const PelayananEditForm = (
 
   const handleDeleteSyarat = async (syaratId: number) => {
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/syarat/${syaratId}`,
+      serverApi.delete.pelayanan.syarat(syaratId),
       { method: "DELETE" },
     );
     if (!response.ok) console.error(await response.json());

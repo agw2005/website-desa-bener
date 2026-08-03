@@ -4,6 +4,7 @@ import useFetch from "../../hooks/useFetch.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";
 import Button from "../reusable/Button.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 type NumericDusunField = Exclude<keyof Dusun, "dusun_id" | "nama">;
 
@@ -76,7 +77,7 @@ const DusunEditForm = (
   { dusunId, refetchDusun, dusunSetter }: DusunEditFormProps,
 ) => {
   const { data: dusunRows } = useFetch<Dusun>(
-    `http://${globalThis.location.hostname}:8000/dusun/${dusunId}`,
+    serverApi.get.dusun.one(dusunId),
   );
   const dusun = dusunRows?.[0] ?? null;
 
@@ -105,7 +106,7 @@ const DusunEditForm = (
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/dusun/${dusunId}`,
+        serverApi.patch.dusun(dusunId),
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -132,7 +133,7 @@ const DusunEditForm = (
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/dusun/${dusunId}`,
+        serverApi.delete.dusun(dusunId),
         { method: "DELETE" },
       );
 

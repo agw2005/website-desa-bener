@@ -15,7 +15,7 @@ import { bigintToNumber } from "../helpers/bigintToNumber.ts";
 import { fetchArtikelDetailById } from "../helpers/fetchArtikelDetailById.ts";
 import { Wisata } from "../types/Wisata.d.ts";
 import { Umkm, UmkmDetail } from "../types/Umkm.d.ts";
-import { Pelayanan, PelayananDetail } from "../types/Pelayanan.d.ts";
+import { PelayananDetail } from "../types/Pelayanan.d.ts";
 
 export const getPelayananLengkap = async (ctx: RouterContext<"/lengkap">) => {
   const connection = await pool.connect();
@@ -95,24 +95,6 @@ export const getPelayananById = async (ctx: RouterContext<"/:id">) => {
 
     ctx.response.status = 200;
     ctx.response.body = result.rows[0];
-  } catch (err) {
-    console.error(err);
-    ctx.response.status = 500;
-    ctx.response.body = { error: "Gagal mengambil data pelayanan." };
-  } finally {
-    connection.release();
-  }
-};
-
-export const getPelayananList = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
-  try {
-    const result = await connection.queryObject<Pelayanan>(
-      "SELECT pelayanan_id, judul FROM Pelayanan ORDER BY pelayanan_id DESC",
-    );
-
-    ctx.response.status = 200;
-    ctx.response.body = result.rows;
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;

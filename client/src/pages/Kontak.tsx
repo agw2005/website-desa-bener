@@ -12,6 +12,7 @@ import type { Komentar } from "../types/Komentar.d.ts";
 import TextAreaInput from "../components/reusable/inputs/TextAreaInput.tsx";
 import useAuth from "../hooks/useAuth.tsx";
 import { authFetch } from "../helpers/authFetch.ts";
+import { serverApi } from "../helpers/serverApi.ts";
 
 const Kontak = () => {
   const { isLoggedIn, authIsLoading: __, authInfo: _ } = useAuth();
@@ -38,16 +39,14 @@ const Kontak = () => {
     isLoading: _aparaturDesaIsLoading,
     isError: _aparaturDesaIsError,
   } = useFetch<Omit<Aparatur, "kata_sandi" | "foto">>(
-    `http://${globalThis.location.hostname}:8000/aparatur`,
+    serverApi.get.aparatur.all(),
   );
 
   const fetchKomentarPage = async (cursor: number | null) => {
     setIsLoadingKomentar(true);
 
     try {
-      const url = new URL(
-        `http://${globalThis.location.hostname}:8000/komentar`,
-      );
+      const url = new URL(serverApi.get.komentar.all());
       if (cursor !== null) url.searchParams.set("cursor", String(cursor));
       url.searchParams.set("limit", "10");
 
@@ -112,7 +111,7 @@ const Kontak = () => {
 
     try {
       const response = await fetch(
-        `http://${globalThis.location.hostname}:8000/komentar`,
+        serverApi.post.komentar(),
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -146,7 +145,7 @@ const Kontak = () => {
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/komentar/${id}`,
+        serverApi.delete.komentar(id),
         { method: "DELETE" },
       );
 
@@ -177,9 +176,9 @@ const Kontak = () => {
                   name={aparaturDesa[indexAparaturDesa]?.nama}
                   position={aparaturDesa[indexAparaturDesa]?.jabatan}
                   phone={aparaturDesa[indexAparaturDesa]?.telepon}
-                  photo={`http://${globalThis.location.hostname}:8000/aparatur/foto/${
-                    aparaturDesa[indexAparaturDesa]?.aparatur_id
-                  }`}
+                  photo={serverApi.get.aparatur.photo(
+                    aparaturDesa[indexAparaturDesa]?.aparatur_id,
+                  )}
                 />
                 <p>{indexAparaturDesa + 1}/{aparaturDesa.length}</p>
                 <div className="flex justify-around w-full self-stretch">

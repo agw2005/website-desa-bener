@@ -4,6 +4,7 @@ import RoundedSection from "../reusable/RoundedSection.tsx";
 import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
 import useApbdes from "../../hooks/useApbdes.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
+import { serverApi } from "../../helpers/serverApi.ts";
 
 const ApbdesManager = () => {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
@@ -39,7 +40,7 @@ const ApbdesManager = () => {
 
     try {
       const response = await authFetch(
-        `http://${globalThis.location.hostname}:8000/apbdes/${selectedYear}`,
+        serverApi.post.apbdes(selectedYear),
         { method: "POST", body: formData },
       );
 
@@ -59,7 +60,7 @@ const ApbdesManager = () => {
   const handleDeleteApbdes = async (id: number) => {
     setIsLoading(true);
     const response = await authFetch(
-      `http://${globalThis.location.hostname}:8000/apbdes/${id}`,
+      serverApi.delete.apbdes(id),
       { method: "DELETE" },
     );
     if (!response.ok) console.error(await response.json());
@@ -94,7 +95,9 @@ const ApbdesManager = () => {
               {apbdesTahun?.lampiran.map((lampiran) => (
                 <li key={lampiran.apbdes_file_id} className="font-bold">
                   <a
-                    href={`http://${globalThis.location.hostname}:8000/apbdes/file/${lampiran.apbdes_file_id}`}
+                    href={serverApi.get.apbdes.attachments(
+                      lampiran.apbdes_file_id,
+                    )}
                     className="text-blue-600 hover:text-blue-900 active:text-blue-700"
                   >
                     ({(lampiran.besar_file / (1024 * 1024)).toFixed(2)} MB){" "}
