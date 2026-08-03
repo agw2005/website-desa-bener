@@ -180,7 +180,8 @@ root
   .use("/komentar", komentar.routes(), komentar.allowedMethods())
   .use("/wisata", wisata.routes(), wisata.allowedMethods())
   .use("/umkm", umkm.routes(), umkm.allowedMethods())
-  .use("/pelayanan", pelayanan.routes(), pelayanan.allowedMethods());
+  .use("/pelayanan", pelayanan.routes(), pelayanan.allowedMethods())
+  .use("/syarat", syarat.routes(), syarat.allowedMethods());
 
 app
   .use(async (ctx, next: Next) => {
