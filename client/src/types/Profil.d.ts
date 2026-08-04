@@ -3,7 +3,7 @@ export interface DeskripsiSekilas {
 }
 
 export interface ProfilDesaData {
-  kode_desa: number;
+  kode_desa: string;
   kecamatan: string;
   kabupaten_kota: string;
   provinsi: string;
@@ -23,7 +23,7 @@ export interface ProfilDesaData {
 export interface Profil {
   profil_id: number;
   deskripsi_sekilas: string;
-  kode_desa: number;
+  kode_desa: string;
   kecamatan: string;
   kabupaten_kota: string;
   provinsi: string;

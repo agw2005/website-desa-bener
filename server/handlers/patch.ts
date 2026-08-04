@@ -122,6 +122,7 @@ export const patchDusun = async (ctx: RouterContext<"/:id">) => {
 export const patchProfil = async (ctx: RouterContext<"/">) => {
   const PROFIL_TEXT_FIELDS = [
     "deskripsi_sekilas",
+    "kode_desa",
     "kecamatan",
     "kabupaten_kota",
     "provinsi",
@@ -137,7 +138,7 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
     "tautan_kalender",
   ] as const;
 
-  const PROFIL_INT_FIELDS = ["kode_desa", "tahun_pembentukan"] as const;
+  const PROFIL_INT_FIELDS = ["tahun_pembentukan"] as const;
   const PROFIL_DECIMAL_FIELDS = ["luas"] as const;
 
   const form = await ctx.request.body.formData();

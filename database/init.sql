@@ -97,7 +97,7 @@ CREATE TABLE Dusun (
 CREATE TABLE Profil (
     profil_id INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     deskripsi_sekilas TEXT,
-    kode_desa INT,
+    kode_desa TEXT,
     kecamatan TEXT,
     kabupaten_kota TEXT,
     provinsi TEXT,
