@@ -42,6 +42,10 @@ const Kontak = () => {
     serverApi.get.aparatur.all(),
   );
 
+  const filteredAparaturDesa = aparaturDesa?.filter((aparatur) =>
+    aparatur.nama !== "Admin"
+  );
+
   const fetchKomentarPage = async (cursor: number | null) => {
     setIsLoadingKomentar(true);
 
@@ -167,27 +171,27 @@ const Kontak = () => {
       <div className="flex flex-col gap-8 px-32">
         <div className="flex gap-8">
           <div className="flex flex-col flex-1 gap-8">
-            {aparaturDesa && (
+            {aparaturDesa && filteredAparaturDesa && (
               <RoundedSection
                 title={`APARATUR DESA`}
                 contentClassName="flex flex-col gap-3 items-center"
               >
                 <AparaturDesa
-                  name={aparaturDesa[indexAparaturDesa]?.nama}
-                  position={aparaturDesa[indexAparaturDesa]?.jabatan}
-                  phone={aparaturDesa[indexAparaturDesa]?.telepon}
+                  name={filteredAparaturDesa[indexAparaturDesa]?.nama}
+                  position={filteredAparaturDesa[indexAparaturDesa]?.jabatan}
+                  phone={filteredAparaturDesa[indexAparaturDesa]?.telepon}
                   photo={serverApi.get.aparatur.photo(
-                    aparaturDesa[indexAparaturDesa]?.aparatur_id,
+                    filteredAparaturDesa[indexAparaturDesa]?.aparatur_id,
                   )}
                 />
-                <p>{indexAparaturDesa + 1}/{aparaturDesa.length}</p>
+                <p>{indexAparaturDesa + 1}/{filteredAparaturDesa.length}</p>
                 <div className="flex justify-around w-full self-stretch">
                   <Button
                     variant="black"
                     onClick={() => {
                       indexAparaturDesa < 1
                         ? setIndexAparaturDesa((_prev) =>
-                          aparaturDesa.length - 1
+                          filteredAparaturDesa.length - 1
                         )
                         : setIndexAparaturDesa((prev) => prev - 1);
                     }}
@@ -197,7 +201,7 @@ const Kontak = () => {
                   <Button
                     variant="black"
                     onClick={() => {
-                      indexAparaturDesa === aparaturDesa.length - 1
+                      indexAparaturDesa === filteredAparaturDesa.length - 1
                         ? setIndexAparaturDesa((_prev) => 0)
                         : setIndexAparaturDesa((prev) => prev + 1);
                     }}

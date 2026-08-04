@@ -277,6 +277,12 @@ export const deleteLabel = async (ctx: RouterContext<"/:id">) => {
 export const deleteAparatur = async (ctx: RouterContext<"/:id">) => {
   const id = Number(ctx.params.id);
 
+  if (id === 1) {
+    ctx.response.status = 403;
+    ctx.response.body = { error: "Tidak bisa menghapus admin." };
+    return;
+  }
+
   const connection = await pool.connect();
   try {
     const result = await connection.queryObject(

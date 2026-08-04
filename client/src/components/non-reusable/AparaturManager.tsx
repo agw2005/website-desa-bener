@@ -210,26 +210,28 @@ const AparaturManager = () => {
               </tr>
             </thead>
             <tbody>
-              {aparaturDesa?.map((aparatur, index) => (
-                <tr key={aparatur.aparatur_id} className="border">
-                  <td className="border border-black py-2 px-4 text-center">
-                    {index + 1}
-                  </td>
-                  <td className="border border-black py-2 px-4 font-medium">
-                    {aparatur.nama}
-                  </td>
-                  <td className="border border-black py-2 px-4">
-                    {aparatur.jabatan}
-                  </td>
-                  <td
-                    onClick={() =>
-                      handleDeleteAparatur(aparatur.aparatur_id)}
-                    className="border border-black py-2 px-4 select-none bg-red-700 hover:bg-red-900 active:bg-red-600 text-white font-bold text-center cursor-pointer"
-                  >
-                    Hapus
-                  </td>
-                </tr>
-              ))}
+              {aparaturDesa
+                ?.filter((aparatur) => aparatur.nama !== "Admin")
+                .map((aparatur, index) => (
+                  <tr key={aparatur.aparatur_id} className="border">
+                    <td className="border border-black py-2 px-4 text-center">
+                      {index + 1}
+                    </td>
+                    <td className="border border-black py-2 px-4 font-medium">
+                      {aparatur.nama}
+                    </td>
+                    <td className="border border-black py-2 px-4">
+                      {aparatur.jabatan}
+                    </td>
+                    <td
+                      onClick={() =>
+                        handleDeleteAparatur(aparatur.aparatur_id)}
+                      className="border border-black py-2 px-4 select-none bg-red-700 hover:bg-red-900 active:bg-red-600 text-white font-bold text-center cursor-pointer"
+                    >
+                      Hapus
+                    </td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </div>
