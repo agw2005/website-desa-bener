@@ -11,11 +11,12 @@ const Layanan = () => {
 
   return (
     <Primitive>
-      <div className="flex flex-col gap-8 px-32">
+      <div className="flex flex-col gap-8 items-center">
         {pelayananList?.map((pelayanan) => (
           <RoundedSection
             key={pelayanan.pelayanan_id}
             title={pelayanan.judul}
+            titleClassName="max-w-7/8"
           >
             {pelayanan.syarat.length > 0
               ? (
