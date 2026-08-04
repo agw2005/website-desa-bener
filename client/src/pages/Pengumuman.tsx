@@ -28,6 +28,7 @@ const Pengumuman = () => {
   const [isLoadingArtikel, setIsLoadingArtikel] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [labelFilter, setLabelFilter] = useState<number | "">("");
+  const [postIsLoading, setPostIsLoading] = useState(false);
 
   const { data: label } = useFetch<Label>(serverApi.get.label.all());
 
@@ -57,11 +58,13 @@ const Pengumuman = () => {
   };
 
   const handleSubmit = async () => {
+    setPostIsLoading(true);
     setRequiredInputIsEmpty(false);
     setSuccess(false);
 
     if (judulArtikelBaru.trim() === "" || isiArtikelBaru.trim() === "") {
       setRequiredInputIsEmpty(true);
+      setPostIsLoading(false);
       return;
     }
 
@@ -95,6 +98,8 @@ const Pengumuman = () => {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setPostIsLoading(false);
     }
   };
 
@@ -226,6 +231,7 @@ const Pengumuman = () => {
                           className="leading-none hover:text-red-400"
                           aria-label={`Hapus label ${l.nama}`}
                           variant="red"
+                          disabled={postIsLoading}
                         >
                           Hapus
                         </Button>
@@ -236,8 +242,13 @@ const Pengumuman = () => {
               </div>
             )}
             <div className="flex gap-2">
-              <Button variant="black" className="w-max" onClick={handleSubmit}>
-                Unggah Artikel
+              <Button
+                variant="black"
+                className="w-max"
+                onClick={handleSubmit}
+                disabled={postIsLoading}
+              >
+                {postIsLoading ? "Mohon ditunggu..." : "Unggah Artikel"}
               </Button>
               {requiredInputIsEmpty && (
                 <div className="bg-red-500 text-white font-bold px-4 py-2 w-max rounded-2xl">
