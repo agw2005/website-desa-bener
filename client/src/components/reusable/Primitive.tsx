@@ -149,8 +149,22 @@ const Primitive = ({ children }: PrimitiveProps) => {
               <div className="text-center text-white text-xs px-12">
                 Website resmi Desa Bener untuk informasi publik, layanan
                 mandiri, berita desa, dan transparansi pembangunan yang dibuat
-                oleh Danial Al-Ghazali Walangadi (2304130143) dari tim UNNES
-                GIAT 16 Desa Bener.
+                oleh{" "}
+                <a
+                  href="https://agw2005.github.io/"
+                  className="text-blue-200 hover:text-blue-500 active:text-blue-400"
+                  target="_blank"
+                >
+                  Danial Al-Ghazali Walangadi
+                </a>{" "}
+                (NIM 2304130143) dari tim{" "}
+                <a
+                  href="https://www.instagram.com/giat16_desabener/"
+                  className="text-blue-200 hover:text-blue-500 active:text-blue-400"
+                  target="_blank"
+                >
+                  UNNES GIAT 16 Desa Bener
+                </a>.
               </div>
             </div>
           </section>
