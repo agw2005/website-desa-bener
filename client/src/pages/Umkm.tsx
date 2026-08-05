@@ -10,9 +10,12 @@ import { useState } from "react";
 import { authFetch } from "../helpers/authFetch.ts";
 import OneFileInput from "../components/reusable/inputs/OneFileInput.tsx";
 import DropdownInput from "../components/reusable/inputs/DropdownInput.tsx";
+import useAuth from "../hooks/useAuth.tsx";
 
 const Umkm = () => {
   const params = useParams();
+  const { isLoggedIn } = useAuth();
+
   const [newKontakJenis, setNewKontakJenis] = useState("");
   const [newKontakIsi, setNewKontakIsi] = useState("");
   const [newKontakTautan, setNewKontakTautan] = useState("");
@@ -179,105 +182,113 @@ const Umkm = () => {
                   );
                 })}
               </ul>
-              <div className="border-3 rounded-2xl p-4 flex flex-col gap-2">
-                <h2 className="font-bold text-2xl">
-                  Tambah Tombol Tautan Baru
-                </h2>
-                <TextInput
-                  label="Jenis"
-                  name={`jenis-kontak-baru`}
-                  id={`jenis-kontak-baru`}
-                  value={newKontakJenis}
-                  onChangeHandler={(e) => setNewKontakJenis(e.target.value)}
-                  placeholder="WhatsApp, Instagram, dll."
-                />
-                <TextInput
-                  label="Isi"
-                  name={`isi-kontak-baru`}
-                  id={`isi-kontak-baru`}
-                  value={newKontakIsi}
-                  onChangeHandler={(e) => setNewKontakIsi(e.target.value)}
-                  placeholder="Nama tampilan / nomor"
-                />
-                <TextInput
-                  label="Tautan"
-                  name={`tautan-kontak-baru`}
-                  id={`tautan-kontak-baru`}
-                  value={newKontakTautan}
-                  onChangeHandler={(e) => setNewKontakTautan(e.target.value)}
-                  placeholder="https://wa.me/..."
-                />
-                <Button
-                  variant="black"
-                  disabled={loading}
-                  onClick={async () => {
-                    if (!data) return;
-                    await handleAddKontak(data.umkm_id);
-                  }}
-                >
-                  {loading ? "Mohon ditunggu..." : "Tambah Tombol"}
-                </Button>
-              </div>
-              <div className="border-3 rounded-2xl p-4 flex flex-col gap-2">
-                <h2 className="font-bold text-2xl">
-                  Perbarui Data UMKM
-                </h2>
-                <TextInput
-                  label="Nama UMKM"
-                  name={`nama-umkm-baru`}
-                  id={`nama-umkm-baru`}
-                  value={namaUmkmBaru}
-                  onChangeHandler={(e) => setNamaUmkmBaru(e.target.value)}
-                  placeholder="Kerupuk Ibu Ninik"
-                />
-                <TextInput
-                  label="Deskripsi Singkat"
-                  name={`deskripsi-singkat-umkm-baru`}
-                  id={`deskripsi-singkat-umkm-baru`}
-                  value={deskripsiUmkmBaru}
-                  onChangeHandler={(e) => setDeskripsiUmkmBaru(e.target.value)}
-                  placeholder="Kerupuk Ceriping"
-                />
-                {namaDusun && (
-                  <DropdownInput
-                    label="Dusun"
-                    name="selected-dusun"
-                    id="selected-dusun"
-                    value={dusunUmkmBaru}
-                    options={namaDusun}
-                    getId={(dusun) => dusun.dusun_id}
-                    getLabel={(dusun) => dusun.nama}
-                    onChangeHandler={setDusunUmkmBaru}
-                    placeholder="Pilih Dusun"
-                  />
-                )}
-                <OneFileInput
-                  label="Ubah Foto UMKM"
-                  name="foto-umkm-baru"
-                  id="foto-umkm-baru"
-                  onChangeHandler={(
-                    e: React.ChangeEvent<HTMLInputElement>,
-                  ) => {
-                    const file = e.target.files?.[0];
-                    if (file) setNewUmkmFoto(file);
-                    else setNewUmkmFoto(null);
-                  }}
-                  accept="*.jpg,*.jpeg,*.png"
-                  fileName={newUmkmFoto?.name}
-                  placeholder="png, jpg, jpeg"
-                />
-                <Button
-                  variant="black"
-                  disabled={loading}
-                  onClick={async () => {
-                    if (!data) return;
-                    await handleUpdateUmkm(data.umkm_id);
-                  }}
-                >
-                  {loading ? "Mohon ditunggu..." : "Perbarui"}
-                </Button>
-              </div>
-              {message !== "" && <p className="font-bold">{message}</p>}
+              {isLoggedIn && (
+                <>
+                  <div className="border-3 rounded-2xl p-4 flex flex-col gap-2">
+                    <h2 className="font-bold text-2xl">
+                      Tambah Tombol Tautan Baru
+                    </h2>
+                    <TextInput
+                      label="Jenis"
+                      name={`jenis-kontak-baru`}
+                      id={`jenis-kontak-baru`}
+                      value={newKontakJenis}
+                      onChangeHandler={(e) => setNewKontakJenis(e.target.value)}
+                      placeholder="WhatsApp, Instagram, dll."
+                    />
+                    <TextInput
+                      label="Isi"
+                      name={`isi-kontak-baru`}
+                      id={`isi-kontak-baru`}
+                      value={newKontakIsi}
+                      onChangeHandler={(e) => setNewKontakIsi(e.target.value)}
+                      placeholder="Nama tampilan / nomor"
+                    />
+                    <TextInput
+                      label="Tautan"
+                      name={`tautan-kontak-baru`}
+                      id={`tautan-kontak-baru`}
+                      value={newKontakTautan}
+                      onChangeHandler={(e) =>
+                        setNewKontakTautan(e.target.value)}
+                      placeholder="https://wa.me/..."
+                    />
+                    <Button
+                      variant="black"
+                      disabled={loading}
+                      onClick={async () => {
+                        if (!data) return;
+                        await handleAddKontak(data.umkm_id);
+                      }}
+                    >
+                      {loading ? "Mohon ditunggu..." : "Tambah Tombol"}
+                    </Button>
+                  </div>
+                  <div className="border-3 rounded-2xl p-4 flex flex-col gap-2">
+                    <h2 className="font-bold text-2xl">
+                      Perbarui Data UMKM
+                    </h2>
+                    <TextInput
+                      label="Nama UMKM"
+                      name={`nama-umkm-baru`}
+                      id={`nama-umkm-baru`}
+                      value={namaUmkmBaru}
+                      onChangeHandler={(e) => setNamaUmkmBaru(e.target.value)}
+                      placeholder="Kerupuk Ibu Ninik"
+                    />
+                    <TextInput
+                      label="Deskripsi Singkat"
+                      name={`deskripsi-singkat-umkm-baru`}
+                      id={`deskripsi-singkat-umkm-baru`}
+                      value={deskripsiUmkmBaru}
+                      onChangeHandler={(e) =>
+                        setDeskripsiUmkmBaru(e.target.value)}
+                      placeholder="Kerupuk Ceriping"
+                    />
+                    {namaDusun && (
+                      <DropdownInput
+                        label="Dusun"
+                        name="selected-dusun"
+                        id="selected-dusun"
+                        value={dusunUmkmBaru}
+                        options={namaDusun}
+                        getId={(dusun) => dusun.dusun_id}
+                        getLabel={(dusun) => dusun.nama}
+                        onChangeHandler={setDusunUmkmBaru}
+                        placeholder="Pilih Dusun"
+                      />
+                    )}
+                    <OneFileInput
+                      label="Ubah Foto UMKM"
+                      name="foto-umkm-baru"
+                      id="foto-umkm-baru"
+                      onChangeHandler={(
+                        e: React.ChangeEvent<HTMLInputElement>,
+                      ) => {
+                        const file = e.target.files?.[0];
+                        if (file) setNewUmkmFoto(file);
+                        else setNewUmkmFoto(null);
+                      }}
+                      accept="*.jpg,*.jpeg,*.png"
+                      fileName={newUmkmFoto?.name}
+                      placeholder="png, jpg, jpeg"
+                    />
+                    <Button
+                      variant="black"
+                      disabled={loading}
+                      onClick={async () => {
+                        if (!data) return;
+                        await handleUpdateUmkm(data.umkm_id);
+                      }}
+                    >
+                      {loading ? "Mohon ditunggu..." : "Perbarui"}
+                    </Button>
+                  </div>
+                </>
+              )}
+              {isLoggedIn && message !== "" && (
+                <p className="font-bold">{message}</p>
+              )}
             </div>
           </div>
         )}
