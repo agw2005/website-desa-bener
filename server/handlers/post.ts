@@ -516,7 +516,8 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
   if (
     typeof nama !== "string" || nama.trim() === "" ||
     typeof jabatan !== "string" || jabatan.trim() === "" ||
-    typeof kataSandi !== "string" || kataSandi.trim() === ""
+    typeof kataSandi !== "string" || kataSandi.trim() === "" ||
+    nama.trim() === "Admin"
   ) {
     ctx.response.status = 400;
     ctx.response.body = {

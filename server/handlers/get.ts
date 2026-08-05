@@ -655,7 +655,7 @@ export const aparaturDesa = async (ctx: RouterContext<"/">) => {
   const result = await connection.queryObject<
     Omit<Aparatur, "kata_sandi" | "foto">
   >(
-    "SELECT aparatur_id, nama, jabatan, telepon FROM Aparatur;",
+    "SELECT aparatur_id, nama, jabatan, telepon FROM Aparatur WHERE aparatur_id <> 1;",
   );
 
   ctx.response.status = 200;
@@ -664,11 +664,17 @@ export const aparaturDesa = async (ctx: RouterContext<"/">) => {
 };
 
 export const fotoAparaturDesa = async (ctx: RouterContext<"/foto/:id">) => {
-  const id = ctx.params.id;
+  const id = Number(ctx.params.id);
 
   if (!id) {
     ctx.response.status = 400;
     ctx.response.body = { message: "Missing id parameter" };
+    return;
+  }
+
+  if (id === 1) {
+    ctx.response.status = 403;
+    ctx.response.body = { error: "Foto not found" };
     return;
   }
 

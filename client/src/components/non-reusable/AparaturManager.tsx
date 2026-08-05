@@ -210,9 +210,8 @@ const AparaturManager = () => {
               </tr>
             </thead>
             <tbody>
-              {aparaturDesa
-                ?.filter((aparatur) => aparatur.nama !== "Admin")
-                .map((aparatur, index) => (
+              {aparaturDesa &&
+                aparaturDesa.map((aparatur, index) => (
                   <tr key={aparatur.aparatur_id} className="border">
                     <td className="border border-black py-2 px-4 text-center">
                       {index + 1}
