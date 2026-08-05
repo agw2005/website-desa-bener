@@ -1,6 +1,116 @@
 import type { RouterContext } from "@oak/oak/router";
 import { pool } from "../dbpool.ts";
 import { safeDecodeURI } from "../helpers/safeDecodeURI.ts";
+import type { Umkm } from "../types/Umkm.d.ts";
+
+export const patchUmkm = async (ctx: RouterContext<"/:id">) => {
+  const umkmId = Number(ctx.params.id);
+
+  if (!Number.isInteger(umkmId)) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `ID UMKM tidak valid.` };
+    return;
+  }
+
+  const form = await ctx.request.body.formData();
+  const nama = form.get("nama");
+  const dusun_id = form.get("dusun_id");
+  const deskripsi = form.get("deskripsi");
+  const foto = form.get("foto");
+
+  const setClauses: string[] = [];
+  const values: unknown[] = [];
+  let paramIndex = 1;
+
+  if (nama !== null) {
+    if (typeof nama !== "string" || nama.trim() === "") {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `Nama UMKM tidak boleh kosong.` };
+      return;
+    }
+    setClauses.push(`nama = $${paramIndex++}`);
+    values.push(nama.trim());
+  }
+
+  if (dusun_id !== null) {
+    const dusunIdNum = Number(dusun_id);
+    if (typeof dusun_id !== "string" || !Number.isInteger(dusunIdNum)) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `ID dusun tidak valid.` };
+      return;
+    }
+    setClauses.push(`dusun_id = $${paramIndex++}`);
+    values.push(dusunIdNum);
+  }
+
+  if (deskripsi !== null) {
+    if (typeof deskripsi !== "string" || deskripsi.trim() === "") {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `Deskripsi UMKM tidak boleh kosong.` };
+      return;
+    }
+    setClauses.push(`deskripsi = $${paramIndex++}`);
+    values.push(deskripsi.trim());
+  }
+
+  if (foto !== null) {
+    if (!(foto instanceof File)) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `Foto UMKM harus berupa file.` };
+      return;
+    }
+    if (!["image/jpeg", "image/png", "image/jpg"].includes(foto.type)) {
+      ctx.response.status = 400;
+      ctx.response.body = {
+        error: "Peta harus berformat JPEG, PNG, atau JPG.",
+      };
+      return;
+    }
+    const fotoBytes = new Uint8Array(await foto.arrayBuffer());
+    setClauses.push(`foto = $${paramIndex++}`);
+    values.push(fotoBytes);
+  }
+
+  if (setClauses.length === 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `Tidak ada data untuk diperbarui.` };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const umkmCheck = await connection.queryObject<Pick<Umkm, "umkm_id">>(
+      `SELECT umkm_id FROM Umkm WHERE umkm_id = $1`,
+      [umkmId],
+    );
+
+    if (umkmCheck.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: `UMKM tidak ditemukan.` };
+      return;
+    }
+
+    values.push(umkmId);
+    const result = await connection.queryObject<
+      Omit<Umkm, "foto">
+    >(
+      `UPDATE Umkm
+       SET ${setClauses.join(", ")}
+       WHERE umkm_id = $${paramIndex}
+       RETURNING umkm_id, nama, deskripsi, dusun_id`,
+      values,
+    );
+
+    ctx.response.status = 200;
+    ctx.response.body = result.rows[0];
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: `Gagal memperbarui UMKM.` };
+  } finally {
+    connection.release();
+  }
+};
 
 export const patchDusun = async (ctx: RouterContext<"/:id">) => {
   const DUSUN_TEXT_FIELDS = ["nama"] as const;

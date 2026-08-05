@@ -60,7 +60,10 @@ export const serverApi = {
       parent: () => buildUrl("/pelayanan"),
       children: (id: number | string) => buildUrl(`/pelayanan/${id}/syarat`),
     },
-    umkm: () => buildUrl("/umkm"),
+    umkm: {
+      parent: () => buildUrl("/umkm"),
+      button: (id: number | string) => buildUrl(`/umkm/${id}`),
+    },
     wisata: () => buildUrl("/wisata"),
     komentar: () => buildUrl("/komentar"),
     artikel: () => buildUrl("/artikel"),
@@ -93,5 +96,6 @@ export const serverApi = {
   patch: {
     profil: () => buildUrl("/profil"),
     dusun: (id: number | string) => buildUrl(`/dusun/${id}`),
+    umkm: (id: number | string) => buildUrl(`/umkm/${id}`),
   },
 };

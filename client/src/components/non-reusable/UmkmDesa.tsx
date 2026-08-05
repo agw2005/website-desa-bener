@@ -92,7 +92,7 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
 
     try {
       const response = await authFetch(
-        serverApi.post.umkm(),
+        serverApi.post.umkm.parent(),
         { method: "POST", body: formData },
       );
 

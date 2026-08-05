@@ -2,10 +2,80 @@ import type { RouterContext } from "@oak/oak/router";
 import type { MisiPostPayload } from "../types/Misi.d.ts";
 import type { VisiPostPayload } from "../types/Visi.d.ts";
 import { pool } from "../dbpool.ts";
-import { Komentar } from "../types/Komentar.d.ts";
-import { Wisata } from "../types/Wisata.d.ts";
-import { Umkm } from "../types/Umkm.d.ts";
-import { Pelayanan } from "../types/Pelayanan.d.ts";
+import type { Komentar } from "../types/Komentar.d.ts";
+import type { Wisata } from "../types/Wisata.d.ts";
+import type { KontakUmkm, Umkm } from "../types/Umkm.d.ts";
+import type { Pelayanan } from "../types/Pelayanan.d.ts";
+
+export const postKontakUmkm = async (ctx: RouterContext<"/:id">) => {
+  const umkmId = Number(ctx.params.id);
+
+  if (!Number.isInteger(umkmId)) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `ID UMKM tidak valid.` };
+    return;
+  }
+
+  const form = await ctx.request.body.formData();
+  const jenis_kontak = form.get("jenis_kontak");
+  const isi_kontak = form.get("isi_kontak");
+  const tautan_kontak = form.get("tautan_kontak");
+
+  if (
+    typeof jenis_kontak !== "string" ||
+    typeof isi_kontak !== "string" ||
+    typeof tautan_kontak !== "string"
+  ) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `Input kontak harus berupa teks.` };
+    return;
+  }
+
+  if (
+    jenis_kontak.trim() === "" ||
+    isi_kontak.trim() === "" ||
+    tautan_kontak.trim() === ""
+  ) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `Input kontak tidak boleh kosong.` };
+    return;
+  }
+
+  const connection = await pool.connect();
+  try {
+    const umkmCheck = await connection.queryObject<Pick<Umkm, "umkm_id">>(
+      `SELECT umkm_id FROM Umkm WHERE umkm_id = $1`,
+      [umkmId],
+    );
+
+    if (umkmCheck.rows.length === 0) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: `UMKM tidak ditemukan.` };
+      return;
+    }
+
+    const result = await connection.queryObject<
+      KontakUmkm & { umkm_id: number }
+    >(
+      `INSERT INTO Kontak_Umkm (umkm_id, jenis_kontak, isi, tautan)
+       VALUES ($1, $2, $3, $4)
+       RETURNING kontak_umkm_id, umkm_id, jenis_kontak, isi, tautan`,
+      [
+        umkmId,
+        jenis_kontak.trim(),
+        isi_kontak.trim(),
+        tautan_kontak.trim(),
+      ],
+    );
+
+    ctx.response.status = 201;
+    ctx.response.body = result.rows[0];
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: `Gagal menyimpan kontak UMKM.` };
+  }
+};
 
 export const postSyaratPelayanan = async (
   ctx: RouterContext<"/:id/syarat">,

@@ -37,6 +37,7 @@ import {
   postArtikel,
   postDusun,
   postKomentar,
+  postKontakUmkm,
   postLabel,
   postMisi,
   postPelayanan,
@@ -45,7 +46,7 @@ import {
   postVisi,
   postWisata,
 } from "./handlers/post.ts";
-import { patchDusun, patchProfil } from "./handlers/patch.ts";
+import { patchDusun, patchProfil, patchUmkm } from "./handlers/patch.ts";
 import type { Next } from "@oak/oak/middleware";
 import {
   deleteAparatur,
@@ -100,9 +101,11 @@ pelayanan
 umkm
   .get("/foto/:id", getUmkmFoto)
   .get("/:id", getUmkmById)
-  .get("/", getUmkmList)
+  .post("/:id", requireAuth, postKontakUmkm)
+  .delete("/:id", requireAuth, deleteUmkm)
+  .patch("/:id", requireAuth, patchUmkm)
   .post("/", requireAuth, postUmkm)
-  .delete("/:id", requireAuth, deleteUmkm);
+  .get("/", getUmkmList);
 
 wisata
   .get("/:id", getFotoTempatWisata)
