@@ -41,7 +41,9 @@ const Profil = () => {
                 </li>
                 <li>
                   <strong>Tahun Pembentukan</strong> :{" "}
-                  {profilDesa[0].tahun_pembentukan}
+                  {profilDesa[0].tahun_pembentukan <= 1945
+                    ? `${profilDesa[0].tahun_pembentukan} (Pra-kemerdekaan)`
+                    : profilDesa[0].tahun_pembentukan}
                 </li>
                 <li>
                   <strong>Luas Desa/Kelurahan (Ha)</strong> :{" "}
