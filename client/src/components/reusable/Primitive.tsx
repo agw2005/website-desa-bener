@@ -78,46 +78,46 @@ const Primitive = ({ children }: PrimitiveProps) => {
           </div>
 
           <nav
-            className={`px-4 sm:px-8 flex-col lg:flex-row lg:flex flex-wrap justify-center gap-2 sm:gap-3 lg:gap-4 relative lg:bottom-6 pt-4 lg:pt-0 my-4 lg:my-0 rounded-2xl bg-amber-600 lg:bg-transparent
+            className={`px-4 sm:px-8 flex-col lg:flex-row lg:flex flex-wrap justify-center gap-2 sm:gap-3 relative lg:bottom-6 pt-4 lg:pt-0 my-4 lg:my-0 rounded-2xl bg-amber-600 lg:bg-transparent
               ${menuOpen ? "flex pb-4" : "hidden lg:flex"}`}
           >
             <Link to={LINKS.home} onClick={() => setMenuOpen(false)}>
-              <Button className="bottom-shadow w-full lg:w-auto text-md">
+              <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                 BERANDA
               </Button>
             </Link>
             <Link to={LINKS.profil} onClick={() => setMenuOpen(false)}>
-              <Button className="bottom-shadow w-full lg:w-auto text-md">
+              <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                 PROFIL
               </Button>
             </Link>
             <Link to={LINKS.data} onClick={() => setMenuOpen(false)}>
-              <Button className="bottom-shadow w-full lg:w-auto text-md">
+              <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                 DATA
               </Button>
             </Link>
             <Link to={LINKS.layanan} onClick={() => setMenuOpen(false)}>
-              <Button className="bottom-shadow w-full lg:w-auto text-md">
+              <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                 LAYANAN PUBLIK
               </Button>
             </Link>
             <Link to={LINKS.pengumuman} onClick={() => setMenuOpen(false)}>
-              <Button className="bottom-shadow w-full lg:w-auto text-md">
+              <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                 PENGUMUMAN
               </Button>
             </Link>
             <Link to={LINKS.wisata} onClick={() => setMenuOpen(false)}>
-              <Button className="bottom-shadow w-full lg:w-auto text-md">
+              <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                 WISATA
               </Button>
             </Link>
             <Link to={LINKS.kontak} onClick={() => setMenuOpen(false)}>
-              <Button className="bottom-shadow w-full lg:w-auto text-md">
+              <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                 KONTAK ASPIRASI
               </Button>
             </Link>
             <Link to={LINKS.kalender} onClick={() => setMenuOpen(false)}>
-              <Button className="bottom-shadow w-full lg:w-auto text-md">
+              <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                 KALENDER
               </Button>
             </Link>
@@ -126,7 +126,7 @@ const Primitive = ({ children }: PrimitiveProps) => {
                 to={LINKS.manajemen}
                 onClick={() => setMenuOpen(false)}
               >
-                <Button className="bottom-shadow w-full lg:w-auto text-md">
+                <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                   MANAJEMEN
                 </Button>
               </Link>
@@ -139,14 +139,14 @@ const Primitive = ({ children }: PrimitiveProps) => {
                     setMenuOpen(false);
                     navigate("/login");
                   }}
-                  className="bottom-shadow w-full lg:w-auto text-md"
+                  className="bottom-shadow w-full lg:w-auto text-sm xl:text-md"
                 >
                   LOGOUT
                 </Button>
               )
               : (
                 <Link to={LINKS.login} onClick={() => setMenuOpen(false)}>
-                  <Button className="bottom-shadow w-full lg:w-auto text-md">
+                  <Button className="bottom-shadow w-full lg:w-auto text-sm xl:text-md">
                     LOGIN
                   </Button>
                 </Link>

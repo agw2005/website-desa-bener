@@ -170,7 +170,7 @@ const Pengumuman = () => {
 
   return (
     <Primitive>
-      <div className="flex flex-col gap-8 px-32">
+      <div className="flex flex-col gap-8 max-w-7/8 self-center">
         {isLoggedIn && (
           <RoundedSection title="Buat Artikel Baru" contentClassName="gap-4">
             <TextInput
@@ -276,7 +276,7 @@ const Pengumuman = () => {
             placeholder="Semua Label"
           />
         )}
-        <div className="grid grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {artikelList.map((artikel) => (
             <ArticleSection
               articleId={artikel.artikel_id}
