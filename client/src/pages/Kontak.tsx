@@ -164,12 +164,12 @@ const Kontak = () => {
 
   return (
     <Primitive>
-      <div className="flex flex-col gap-8 px-32">
-        <div className="flex gap-8">
-          <div className="flex flex-col flex-1 gap-8">
+      <div className="w-full max-w-7/8 self-center">
+        <div className="flex flex-col gap-8 md:flex-row">
+          <div className="flex flex-col gap-8 md:flex-1">
             {aparaturDesa && (
               <RoundedSection
-                title={`APARATUR DESA`}
+                title="APARATUR DESA"
                 contentClassName="flex flex-col gap-3 items-center"
               >
                 <AparaturDesa
@@ -180,25 +180,28 @@ const Kontak = () => {
                     aparaturDesa[indexAparaturDesa]?.aparatur_id,
                   )}
                 />
-                <p>{indexAparaturDesa + 1}/{aparaturDesa.length}</p>
-                <div className="flex justify-around w-full self-stretch">
+
+                <p>
+                  {indexAparaturDesa + 1}/{aparaturDesa.length}
+                </p>
+
+                <div className="flex w-full self-stretch justify-around">
                   <Button
                     variant="black"
                     onClick={() => {
                       indexAparaturDesa < 1
-                        ? setIndexAparaturDesa((_prev) =>
-                          aparaturDesa.length - 1
-                        )
+                        ? setIndexAparaturDesa(() => aparaturDesa.length - 1)
                         : setIndexAparaturDesa((prev) => prev - 1);
                     }}
                   >
                     SEBELUM
                   </Button>
+
                   <Button
                     variant="black"
                     onClick={() => {
                       indexAparaturDesa === aparaturDesa.length - 1
-                        ? setIndexAparaturDesa((_prev) => 0)
+                        ? setIndexAparaturDesa(() => 0)
                         : setIndexAparaturDesa((prev) => prev + 1);
                     }}
                   >
@@ -207,8 +210,9 @@ const Kontak = () => {
                 </div>
               </RoundedSection>
             )}
+
             <RoundedSection
-              title={`KOMENTAR`}
+              title="KOMENTAR"
               contentClassName="flex flex-col gap-3"
             >
               <TextInput
@@ -220,6 +224,7 @@ const Kontak = () => {
                   setInputNama(e.target.value);
                 }}
               />
+
               <TextInput
                 label="SUREL"
                 name="surel-komentator"
@@ -229,6 +234,7 @@ const Kontak = () => {
                   setInputSurel(e.target.value);
                 }}
               />
+
               <TextAreaInput
                 label="ISI KOMENTAR"
                 name="isi-komentar"
@@ -239,6 +245,7 @@ const Kontak = () => {
                 }}
                 rows={3}
               />
+
               <Button
                 variant="black"
                 onClick={handleSubmitKomentar}
@@ -248,30 +255,34 @@ const Kontak = () => {
               </Button>
 
               {namaIsEmpty && (
-                <div className="bg-red-500 text-white font-bold px-4 py-2 text-center rounded-2xl">
+                <div className="rounded-2xl bg-red-500 px-4 py-2 text-center font-bold text-white">
                   Nama wajib diisi
                 </div>
               )}
+
               {isiIsEmpty && (
-                <div className="bg-red-500 text-white font-bold px-4 py-2 text-center rounded-2xl">
+                <div className="rounded-2xl bg-red-500 px-4 py-2 text-center font-bold text-white">
                   Isi komentar wajib diisi
                 </div>
               )}
+
               {emailIsNotValid && (
-                <div className="bg-red-500 text-white font-bold px-4 py-2 text-center rounded-2xl">
+                <div className="rounded-2xl bg-red-500 px-4 py-2 text-center font-bold text-white">
                   Surel tidak valid
                 </div>
               )}
+
               {submitError && (
-                <div className="bg-red-500 text-white font-bold px-4 py-2 text-center rounded-2xl">
+                <div className="rounded-2xl bg-red-500 px-4 py-2 text-center font-bold text-white">
                   {submitError}
                 </div>
               )}
             </RoundedSection>
           </div>
+
           <RoundedSection
             title={`${komentarList.length} KOMENTAR`}
-            titleClassName="flex-4"
+            titleClassName="md:flex-4"
             contentClassName="flex flex-col gap-4"
           >
             {komentarList.map((komentar) => (
@@ -284,6 +295,7 @@ const Kontak = () => {
               >
                 <div className="flex flex-col gap-2">
                   <p>{komentar.isi}</p>
+
                   {isLoggedIn && (
                     <Button
                       variant="red"
@@ -301,7 +313,9 @@ const Kontak = () => {
             ))}
 
             {hasLoadedOnce && komentarList.length === 0 && (
-              <p className="text-center text-gray-500">Belum ada komentar.</p>
+              <p className="text-center text-gray-500">
+                Belum ada komentar.
+              </p>
             )}
 
             {nextCursor !== null && (
