@@ -35,7 +35,7 @@ const Data = () => {
   return (
     <Primitive>
       {dataSemuaDusun && (
-        <div className="flex flex-col gap-8 px-32">
+        <div className="flex flex-col gap-8 mx-2 md:mx-4 lg:mx-8 xl:mx-32">
           <RoundedSection title="APBDes (Anggaran Pendapatan dan Belanja Desa)">
             <div className="flex flex-col gap-4">
               <div className="flex gap-2">
