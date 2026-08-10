@@ -160,12 +160,12 @@ const Primitive = ({ children }: PrimitiveProps) => {
 
         <footer className="bg-black mt-16 sm:mt-24 lg:mt-32 pt-8 pb-8 px-4 sm:px-8 lg:px-16 flex flex-col lg:flex-row gap-8 lg:gap-16 relative">
           <section className="flex flex-col flex-1 order-2 lg:order-1">
-            <div className="bg-amber-500 flex justify-center p-3 sm:p-4 font-bold text-sm sm:text-base">
+            <div className="bg-amber-500 rounded-t-2xl flex justify-center p-3 sm:p-4 font-bold text-sm sm:text-base">
               LOKASI BALAI DESA
             </div>
-            <div className="bg-white flex justify-center items-center text-xs">
+            <div className="bg-white rounded-b-2xl overflow-hidden flex justify-center items-center text-xs">
               <iframe
-                className="h-56 sm:h-64 lg:h-75 w-full"
+                className="h-56 sm:h-64 lg:h-75 w-full border-0"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d298.368306004403!2d110.51549963254276!3d-7.376758441336304!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a79ff3320be0f%3A0xb019462c2379b0a0!2sKantor%20Kelurahan%20Desa%20Bener!5e0!3m2!1sen!2sro!4v1783912345330!5m2!1sen!2sro"
                 loading="lazy"
                 referrerPolicy="strict-origin-when-cross-origin"
@@ -220,12 +220,12 @@ const Primitive = ({ children }: PrimitiveProps) => {
           </section>
 
           <section className="flex flex-col flex-1 order-3">
-            <div className="bg-amber-500 flex justify-center p-3 sm:p-4 font-bold text-sm sm:text-base">
+            <div className="bg-amber-500 rounded-t-2xl flex justify-center p-3 sm:p-4 font-bold text-sm sm:text-base">
               WILAYAH DESA
             </div>
-            <div className="bg-white flex justify-center items-center text-white text-xs">
+            <div className="bg-white rounded-b-2xl overflow-hidden flex justify-center items-center text-white text-xs">
               <iframe
-                className="h-56 sm:h-64 lg:h-75 w-full"
+                className="h-56 sm:h-64 lg:h-75 w-full border-0"
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d15827.278982398184!2d110.51010771128858!3d-7.374090151845335!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a79fe13e0b6d7%3A0xa502080478e8be7b!2sBener%2C%20Tengaran%2C%20Semarang%20Regency%2C%20Central%20Java%2C%20Indonesia!5e0!3m2!1sen!2sro!4v1783912132479!5m2!1sen!2sro"
                 loading="lazy"
                 referrerPolicy="strict-origin-when-cross-origin"
