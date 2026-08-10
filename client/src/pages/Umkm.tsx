@@ -139,13 +139,13 @@ const Umkm = () => {
 
   return (
     <Primitive>
-      <div className="flex flex-col gap-8 px-32">
+      <div className="flex flex-col gap-8 px-4 md:px-16 lg:px-32">
         {data && (
-          <div className="bg-amber-300 p-8 rounded-3xl flow-root">
+          <div className="bg-amber-300 p-5 md:p-8 rounded-3xl flow-root">
             <img
               src={serverApi.get.umkm.photo(`${data.umkm_id}?cb=${Date.now()}`)}
               alt={`Gambar UMKM dengan ID ${data.umkm_id}`}
-              className="h-max w-max max-h-128 max-w-1/2 float-left mr-4 rounded-2xl"
+              className="h-auto w-full md:w-max max-h-128 md:max-w-1/2 mb-5 md:mb-0 md:float-left md:mr-6 rounded-2xl object-cover"
               onError={(e) => {
                 e.currentTarget.src = "/tidak-ada-gambar-box.png";
                 e.currentTarget.onerror = null;
@@ -155,7 +155,7 @@ const Umkm = () => {
               <Link to="/wisata">
                 <Button variant="black" className="w-max">Kembali</Button>
               </Link>
-              <ul>
+              <ul className="flex flex-col gap-1">
                 <li>
                   <span className="font-bold">Nama UMKM :</span> {data.nama}
                 </li>
@@ -174,7 +174,7 @@ const Umkm = () => {
                   return (
                     <li key={i}>
                       <Link to={k.tautan}>
-                        <Button variant="black">
+                        <Button variant="black" className="w-full lg:w-max">
                           {k.jenis_kontak} - {k.isi}
                         </Button>
                       </Link>
@@ -184,7 +184,7 @@ const Umkm = () => {
               </ul>
               {isLoggedIn && (
                 <>
-                  <div className="border-3 rounded-2xl p-4 flex flex-col gap-2">
+                  <div className="border-3 border-black rounded-2xl p-4 flex flex-col gap-2 mt-4">
                     <h2 className="font-bold text-2xl">
                       Tambah Tombol Tautan Baru
                     </h2>
@@ -224,7 +224,7 @@ const Umkm = () => {
                       {loading ? "Mohon ditunggu..." : "Tambah Tombol"}
                     </Button>
                   </div>
-                  <div className="border-3 rounded-2xl p-4 flex flex-col gap-2">
+                  <div className="border-3 border-black rounded-2xl p-4 flex flex-col gap-2 mt-2">
                     <h2 className="font-bold text-2xl">
                       Perbarui Data UMKM
                     </h2>
@@ -287,7 +287,7 @@ const Umkm = () => {
                 </>
               )}
               {isLoggedIn && message !== "" && (
-                <p className="font-bold">{message}</p>
+                <p className="font-bold mt-2">{message}</p>
               )}
             </div>
           </div>

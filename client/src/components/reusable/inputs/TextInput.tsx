@@ -11,7 +11,7 @@ const TextInput = (
   { label, name, id, value, onChangeHandler, placeholder }: TextInputProps,
 ) => {
   return (
-    <label className="flex">
+    <label className="flex w-full">
       <div className="border w-max px-4 py-2 text-white font-bold border-black bg-black rounded-l-2xl select-none">
         {label}
       </div>

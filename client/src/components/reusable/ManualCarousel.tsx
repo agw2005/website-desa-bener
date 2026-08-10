@@ -13,9 +13,9 @@ interface CarouselItem {
 interface ManualCarouselProps {
   items: CarouselItem[];
   pixelGap: number;
-  minCardWidth?: number; // e.g. 200 — used to derive how many cards fit
-  maxVisibleCards?: number; // upper bound, e.g. 3
-  aspectRatio?: string; // e.g. "2 / 3"
+  minCardWidth?: number;
+  maxVisibleCards?: number;
+  aspectRatio?: string;
   showDelete?: boolean;
   onDelete?: (id: number) => void;
 }
@@ -33,6 +33,7 @@ const ManualCarousel = (
 ) => {
   const [index, setIndex] = useState(0);
   const [visibleCards, setVisibleCards] = useState(1);
+  const [containerWidth, setContainerWidth] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const cacheBuster = useRef(`?cb=${Date.now()}`);
   const fallbackImage = "/tidak-ada-gambar-4x5.png";
@@ -47,6 +48,7 @@ const ManualCarousel = (
       const fit = Math.floor((width + pixelGap) / (minCardWidth + pixelGap));
       const clamped = Math.min(Math.max(fit, 1), maxVisibleCards);
       setVisibleCards(clamped);
+      setContainerWidth(width);
     };
 
     compute(el.clientWidth);
@@ -70,22 +72,24 @@ const ManualCarousel = (
   const goPrev = () => setIndex((prev) => Math.max(prev - 1, 0));
   const goNext = () => setIndex((prev) => Math.min(prev + 1, maxIndex));
 
+  const cardWidthPx = containerWidth > 0
+    ? (containerWidth - pixelGap * (visibleCards - 1)) / visibleCards
+    : 0;
+  const stepPx = cardWidthPx + pixelGap;
+
   return (
     <div ref={containerRef} className="relative w-full overflow-hidden">
       <div
         className="flex items-start gap-4 transition-transform duration-500 ease-in-out"
         style={{
-          transform:
-            `translateX(calc(-${index} * (100% / ${visibleCards} + ${pixelGap}px / ${visibleCards})))`,
+          transform: `translateX(${-index * stepPx}px)`,
         }}
       >
         {items.map((item) => {
           const className =
             `shrink-0 relative rounded-2xl overflow-hidden border-2 border-white shadow block group`;
           const style = {
-            width: `calc((100% - ${
-              pixelGap * (visibleCards - 1)
-            }px) / ${visibleCards})`,
+            width: `${cardWidthPx}px`,
             aspectRatio,
           };
 

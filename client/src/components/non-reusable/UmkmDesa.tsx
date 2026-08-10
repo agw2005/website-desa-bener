@@ -211,7 +211,10 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
           <div className="flex flex-col gap-2">
             <h3 className="font-bold text-lg">Kontak</h3>
             {kontakList.map((kontak, index) => (
-              <div key={index} className="flex gap-2 items-start">
+              <div
+                key={index}
+                className="flex flex-col xl:flex-row border p-2 rounded-2xl gap-2 items-start"
+              >
                 <TextInput
                   label="Jenis"
                   name={`jenis-kontak-${index}`}
@@ -242,8 +245,7 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
                 <Button
                   type="button"
                   variant="red"
-                  onClick={() =>
-                    handleRemoveKontak(index)}
+                  onClick={() => handleRemoveKontak(index)}
                   aria-label={`Hapus kontak ${index + 1}`}
                 >
                   Hapus
