@@ -102,8 +102,8 @@ const AparaturManager = () => {
 
   return (
     <RoundedSection title="Aparatur Desa">
-      <div className="flex gap-8">
-        <div className="flex flex-col gap-2 flex-1">
+      <div className="flex flex-col gap-8 xl:flex-row">
+        <div className="flex min-w-0 flex-1 flex-col gap-2">
           <TextInput
             label="Nama"
             name="nama-aparatur"
@@ -112,6 +112,7 @@ const AparaturManager = () => {
             onChangeHandler={(e) => setInputNamaAparatur(e.target.value)}
             placeholder="Contoh: Beni Saefudin"
           />
+
           <TextInput
             label="Jabatan"
             name="jabatan-aparatur"
@@ -120,6 +121,7 @@ const AparaturManager = () => {
             onChangeHandler={(e) => setInputJabatanAparatur(e.target.value)}
             placeholder="Contoh: Kepala Desa"
           />
+
           <TextInput
             label="Telepon"
             name="telepon-aparatur"
@@ -128,9 +130,11 @@ const AparaturManager = () => {
             onChangeHandler={(e) => setInputTeleponAparatur(e.target.value)}
             placeholder="Contoh: 0812-3456-7890"
           />
+
           <p className="text-xs font-bold text-red-700">
-            (png, jpg, jpeg) Disarankan memakai foto dengan rasio 2x3
+            Disarankan memakai foto dengan rasio 2x3
           </p>
+
           <OneFileInput
             label="Foto"
             name="foto-aparatur"
@@ -138,15 +142,19 @@ const AparaturManager = () => {
             onChangeHandler={handleAparaturFotoChange}
             accept=".png, .jpg, .jpeg"
             fileName={inputFotoAparatur?.name}
-            placeholder="(png, jpg, jpeg) Disarankan memakai foto dengan rasio 2x3"
+            placeholder="(png, jpg, jpeg)"
           />
+
           {previewFotoUrl && (
-            <div className="mt-2 mb-4 border rounded p-2 w-max">
-              <p className="text-sm font-semibold mb-2">Pratinjau Foto:</p>
+            <div className="mt-2 mb-4 w-max rounded border p-2">
+              <p className="mb-2 text-sm font-semibold">
+                Pratinjau Foto:
+              </p>
+
               <img
                 src={previewFotoUrl}
                 alt="Pratinjau upload aparatur"
-                className="w-32 h-48 object-cover rounded shadow-sm"
+                className="h-48 w-32 rounded object-cover shadow-sm"
                 onError={(e) => {
                   e.currentTarget.src = "/tidak-ada-gambar-2x3.png";
                   e.currentTarget.onerror = null;
@@ -154,6 +162,7 @@ const AparaturManager = () => {
               />
             </div>
           )}
+
           <PasswordInput
             label="Kata Sandi"
             name="kata-sandi-aparatur"
@@ -161,6 +170,7 @@ const AparaturManager = () => {
             value={inputKataSandiAparatur}
             onChangeHandler={(e) => setInputKataSandiAparatur(e.target.value)}
           />
+
           <PasswordInput
             label="Konfirmasi Sandi"
             name="konfirmasi-sandi-aparatur"
@@ -169,63 +179,83 @@ const AparaturManager = () => {
             onChangeHandler={(e) =>
               setInputKonfirmasiSandiAparatur(e.target.value)}
           />
+
           <Button
             variant="black"
             onClick={async () => {
               setAparaturTerkonfirmasi(false);
-              if (inputKataSandiAparatur !== inputKonfirmasiSandiAparatur) {
+
+              if (
+                inputKataSandiAparatur !== inputKonfirmasiSandiAparatur
+              ) {
                 setAparaturTerkonfirmasi(true);
                 return;
               }
+
               await handleAddAparatur();
             }}
           >
             Tambah Aparatur Desa
           </Button>
+
           {aparaturTerkonfirmasi && (
-            <div className="w-max px-4 py-2 bg-red-600 text-white font-bold rounded-2xl">
+            <div className="w-max max-w-full rounded-2xl bg-red-600 px-4 py-2 font-bold text-white">
               Kata Sandi tidak sesuai
             </div>
           )}
+
           {requiredInputIsMissing && (
-            <div className="w-max px-4 py-2 bg-red-600 text-white font-bold rounded-2xl">
+            <div className="w-max max-w-full rounded-2xl bg-red-600 px-4 py-2 font-bold text-white">
               Nama, Jabatan, dan Kata sandi wajib diisi
             </div>
           )}
         </div>
 
-        <div className="flex-1 overflow-x-auto">
-          <table className="w-full text-left border-collapse">
+        {/* Table */}
+        <div className="min-w-0 flex-1 overflow-x-auto">
+          <table className="w-full min-w-125 border-collapse text-left">
             <thead>
               <tr className="bg-amber-700 text-white">
-                <th className="py-2 px-4 font-bold border border-black text-center">
+                <th className="border border-black px-4 py-2 text-center font-bold">
                   No
                 </th>
-                <th className="py-2 px-4 font-bold border border-black text-center">
+
+                <th className="border border-black px-4 py-2 text-center font-bold">
                   Nama
                 </th>
-                <th className="py-2 px-4 font-bold border border-black text-center">
+
+                <th className="border border-black px-4 py-2 text-center font-bold">
                   Jabatan
+                </th>
+
+                <th className="border border-black px-4 py-2 text-center font-bold">
+                  Aksi
                 </th>
               </tr>
             </thead>
+
             <tbody>
               {aparaturDesa &&
                 aparaturDesa.map((aparatur, index) => (
-                  <tr key={aparatur.aparatur_id} className="border">
-                    <td className="border border-black py-2 px-4 text-center">
+                  <tr
+                    key={aparatur.aparatur_id}
+                    className="border"
+                  >
+                    <td className="border border-black px-4 py-2 text-center">
                       {index + 1}
                     </td>
-                    <td className="border border-black py-2 px-4 font-medium">
+
+                    <td className="border border-black px-4 py-2 font-medium">
                       {aparatur.nama}
                     </td>
-                    <td className="border border-black py-2 px-4">
+
+                    <td className="border border-black px-4 py-2">
                       {aparatur.jabatan}
                     </td>
+
                     <td
-                      onClick={() =>
-                        handleDeleteAparatur(aparatur.aparatur_id)}
-                      className="border border-black py-2 px-4 select-none bg-red-700 hover:bg-red-900 active:bg-red-600 text-white font-bold text-center cursor-pointer"
+                      onClick={() => handleDeleteAparatur(aparatur.aparatur_id)}
+                      className="cursor-pointer select-none border border-black bg-red-700 px-4 py-2 text-center font-bold text-white hover:bg-red-900 active:bg-red-600"
                     >
                       Hapus
                     </td>

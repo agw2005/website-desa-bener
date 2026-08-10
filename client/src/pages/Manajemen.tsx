@@ -10,7 +10,7 @@ import PelayananManager from "../components/non-reusable/PelayananManager.tsx";
 const Manajemen = () => {
   return (
     <Primitive>
-      <div className="flex flex-col gap-8 px-32">
+      <div className="flex flex-col gap-8 max-w-7/8 self-center">
         <AparaturManager />
         <DusunManager />
         <ProfilDesaManager />

@@ -168,7 +168,7 @@ const ProfilDesaManager = () => {
 
   return (
     <RoundedSection title="Profil Desa">
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 w-full">
         <TextAreaInput
           label="Deskripsi Sekilas"
           name="deskripsi-sekilas"
@@ -183,7 +183,7 @@ const ProfilDesaManager = () => {
         {FIELD_GROUPS.map((group) => (
           <div key={group.title} className="flex flex-col gap-2">
             <h3 className="font-bold text-lg">{group.title}</h3>
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {group.fields.map((field) => (
                 <TextInput
                   key={field}
@@ -212,6 +212,11 @@ const ProfilDesaManager = () => {
 
         <div className="flex flex-col gap-2">
           <h3 className="font-bold text-lg">Peta Desa</h3>
+
+          <p className="text-xs font-bold text-red-700">
+            Kosongkan jika tidak ingin mengganti peta
+          </p>
+
           <OneFileInput
             label="Peta"
             name="peta"
@@ -219,15 +224,15 @@ const ProfilDesaManager = () => {
             onChangeHandler={handlePetaChange}
             accept=".png, .jpg, .jpeg"
             fileName={inputPeta?.name}
-            placeholder="(png, jpg, jpeg) — kosongkan jika tidak ingin mengganti peta"
+            placeholder="(png, jpg, jpeg)"
           />
           {previewPetaUrl && (
-            <div className="mt-2 mb-4 border rounded p-2 w-max">
+            <div className="mt-2 mb-4 border rounded p-2 w-full sm:w-max">
               <p className="text-sm font-semibold mb-2">Pratinjau Peta Baru:</p>
               <img
                 src={previewPetaUrl}
                 alt="Pratinjau peta desa"
-                className="w-64 h-40 object-cover rounded shadow-sm"
+                className="w-full sm:w-64 h-40 object-cover rounded shadow-sm"
                 onError={(e) => {
                   e.currentTarget.src = "/tidak-ada-gambar-box.png";
                   e.currentTarget.onerror = null;

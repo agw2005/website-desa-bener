@@ -44,8 +44,8 @@ const DusunManager = () => {
 
   return (
     <RoundedSection title="Dusun">
-      <div className="flex gap-8">
-        <div className="flex flex-col gap-2 w-max px-8 py-4 border-3 rounded-2xl h-max">
+      <div className="flex flex-col lg:flex-row gap-8">
+        <div className="flex flex-col gap-2 w-full lg:w-max px-4 sm:px-8 py-4 border-3 rounded-2xl h-max">
           <h2 className="text-2xl font-bold">Tambah Dusun Baru</h2>
           <TextInput
             label="Nama Dusun"
@@ -59,13 +59,13 @@ const DusunManager = () => {
             Tambah Dusun Baru
           </Button>
           {requiredInputIsEmpty && (
-            <div className="w-max px-4 py-2 bg-red-600 text-white font-bold rounded-2xl">
+            <div className="w-full lg:w-max px-4 py-2 bg-red-600 text-white font-bold rounded-2xl">
               Nama dusun wajib diisi
             </div>
           )}
         </div>
 
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="flex flex-col gap-2 flex-1 w-full">
           <h2 className="text-2xl font-bold">Data Per-dusun</h2>
           {namaDusun && (
             <DropdownInput

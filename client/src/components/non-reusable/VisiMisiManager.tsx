@@ -58,10 +58,10 @@ const VisiMisiManager = () => {
 
   return (
     <RoundedSection title="Visi & Misi" contentClassName="gap-4">
-      <div className="flex gap-4">
-        <div className="flex flex-col flex-1 gap-4">
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col flex-1 gap-4 w-full">
           <div className="flex-1 overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-75">
               <thead>
                 <tr className="bg-amber-700 text-white">
                   <th className="py-2 px-4 font-bold border border-black text-center">
@@ -114,9 +114,10 @@ const VisiMisiManager = () => {
             Tambahkan Visi
           </Button>
         </div>
-        <div className="flex flex-col flex-1 gap-4">
+
+        <div className="flex flex-col flex-1 gap-4 w-full">
           <div className="flex-1 overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+            <table className="w-full text-left border-collapse min-w-75">
               <thead>
                 <tr className="bg-amber-700 text-white">
                   <th className="py-2 px-4 font-bold border border-black text-center">

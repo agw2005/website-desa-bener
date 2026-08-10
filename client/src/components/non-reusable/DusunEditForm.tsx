@@ -153,7 +153,7 @@ const DusunEditForm = (
   if (!dusun) return <p>Memuat data dusun...</p>;
 
   return (
-    <div className="flex flex-col gap-6 border-3 rounded-2xl p-6">
+    <div className="flex flex-col gap-6 border-3 rounded-2xl p-4 sm:p-6 w-full overflow-hidden">
       <TextInput
         label="Nama Dusun"
         name="nama"
@@ -165,7 +165,7 @@ const DusunEditForm = (
       {FIELD_GROUPS.map((group) => (
         <div key={group.title} className="flex flex-col gap-2">
           <h3 className="font-bold text-lg">{group.title}</h3>
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {group.fields.map((field) => (
               <TextInput
                 key={field}
