@@ -21,7 +21,7 @@ const Profil = () => {
 
   return (
     <Primitive>
-      <div className="flex gap-8 mx-32">
+      <div className="flex flex-col lg:flex-row gap-8 mx-2 md:mx-4 lg:mx-8 xl:mx-32">
         <div className="flex flex-col gap-8 flex-1">
           {profilDesa && (
             <RoundedSection title="PROFIL DESA">
