@@ -8,7 +8,7 @@ const Wisata = () => {
 
   return (
     <Primitive>
-      <div className="flex flex-col gap-8 px-32">
+      <div className="flex flex-col gap-8 max-w-7/8 self-center">
         <TempatWisata isLoggedIn={isLoggedIn} />
         <UmkmDesa isLoggedIn={isLoggedIn} />
       </div>
