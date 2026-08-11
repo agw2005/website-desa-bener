@@ -33,7 +33,7 @@ const Card = (
               }}
               className={`w-full object-cover rounded-2xl mb-4 ${aspectClass} transition duration-300 ease-in-out hover:brightness-75`}
             />
-            <h3 className="font-bold text-justify hover:text-blue-100">
+            <h3 className="font-bold hover:text-blue-100">
               {title}
             </h3>
           </Link>
@@ -49,10 +49,10 @@ const Card = (
               }}
               className={`w-full object-cover rounded-2xl mb-4 ${aspectClass}`}
             />
-            <h3 className="font-bold text-justify">{title}</h3>
+            <h3 className="font-bold">{title}</h3>
           </div>
         )}
-      <div className="flex flex-col gap-1 text-sm text-justify grow">
+      <div className="flex flex-col gap-1 text-sm grow">
         {children}
       </div>
     </div>

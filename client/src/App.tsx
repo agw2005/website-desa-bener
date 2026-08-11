@@ -14,20 +14,43 @@ import Manajemen from "./pages/Manajemen.tsx";
 import { manajemenLoader } from "./helpers/manajemenLoader.ts";
 import Artikel from "./pages/Artikel.tsx";
 import Umkm from "./pages/Umkm.tsx";
+import RootErrorBoundary from "./pages/RootErrorBoundary.tsx";
 
 const router = createBrowserRouter([
-  { path: "/", element: <Home /> },
-  { path: "/profil", element: <Profil /> },
-  { path: "/data", element: <Data /> },
-  { path: "/layanan", element: <Layanan /> },
-  { path: "/pengumuman", element: <Pengumuman /> },
-  { path: "/wisata", element: <Wisata /> },
-  { path: "/kontak", element: <Kontak /> },
-  { path: "/kalender", element: <Kalender /> },
-  { path: "/manajemen", element: <Manajemen />, loader: manajemenLoader },
-  { path: "/login", element: <Login />, loader: loginLoader },
-  { path: "/pengumuman/:id", element: <Artikel /> },
-  { path: "/umkm/:id", element: <Umkm /> },
+  { path: "/", ErrorBoundary: RootErrorBoundary, element: <Home /> },
+  { path: "/profil", ErrorBoundary: RootErrorBoundary, element: <Profil /> },
+  { path: "/data", ErrorBoundary: RootErrorBoundary, element: <Data /> },
+  { path: "/layanan", ErrorBoundary: RootErrorBoundary, element: <Layanan /> },
+  {
+    path: "/pengumuman",
+    ErrorBoundary: RootErrorBoundary,
+    element: <Pengumuman />,
+  },
+  { path: "/wisata", ErrorBoundary: RootErrorBoundary, element: <Wisata /> },
+  { path: "/kontak", ErrorBoundary: RootErrorBoundary, element: <Kontak /> },
+  {
+    path: "/kalender",
+    ErrorBoundary: RootErrorBoundary,
+    element: <Kalender />,
+  },
+  {
+    path: "/manajemen",
+    ErrorBoundary: RootErrorBoundary,
+    element: <Manajemen />,
+    loader: manajemenLoader,
+  },
+  {
+    path: "/login",
+    ErrorBoundary: RootErrorBoundary,
+    element: <Login />,
+    loader: loginLoader,
+  },
+  {
+    path: "/pengumuman/:id",
+    ErrorBoundary: RootErrorBoundary,
+    element: <Artikel />,
+  },
+  { path: "/umkm/:id", ErrorBoundary: RootErrorBoundary, element: <Umkm /> },
   { path: "/umkm", loader: () => redirect("/wisata") },
 ]);
 
