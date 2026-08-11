@@ -4,6 +4,14 @@
   box-shadow: 0 8px 10px -6px rgba(0, 0, 0, 0.3);
 }
 
+.scrollbar-hide {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge legacy */
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+
 html {
   font-size: clamp(12px, 1vw + 2px, 15px);
 }

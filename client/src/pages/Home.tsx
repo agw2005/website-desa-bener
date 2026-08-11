@@ -1,6 +1,5 @@
 import Primitive from "../components/reusable/Primitive.tsx";
 import SimpleSection from "../components/reusable/SimpleSection.tsx";
-import ManualCarousel from "../components/reusable/ManualCarousel.tsx";
 import useFetch from "../hooks/useFetch.tsx";
 import type { DeskripsiSekilas } from "../types/Profil.d.ts";
 import type { Aparatur } from "../types/Aparatur.d.ts";
@@ -8,6 +7,8 @@ import { Link } from "react-router";
 import { dateToText } from "../helpers/dateToText.ts";
 import useArticle from "../hooks/useArticle.tsx";
 import { serverApi } from "../helpers/serverApi.ts";
+import Card from "../components/reusable/Card.tsx";
+import Carousel from "../components/reusable/Carousel.tsx";
 
 const Home = () => {
   const {
@@ -20,18 +21,11 @@ const Home = () => {
 
   const {
     data: aparaturDesa,
-    isLoading: _aparaturDesaIsLoading,
+    isLoading: aparaturDesaIsLoading,
     isError: _aparaturDesaIsError,
   } = useFetch<Omit<Aparatur, "kata_sandi" | "foto">>(
     serverApi.get.aparatur.all(),
   );
-
-  const aparaturItems = aparaturDesa?.map((aparatur) => ({
-    id: aparatur.aparatur_id,
-    title: aparatur.nama,
-    subtitle: aparatur.jabatan,
-    photo: serverApi.get.aparatur.photo(aparatur.aparatur_id),
-  })) ?? [];
 
   const { data: artikelTerbaru } = useArticle();
 
@@ -39,19 +33,36 @@ const Home = () => {
     <Primitive>
       <SimpleSection subtitle="PROFIL SEKILAS">
         {profilSekilas?.[0]?.deskripsi_sekilas ??
-          <p className="font-bold">Profil sekilas belum tersedia</p>}
+          (
+            <p className="font-bold">
+              Profil sekilas belum dibuat admin website
+            </p>
+          )}
       </SimpleSection>
 
       <SimpleSection subtitle="APARATUR DESA">
-        {aparaturItems.length < 1
-          ? <p className="font-bold">Profil sekilas belum tersedia</p>
+        {aparaturDesaIsLoading
+          ? <p>Memuat data...</p>
+          : aparaturDesa && aparaturDesa.length > 0
+          ? (
+            <Carousel>
+              {aparaturDesa.map((aparatur) => (
+                <Card
+                  key={aparatur.aparatur_id}
+                  image={serverApi.get.aparatur.photo(aparatur.aparatur_id)}
+                  alt={aparatur.jabatan}
+                  title={aparatur.nama}
+                  aspect="2x3"
+                >
+                  <p>{aparatur.jabatan}</p>
+                </Card>
+              ))}
+            </Carousel>
+          )
           : (
-            <ManualCarousel
-              minCardWidth={180}
-              maxVisibleCards={8}
-              pixelGap={16}
-              items={aparaturItems}
-            />
+            <p className="font-bold">
+              Aparatur desa belum dibuat admin website
+            </p>
           )}
       </SimpleSection>
 
