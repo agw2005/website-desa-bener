@@ -2,7 +2,6 @@ import { useState } from "react";
 import Button from "../reusable/Button.tsx";
 import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";
-import ManualCarousel from "../reusable/ManualCarousel.tsx";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import type { Umkm } from "../../types/Umkm.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
@@ -10,6 +9,8 @@ import DropdownInput from "../reusable/inputs/DropdownInput.tsx";
 import type { Dusun } from "../../types/Dusun.d.ts";
 import { authFetch } from "../../helpers/authFetch.ts";
 import { serverApi } from "../../helpers/serverApi.ts";
+import Carousel from "../reusable/Carousel.tsx";
+import Card from "../reusable/Card.tsx";
 
 interface UmkmDesaProps {
   isLoggedIn: boolean;
@@ -37,7 +38,7 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
   );
 
   const {
-    data: rawUmkm,
+    data: umkm,
     refetch: refetchUmkm,
   } = useFetch<Omit<Umkm, "foto">>(
     serverApi.get.umkm.all(),
@@ -139,25 +140,37 @@ const UmkmDesa = ({ isLoggedIn }: UmkmDesaProps) => {
     );
   };
 
-  const umkm = rawUmkm?.map((umkm) => ({
-    id: umkm.umkm_id,
-    title: umkm.nama,
-    subtitle: umkm.deskripsi,
-    photo: serverApi.get.umkm.photo(umkm.umkm_id),
-    link: `/umkm/${umkm.umkm_id}`,
-  })) ?? [];
-
   return (
     <RoundedSection title="UMKM DESA" contentClassName="flex flex-col gap-8">
-      <ManualCarousel
-        minCardWidth={180}
-        maxVisibleCards={5}
-        pixelGap={16}
-        aspectRatio="1/1"
-        items={umkm}
-        showDelete={isLoggedIn}
-        onDelete={handleDeleteUmkm}
-      />
+      {umkm && (
+        <Carousel cardWidthClassName="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5">
+          {umkm.map((u) => (
+            <Card
+              key={u.umkm_id}
+              image={serverApi.get.umkm.photo(u.umkm_id)}
+              alt={u.deskripsi}
+              title={u.nama}
+              aspect="box"
+              link={`/umkm/${u.umkm_id}`}
+            >
+              <p>{u.deskripsi}</p>
+              {isLoggedIn && (
+                <Button
+                  className="mt-auto"
+                  variant="red"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDeleteUmkm(u.umkm_id);
+                  }}
+                >
+                  Hapus
+                </Button>
+              )}
+            </Card>
+          ))}
+        </Carousel>
+      )}
       {isLoggedIn && (
         <div className="flex flex-col gap-2">
           <h2 className="font-bold text-xl">TAMBAH UMKM BARU</h2>
