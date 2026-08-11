@@ -13,12 +13,10 @@ const Artikel = () => {
   const { data } = useArticle(Number(params.id));
   const nav = useNavigate();
 
-  console.log(data);
-
   return (
     <Primitive>
       {data && (
-        <div className="flex justify-center">
+        <div className="flex justify-center mx-8">
           <div className="flex flex-col gap-4 bg-amber-400 rounded-2xl p-8 max-w-4xl">
             <img
               className="rounded-2xl"
