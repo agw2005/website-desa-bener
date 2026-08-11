@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import RoundedSection from "../reusable/RoundedSection.tsx";
-import ManualCarousel from "../reusable/ManualCarousel.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";
 import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
 import Button from "../reusable/Button.tsx";
@@ -8,6 +7,8 @@ import type { Wisata } from "../../types/Wisata.d.ts";
 import useFetch from "../../hooks/useFetch.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
 import { serverApi } from "../../helpers/serverApi.ts";
+import Carousel from "../reusable/Carousel.tsx";
+import Card from "../reusable/Card.tsx";
 
 interface TempatWisataProps {
   isLoggedIn: boolean;
@@ -25,7 +26,7 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
   const [wisataPostMessage, setWisataPostMessage] = useState("");
 
   const {
-    data: rawWisata,
+    data: wisata,
     refetch: refetchWisata,
   } = useFetch<Omit<Wisata, "foto">>(
     serverApi.get.wisata.all(),
@@ -83,27 +84,39 @@ const TempatWisata = ({ isLoggedIn }: TempatWisataProps) => {
     }
   };
 
-  const wisata = rawWisata?.map((wisata) => ({
-    id: wisata.wisata_id,
-    title: wisata.nama,
-    subtitle: wisata.deskripsi,
-    photo: serverApi.get.wisata.photo(wisata.wisata_id),
-  })) ?? [];
-
   return (
     <RoundedSection
       title="TEMPAT WISATA"
       contentClassName="flex flex-col gap-8"
     >
-      <ManualCarousel
-        minCardWidth={180}
-        maxVisibleCards={5}
-        pixelGap={16}
-        aspectRatio="1/1"
-        items={wisata}
-        showDelete={isLoggedIn}
-        onDelete={handleDeleteWisata}
-      />
+      {wisata && (
+        <Carousel cardWidthClassName="w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5">
+          {wisata.map((w) => (
+            <Card
+              key={w.wisata_id}
+              image={serverApi.get.wisata.photo(w.wisata_id)}
+              alt={w.deskripsi}
+              title={w.nama}
+              aspect="box"
+            >
+              <p>{w.deskripsi}</p>
+              {isLoggedIn && (
+                <Button
+                  className="mt-auto"
+                  variant="red"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    handleDeleteWisata(w.wisata_id);
+                  }}
+                >
+                  Hapus
+                </Button>
+              )}
+            </Card>
+          ))}
+        </Carousel>
+      )}
       {isLoggedIn && (
         <div className="flex flex-col gap-2">
           <h2 className="font-bold text-xl">TAMBAH TEMPAT WISATA BARU</h2>
