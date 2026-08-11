@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import AparaturDesa from "../components/reusable/AparaturDesa.tsx";
 import Button from "../components/reusable/Button.tsx";
 import Primitive from "../components/reusable/Primitive.tsx";
 import RoundedSection from "../components/reusable/RoundedSection.tsx";
@@ -13,6 +12,7 @@ import TextAreaInput from "../components/reusable/inputs/TextAreaInput.tsx";
 import useAuth from "../hooks/useAuth.tsx";
 import { authFetch } from "../helpers/authFetch.ts";
 import { serverApi } from "../helpers/serverApi.ts";
+import Card from "../components/reusable/Card.tsx";
 
 const Kontak = () => {
   const { isLoggedIn, authIsLoading: __, authInfo: _ } = useAuth();
@@ -172,14 +172,22 @@ const Kontak = () => {
                 title="APARATUR DESA"
                 contentClassName="flex flex-col gap-3 items-center"
               >
-                <AparaturDesa
-                  name={aparaturDesa[indexAparaturDesa]?.nama}
-                  position={aparaturDesa[indexAparaturDesa]?.jabatan}
-                  phone={aparaturDesa[indexAparaturDesa]?.telepon}
-                  photo={serverApi.get.aparatur.photo(
+                <Card
+                  image={serverApi.get.aparatur.photo(
                     aparaturDesa[indexAparaturDesa]?.aparatur_id,
                   )}
-                />
+                  alt={aparaturDesa[indexAparaturDesa]?.jabatan}
+                  title={aparaturDesa[indexAparaturDesa]?.nama}
+                  aspect="2x3"
+                >
+                  <p>
+                    Jabatan : {aparaturDesa[indexAparaturDesa]?.jabatan}
+                  </p>
+                  <p>
+                    No. Telp :{" "}
+                    {aparaturDesa[indexAparaturDesa]?.telepon || "N/A"}
+                  </p>
+                </Card>
 
                 <p>
                   {indexAparaturDesa + 1}/{aparaturDesa.length}

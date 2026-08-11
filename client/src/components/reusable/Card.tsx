@@ -20,7 +20,7 @@ const Card = (
     : (aspect === "4x5" ? "aspect-[4/5]" : "aspect-square");
 
   return (
-    <div className="w-full p-4 rounded-xl bg-amber-600 text-white flex flex-col">
+    <div className="w-full p-4 rounded-xl bg-amber-600 text-white flex flex-col gap-2">
       {link
         ? (
           <Link to={link}>
@@ -39,7 +39,7 @@ const Card = (
           </Link>
         )
         : (
-          <>
+          <div>
             <img
               src={imageSrc}
               alt={alt}
@@ -50,9 +50,9 @@ const Card = (
               className={`w-full object-cover rounded-2xl mb-4 ${aspectClass}`}
             />
             <h3 className="font-bold text-justify">{title}</h3>
-          </>
+          </div>
         )}
-      <div className="flex flex-col gap-2 text-sm text-justify grow">
+      <div className="flex flex-col gap-1 text-sm text-justify grow">
         {children}
       </div>
     </div>
