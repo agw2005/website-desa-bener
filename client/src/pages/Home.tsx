@@ -98,7 +98,7 @@ const Home = () => {
               </div>
               <p className="text-justify whitespace-pre-line">
                 {artikelTerbaru.labels.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-2">
+                  <span className="flex flex-wrap gap-2 mb-2">
                     {artikelTerbaru.labels.map((l) => (
                       <span
                         key={l.label_id}
@@ -107,7 +107,7 @@ const Home = () => {
                         {l.nama}
                       </span>
                     ))}
-                  </div>
+                  </span>
                 )}
                 {artikelTerbaru.isi}
               </p>
