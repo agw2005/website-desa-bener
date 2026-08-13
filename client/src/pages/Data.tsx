@@ -16,13 +16,22 @@ const Data = () => {
     isError: _dataSemuaDusunIsError,
   } = useFetch<Dusun>(serverApi.get.dusun.all());
 
-  const {
-    data: apbdesTahun,
-  } = useApbdes(selectedYear);
+  const { data: apbdesTahun } = useApbdes(selectedYear);
+
+  const sortedDataSemuaDusun = useMemo(() => {
+    if (!dataSemuaDusun) return null;
+    return [...dataSemuaDusun].sort((a, b) => {
+      // Extract the first number found in the name, fallback to 0 if none is found
+      const numA = parseInt(a.nama?.match(/\d+/)?.[0] || "0", 10);
+      const numB = parseInt(b.nama?.match(/\d+/)?.[0] || "0", 10);
+
+      return numA - numB;
+    });
+  }, [dataSemuaDusun]);
 
   const totals = useMemo(() => {
-    if (!dataSemuaDusun) return {} as Dusun;
-    return dataSemuaDusun.reduce((accumulator, currentDusun) => {
+    if (!sortedDataSemuaDusun) return {} as Dusun;
+    return sortedDataSemuaDusun.reduce((accumulator, currentDusun) => {
       for (const key in currentDusun) {
         if (typeof currentDusun[key] === "number" && key !== "dusun_id") {
           accumulator[key] = (accumulator[key] || 0) + currentDusun[key];
@@ -30,11 +39,11 @@ const Data = () => {
       }
       return accumulator;
     }, {} as Dusun);
-  }, [dataSemuaDusun]);
+  }, [sortedDataSemuaDusun]);
 
   return (
     <Primitive>
-      {dataSemuaDusun && (
+      {sortedDataSemuaDusun && (
         <div className="flex flex-col gap-8 mx-2 md:mx-4 lg:mx-8 xl:mx-32">
           <RoundedSection title="APBDes (Anggaran Pendapatan dan Belanja Desa)">
             <div className="flex flex-col gap-4">
@@ -108,21 +117,21 @@ const Data = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dataSemuaDusun.map((dusun, index) => {
+                  {sortedDataSemuaDusun.map((dusun, index) => {
                     return (
                       <tr
                         key={index}
                         className="border-b border-slate-200 odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                       >
-                        <td className="px-4 py-2">{dusun.nama || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.rt || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.populasi || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.keluarga || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.laki || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.nama ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.rt ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.populasi ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.keluarga ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.laki ?? "N/A"}</td>
                         <td className="px-4 py-2">
-                          {dusun.perempuan || "N/A"}
+                          {dusun.perempuan ?? "N/A"}
                         </td>
-                        <td className="px-4 py-2">{dusun.umkm || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.umkm ?? "N/A"}</td>
                       </tr>
                     );
                   })}
@@ -150,9 +159,7 @@ const Data = () => {
                     <th className="px-4 py-2 text-left font-semibold">
                       Populasi
                     </th>
-                    <th className="px-4 py-2 text-left font-semibold">
-                      Islam
-                    </th>
+                    <th className="px-4 py-2 text-left font-semibold">Islam</th>
                     <th className="px-4 py-2 text-left font-semibold">
                       Protestanisme
                     </th>
@@ -171,29 +178,29 @@ const Data = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dataSemuaDusun.map((dusun, index) => {
+                  {sortedDataSemuaDusun.map((dusun, index) => {
                     return (
                       <tr
                         key={index}
                         className="border-b border-slate-200 odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                       >
-                        <td className="px-4 py-2">{dusun.nama || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.populasi || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.islam || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.nama ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.populasi ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.islam ?? "N/A"}</td>
                         <td className="px-4 py-2">
-                          {dusun.protestanisme || "N/A"}
+                          {dusun.protestanisme ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.katolisisme || "N/A"}
+                          {dusun.katolisisme ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.hinduisme || "N/A"}
+                          {dusun.hinduisme ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.buddhisme || "N/A"}
+                          {dusun.buddhisme ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.konfusianisme || "N/A"}
+                          {dusun.konfusianisme ?? "N/A"}
                         </td>
                       </tr>
                     );
@@ -241,30 +248,30 @@ const Data = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dataSemuaDusun.map((dusun, index) => {
+                  {sortedDataSemuaDusun.map((dusun, index) => {
                     return (
                       <tr
                         key={index}
                         className="border-b border-slate-200 odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                       >
-                        <td className="px-4 py-2">{dusun.nama || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.nama ?? "N/A"}</td>
                         <td className="px-4 py-2">
-                          {dusun.tunadaksa || "N/A"}
+                          {dusun.tunadaksa ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.tunanetra || "N/A"}
+                          {dusun.tunanetra ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.tunarungu || "N/A"}
+                          {dusun.tunarungu ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.tunawicara || "N/A"}
+                          {dusun.tunawicara ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.tunagrahita || "N/A"}
+                          {dusun.tunagrahita ?? "N/A"}
                         </td>
                         <td className="px-4 py-2">
-                          {dusun.tunalaras || "N/A"}
+                          {dusun.tunalaras ?? "N/A"}
                         </td>
                       </tr>
                     );
@@ -308,19 +315,19 @@ const Data = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {dataSemuaDusun.map((dusun, index) => {
+                  {sortedDataSemuaDusun.map((dusun, index) => {
                     return (
                       <tr
                         key={index}
                         className="border-b border-slate-200 odd:bg-white even:bg-slate-50 hover:bg-slate-100"
                       >
-                        <td className="px-4 py-2">{dusun.nama || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.kps || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.ks_satu || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.ks_dua || "N/A"}</td>
-                        <td className="px-4 py-2">{dusun.ks_tiga || "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.nama ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.kps ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.ks_satu ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.ks_dua ?? "N/A"}</td>
+                        <td className="px-4 py-2">{dusun.ks_tiga ?? "N/A"}</td>
                         <td className="px-4 py-2">
-                          {dusun.ks_tiga_plus || "N/A"}
+                          {dusun.ks_tiga_plus ?? "N/A"}
                         </td>
                       </tr>
                     );

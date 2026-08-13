@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import RoundedSection from "../reusable/RoundedSection.tsx";
 import TextInput from "../reusable/inputs/TextInput.tsx";
 import DropdownInput from "../reusable/inputs/DropdownInput.tsx";
@@ -20,6 +20,17 @@ const DusunManager = () => {
   } = useFetch<Pick<Dusun, "dusun_id" | "nama">>(
     serverApi.get.dusun.names(),
   );
+
+  const sortedNamaDusun = useMemo(() => {
+    if (!namaDusun) return null;
+    return [...namaDusun].sort((a, b) => {
+      // Extract the first number found in the name, fallback to 0 if none is found
+      const numA = parseInt(a.nama?.match(/\d+/)?.[0] || "0", 10);
+      const numB = parseInt(b.nama?.match(/\d+/)?.[0] || "0", 10);
+
+      return numA - numB;
+    });
+  }, [namaDusun]);
 
   const handleAddDusun = async () => {
     setRequiredInputIsEmpty(false);
@@ -67,13 +78,13 @@ const DusunManager = () => {
 
         <div className="flex flex-col gap-2 flex-1 w-full">
           <h2 className="text-2xl font-bold">Data Per-dusun</h2>
-          {namaDusun && (
+          {sortedNamaDusun && (
             <DropdownInput
               label="Dusun"
               name="selected-dusun"
               id="selected-dusun"
               value={selectedDusun}
-              options={namaDusun}
+              options={sortedNamaDusun}
               getId={(dusun) => dusun.dusun_id}
               getLabel={(dusun) => dusun.nama}
               onChangeHandler={setSelectedDusun}
