@@ -195,9 +195,17 @@ const Primitive = ({ children }: PrimitiveProps) => {
                 Tengaran<br />Kabupaten Semarang<br />Jawa Tengah, Indonesia
               </div>
               <div className="text-center text-white text-xs px-2 sm:px-8 lg:px-12">
-                Website resmi Desa Bener untuk informasi publik, layanan
-                mandiri, berita desa, dan transparansi pembangunan yang dibuat
-                oleh{" "}
+                Website Desa Bener adalah{" "}
+                <a
+                  href="https://github.com/agw2005/website-desa-bener"
+                  className="text-blue-200 hover:text-blue-500 active:text-blue-400"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  aplikasi berbasis web
+                </a>{" "}
+                untuk informasi publik, layanan mandiri, berita desa, dan
+                transparansi pembangunan yang dibuat oleh{" "}
                 <a
                   href="https://agw2005.github.io/"
                   className="text-blue-200 hover:text-blue-500 active:text-blue-400"
