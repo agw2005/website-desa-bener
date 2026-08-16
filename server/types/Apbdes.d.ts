@@ -3,7 +3,7 @@ export interface Apbdes {
   tahun: number;
 }
 
-interface LampiranApbdes {
+export interface LampiranApbdes {
   apbdes_file_id: number;
   apbdes_id: number;
   nama_file: string;

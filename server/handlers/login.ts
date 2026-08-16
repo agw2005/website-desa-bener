@@ -8,20 +8,15 @@ import {
 import type { LoggedInInfo, LoginInfo } from "../types/Login.d.ts";
 import type { RouterContext } from "@oak/oak/router";
 import type { Aparatur } from "../types/Aparatur.d.ts";
-import { pool } from "../dbpool.ts";
 import { getJwtKey } from "../helpers/getJwtKey.ts";
+import { executeQuery } from "../helpers/executeQuery.ts";
 
 const getAparaturByName = async (nama: string): Promise<Aparatur | null> => {
-  const connection = await pool.connect();
-  try {
-    const result = await connection.queryObject<Aparatur>(
-      "SELECT * FROM Aparatur WHERE nama = $1 LIMIT 1",
-      [nama],
-    );
-    return result.rows[0] ?? null;
-  } finally {
-    connection.release();
-  }
+  const rows = await executeQuery<Aparatur>(
+    "SELECT * FROM Aparatur WHERE nama = $1 LIMIT 1;",
+    [nama],
+  );
+  return rows[0] ?? null;
 };
 
 export const requestJwtAparatur = async (ctx: RouterContext<"/login">) => {

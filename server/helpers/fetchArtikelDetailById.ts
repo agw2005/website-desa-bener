@@ -1,12 +1,11 @@
-import { PoolClient } from "@db/postgres";
 import type { ArtikelDetail } from "../types/Artikel.d.ts";
 import { bigintToNumber } from "./bigintToNumber.ts";
+import { executeQuery } from "./executeQuery.ts";
 
 export const fetchArtikelDetailById = async (
-  connection: PoolClient,
   id: number,
 ): Promise<ArtikelDetail | null> => {
-  const result = await connection.queryObject<ArtikelDetail>(
+  const rows = await executeQuery<ArtikelDetail>(
     `
     SELECT
       Artikel.artikel_id,
@@ -35,12 +34,12 @@ export const fetchArtikelDetailById = async (
         '[]'
       ) AS lampiran
     FROM Artikel
-    WHERE Artikel.artikel_id = $1
+    WHERE Artikel.artikel_id = $1;
     `,
     [id],
   );
 
-  if (result.rows.length === 0) return null;
+  if (rows.length === 0) return null;
 
-  return bigintToNumber(result.rows[0], ["waktu_upload"]);
+  return bigintToNumber(rows[0], ["waktu_upload"]);
 };

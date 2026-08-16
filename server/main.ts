@@ -63,6 +63,7 @@ import {
   deleteVisi,
 } from "./handlers/delete.ts";
 import { requireAuth } from "./middlewares/requireAuth.ts";
+import { pool } from "./dbpool.ts";
 
 const port = 8000;
 const app = new Application();
@@ -84,7 +85,7 @@ const syarat = new Router();
 root
   .get("/", (ctx: RouterContext<"/">) => {
     ctx.response.status = 200;
-    ctx.response.body = "Healthy";
+    ctx.response.body = `Healthy (pool available: ${pool.size})`;
   })
   .get("/verifikasi", verifyJwt);
 

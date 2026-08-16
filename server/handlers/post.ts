@@ -1,11 +1,12 @@
 import type { RouterContext } from "@oak/oak/router";
 import type { MisiPostPayload } from "../types/Misi.d.ts";
 import type { VisiPostPayload } from "../types/Visi.d.ts";
-import { pool } from "../dbpool.ts";
 import type { Komentar } from "../types/Komentar.d.ts";
 import type { Wisata } from "../types/Wisata.d.ts";
 import type { KontakUmkm, Umkm } from "../types/Umkm.d.ts";
 import type { Pelayanan } from "../types/Pelayanan.d.ts";
+import { executeQuery } from "../helpers/executeQuery.ts";
+import { executeTransaction } from "../helpers/executeTransaction.ts";
 
 export const postKontakUmkm = async (ctx: RouterContext<"/:id">) => {
   const umkmId = Number(ctx.params.id);
@@ -41,35 +42,42 @@ export const postKontakUmkm = async (ctx: RouterContext<"/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const umkmCheck = await connection.queryObject<Pick<Umkm, "umkm_id">>(
-      `SELECT umkm_id FROM Umkm WHERE umkm_id = $1`,
-      [umkmId],
-    );
+    const created = await executeTransaction(async (connection) => {
+      const umkmCheck = await connection.queryObject<Pick<Umkm, "umkm_id">>(
+        `SELECT umkm_id FROM Umkm WHERE umkm_id = $1;`,
+        [umkmId],
+      );
 
-    if (umkmCheck.rows.length === 0) {
+      if (umkmCheck.rows.length === 0) {
+        return null;
+      }
+
+      const result = await connection.queryObject<
+        KontakUmkm & { umkm_id: number }
+      >(
+        `INSERT INTO Kontak_Umkm (umkm_id, jenis_kontak, isi, tautan)
+         VALUES ($1, $2, $3, $4)
+         RETURNING kontak_umkm_id, umkm_id, jenis_kontak, isi, tautan;`,
+        [
+          umkmId,
+          jenis_kontak.trim(),
+          isi_kontak.trim(),
+          tautan_kontak.trim(),
+        ],
+      );
+
+      return result.rows[0];
+    });
+
+    if (created === null) {
       ctx.response.status = 404;
       ctx.response.body = { error: `UMKM tidak ditemukan.` };
       return;
     }
 
-    const result = await connection.queryObject<
-      KontakUmkm & { umkm_id: number }
-    >(
-      `INSERT INTO Kontak_Umkm (umkm_id, jenis_kontak, isi, tautan)
-       VALUES ($1, $2, $3, $4)
-       RETURNING kontak_umkm_id, umkm_id, jenis_kontak, isi, tautan`,
-      [
-        umkmId,
-        jenis_kontak.trim(),
-        isi_kontak.trim(),
-        tautan_kontak.trim(),
-      ],
-    );
-
     ctx.response.status = 201;
-    ctx.response.body = result.rows[0];
+    ctx.response.body = created;
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
@@ -98,14 +106,11 @@ export const postSyaratPelayanan = async (
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<
-      { syarat_pelayanan_id: number }
-    >(
+    const rows = await executeQuery<{ syarat_pelayanan_id: number }>(
       `INSERT INTO Syarat_Pelayanan (pelayanan_id, isi, tautan)
        VALUES ($1, $2, $3)
-       RETURNING syarat_pelayanan_id`,
+       RETURNING syarat_pelayanan_id;`,
       [
         pelayananId,
         isi.trim(),
@@ -116,15 +121,11 @@ export const postSyaratPelayanan = async (
     );
 
     ctx.response.status = 201;
-    ctx.response.body = {
-      syarat_pelayanan_id: result.rows[0].syarat_pelayanan_id,
-    };
+    ctx.response.body = { syarat_pelayanan_id: rows[0].syarat_pelayanan_id };
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menambahkan syarat." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -156,44 +157,40 @@ export const postPelayanan = async (ctx: RouterContext<"/">) => {
     }
   }
 
-  const connection = await pool.connect();
   try {
-    await connection.queryObject("BEGIN");
+    const pelayananId = await executeTransaction(async (connection) => {
+      const created = await connection.queryObject<
+        Pick<Pelayanan, "pelayanan_id">
+      >(
+        "INSERT INTO Pelayanan (judul) VALUES ($1) RETURNING pelayanan_id;",
+        [judul.trim()],
+      );
+      const id = created.rows[0].pelayanan_id;
 
-    const created = await connection.queryObject<
-      Pick<Pelayanan, "pelayanan_id">
-    >(
-      "INSERT INTO Pelayanan (judul) VALUES ($1) RETURNING pelayanan_id",
-      [judul.trim()],
-    );
-    const pelayananId = created.rows[0].pelayanan_id;
+      for (let i = 0; i < isiSyaratList.length; i++) {
+        const isi = isiSyaratList[i];
+        const tautan = tautanSyaratList[i];
 
-    for (let i = 0; i < isiSyaratList.length; i++) {
-      const isi = isiSyaratList[i];
-      const tautan = tautanSyaratList[i];
+        if (typeof isi !== "string" || typeof tautan !== "string") {
+          throw new Error("Format data syarat tidak valid.");
+        }
 
-      if (typeof isi !== "string" || typeof tautan !== "string") {
-        throw new Error("Format data syarat tidak valid.");
+        await connection.queryObject(
+          `INSERT INTO Syarat_Pelayanan (pelayanan_id, isi, tautan)
+           VALUES ($1, $2, $3);`,
+          [id, isi.trim(), tautan.trim() === "" ? null : tautan.trim()],
+        );
       }
 
-      await connection.queryObject(
-        `INSERT INTO Syarat_Pelayanan (pelayanan_id, isi, tautan)
-         VALUES ($1, $2, $3)`,
-        [pelayananId, isi.trim(), tautan.trim() === "" ? null : tautan.trim()],
-      );
-    }
-
-    await connection.queryObject("COMMIT");
+      return id;
+    });
 
     ctx.response.status = 201;
     ctx.response.body = { pelayanan_id: pelayananId };
   } catch (err) {
-    await connection.queryObject("ROLLBACK");
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data pelayanan." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -263,48 +260,44 @@ export const postUmkm = async (ctx: RouterContext<"/">) => {
 
   const fotoBytes = new Uint8Array(await foto.arrayBuffer());
 
-  const connection = await pool.connect();
   try {
-    await connection.queryObject("BEGIN");
+    const umkmId = await executeTransaction(async (connection) => {
+      const created = await connection.queryObject<Pick<Umkm, "umkm_id">>(
+        `INSERT INTO Umkm (nama, dusun_id, deskripsi, foto)
+         VALUES ($1, $2, $3, $4)
+         RETURNING umkm_id;`,
+        [nama.trim(), dusunId, deskripsi.trim(), fotoBytes],
+      );
+      const id = created.rows[0].umkm_id;
 
-    const created = await connection.queryObject<Pick<Umkm, "umkm_id">>(
-      `INSERT INTO Umkm (nama, dusun_id, deskripsi, foto)
-       VALUES ($1, $2, $3, $4)
-       RETURNING umkm_id`,
-      [nama.trim(), dusunId, deskripsi.trim(), fotoBytes],
-    );
-    const umkmId = created.rows[0].umkm_id;
+      for (let i = 0; i < jenisKontakList.length; i++) {
+        const jenisKontak = jenisKontakList[i];
+        const isiKontak = isiKontakList[i];
+        const tautanKontak = tautanKontakList[i];
 
-    for (let i = 0; i < jenisKontakList.length; i++) {
-      const jenisKontak = jenisKontakList[i];
-      const isiKontak = isiKontakList[i];
-      const tautanKontak = tautanKontakList[i];
+        if (
+          typeof jenisKontak !== "string" || typeof isiKontak !== "string" ||
+          typeof tautanKontak !== "string"
+        ) {
+          throw new Error("Format data kontak tidak valid.");
+        }
 
-      if (
-        typeof jenisKontak !== "string" || typeof isiKontak !== "string" ||
-        typeof tautanKontak !== "string"
-      ) {
-        throw new Error("Format data kontak tidak valid.");
+        await connection.queryObject(
+          `INSERT INTO Kontak_Umkm (umkm_id, jenis_kontak, isi, tautan)
+           VALUES ($1, $2, $3, $4);`,
+          [id, jenisKontak, isiKontak, tautanKontak],
+        );
       }
 
-      await connection.queryObject(
-        `INSERT INTO Kontak_Umkm (umkm_id, jenis_kontak, isi, tautan)
-         VALUES ($1, $2, $3, $4)`,
-        [umkmId, jenisKontak, isiKontak, tautanKontak],
-      );
-    }
-
-    await connection.queryObject("COMMIT");
+      return id;
+    });
 
     ctx.response.status = 201;
     ctx.response.body = { umkm_id: umkmId };
   } catch (err) {
-    await connection.queryObject("ROLLBACK");
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data UMKM." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -328,8 +321,6 @@ export const postWisata = async (ctx: RouterContext<"/">) => {
     return;
   }
 
-  let fotoBytes = null;
-
   if (
     foto instanceof File && !ALLOWED_IMAGE_TYPES.includes(foto.type)
   ) {
@@ -346,35 +337,31 @@ export const postWisata = async (ctx: RouterContext<"/">) => {
     return;
   }
 
-  fotoBytes = foto instanceof File
+  const fotoBytes = foto instanceof File
     ? new Uint8Array(await foto.arrayBuffer())
     : null;
 
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<Pick<Wisata, "wisata_id">>(
+    const rows = await executeQuery<Pick<Wisata, "wisata_id">>(
       `INSERT INTO
        Wisata (nama, deskripsi, foto)
        VALUES ($1, $2, $3)
-       RETURNING wisata_id`,
+       RETURNING wisata_id;`,
       [nama, deskripsi, fotoBytes],
     );
 
     ctx.response.status = 201;
-    ctx.response.body = { wisata_id: result.rows[0].wisata_id };
+    ctx.response.body = { wisata_id: rows[0].wisata_id };
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data tempat wisata." };
-  } finally {
-    connection.release();
   }
 };
 
 export const postKomentar = async (ctx: RouterContext<"/">) => {
-  const body: Omit<Komentar, "komentar_id" | "waktu_upload"> = await ctx.request
-    .body.json();
+  const body: Omit<Komentar, "komentar_id" | "waktu_upload"> = await ctx
+    .request.body.json();
 
   if (!body.nama) {
     ctx.response.status = 400;
@@ -386,25 +373,21 @@ export const postKomentar = async (ctx: RouterContext<"/">) => {
 
   const waktuUpload = Math.floor(Date.now() / 1000);
 
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<{ komentar_id: number }>(
+    const rows = await executeQuery<{ komentar_id: number }>(
       `INSERT INTO
        Komentar  (nama, surel, isi, waktu_upload)
        VALUES    ($1  , $2   , $3 , $4          )
-       RETURNING komentar_id`,
+       RETURNING komentar_id;`,
       [body.nama, body.surel, body.isi, waktuUpload],
     );
 
     ctx.response.status = 201;
-    ctx.response.body = { komentar_id: result.rows[0].komentar_id };
+    ctx.response.body = { komentar_id: rows[0].komentar_id };
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data label." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -419,25 +402,21 @@ export const postLabel = async (ctx: RouterContext<"/">) => {
     return;
   }
 
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<{ label_id: number }>(
+    const rows = await executeQuery<{ label_id: number }>(
       `INSERT INTO
        Label (nama)
        VALUES ($1)
-       RETURNING label_id`,
+       RETURNING label_id;`,
       [nama],
     );
 
     ctx.response.status = 201;
-    ctx.response.body = { label_id: result.rows[0].label_id };
+    ctx.response.body = { label_id: rows[0].label_id };
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data label." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -467,76 +446,99 @@ export const postApbdesFileAtYear = async (ctx: RouterContext<"/:year">) => {
     return;
   }
 
-  const connection = await pool.connect();
+  const fileBytes = new Uint8Array(await file.arrayBuffer());
+
   try {
-    const existing = await connection.queryObject<{ apbdes_id: number }>(
-      "SELECT apbdes_id FROM Apbdes WHERE tahun = $1",
-      [year],
-    );
-
-    let apbdesId: number;
-
-    if (existing.rows.length > 0) {
-      apbdesId = existing.rows[0].apbdes_id;
-    } else {
-      const created = await connection.queryObject<{ apbdes_id: number }>(
-        "INSERT INTO Apbdes (tahun) VALUES ($1) RETURNING apbdes_id",
+    const result = await executeTransaction(async (connection) => {
+      const existing = await connection.queryObject<{ apbdes_id: number }>(
+        "SELECT apbdes_id FROM Apbdes WHERE tahun = $1;",
         [year],
       );
-      apbdesId = created.rows[0].apbdes_id;
-    }
 
-    const fileBytes = new Uint8Array(await file.arrayBuffer());
+      let apbdesId: number;
 
-    const inserted = await connection.queryObject<{ apbdes_file_id: number }>(
-      `INSERT INTO Lampiran_Apbdes (apbdes_id, nama_file, besar_file, isi_file)
-       VALUES ($1, $2, $3, $4)
-       RETURNING apbdes_file_id`,
-      [apbdesId, file.name, file.size, fileBytes],
-    );
+      if (existing.rows.length > 0) {
+        apbdesId = existing.rows[0].apbdes_id;
+      } else {
+        const created = await connection.queryObject<{ apbdes_id: number }>(
+          "INSERT INTO Apbdes (tahun) VALUES ($1) RETURNING apbdes_id;",
+          [year],
+        );
+        apbdesId = created.rows[0].apbdes_id;
+      }
+
+      const inserted = await connection.queryObject<
+        { apbdes_file_id: number }
+      >(
+        `INSERT INTO Lampiran_Apbdes (apbdes_id, nama_file, besar_file, isi_file)
+         VALUES ($1, $2, $3, $4)
+         RETURNING apbdes_file_id;`,
+        [apbdesId, file.name, file.size, fileBytes],
+      );
+
+      return {
+        apbdes_id: apbdesId,
+        apbdes_file_id: inserted.rows[0].apbdes_file_id,
+      };
+    });
 
     ctx.response.status = 201;
-    ctx.response.body = {
-      apbdes_id: apbdesId,
-      apbdes_file_id: inserted.rows[0].apbdes_file_id,
-    };
+    ctx.response.body = result;
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan lampiran APBDes." };
-  } finally {
-    connection.release();
   }
 };
 
 export const postVisi = async (ctx: RouterContext<"/">) => {
-  const request: VisiPostPayload = await ctx.request.body.json();
+  let request: VisiPostPayload;
+  try {
+    request = await ctx.request.body.json();
+  } catch {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Body permintaan tidak valid." };
+    return;
+  }
 
-  const connection = await pool.connect();
+  try {
+    const rows = await executeQuery<{ visi_id: number }>(
+      "INSERT INTO Visi (isi) VALUES ($1) RETURNING visi_id;",
+      [request.isi],
+    );
 
-  const result = await connection.queryObject<{ visi_id: number }>(
-    "INSERT INTO Visi (isi) VALUES ($1) RETURNING visi_id;",
-    [request.isi],
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+    ctx.response.status = 201;
+    ctx.response.body = rows[0];
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data visi." };
+  }
 };
 
 export const postMisi = async (ctx: RouterContext<"/">) => {
-  const request: MisiPostPayload = await ctx.request.body.json();
+  let request: MisiPostPayload;
+  try {
+    request = await ctx.request.body.json();
+  } catch {
+    ctx.response.status = 400;
+    ctx.response.body = { error: "Body permintaan tidak valid." };
+    return;
+  }
 
-  const connection = await pool.connect();
+  try {
+    const rows = await executeQuery<{ misi_id: number }>(
+      "INSERT INTO Misi (isi) VALUES ($1) RETURNING misi_id;",
+      [request.isi],
+    );
 
-  const result = await connection.queryObject<{ misi_id: number }>(
-    "INSERT INTO Misi (isi) VALUES ($1) RETURNING misi_id;",
-    [request.isi],
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+    ctx.response.status = 201;
+    ctx.response.body = rows[0];
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal menyimpan data misi." };
+  }
 };
 
 export const postDusun = async (ctx: RouterContext<"/">) => {
@@ -550,25 +552,21 @@ export const postDusun = async (ctx: RouterContext<"/">) => {
     return;
   }
 
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<{ dusun_id: number }>(
+    const rows = await executeQuery<{ dusun_id: number }>(
       `INSERT INTO
        Dusun (nama, rt, populasi, keluarga, laki, perempuan, umkm, islam, protestanisme, katolisisme, hinduisme, buddhisme, konfusianisme, tunadaksa, tunanetra, tunarungu, tunawicara, tunagrahita, tunalaras, kps, ks_satu, ks_dua, ks_tiga, ks_tiga_plus)
        VALUES ($1, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null)
-       RETURNING dusun_id`,
+       RETURNING dusun_id;`,
       [nama],
     );
 
     ctx.response.status = 201;
-    ctx.response.body = { dusun_id: result.rows[0].dusun_id };
+    ctx.response.body = { dusun_id: rows[0].dusun_id };
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data dusun." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -596,8 +594,6 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
     return;
   }
 
-  let fotoBytes = null;
-
   if (
     foto instanceof File && !ALLOWED_IMAGE_TYPES.includes(foto.type)
   ) {
@@ -614,31 +610,28 @@ export const postAparatur = async (ctx: RouterContext<"/">) => {
     return;
   }
 
-  fotoBytes = foto instanceof File
+  const fotoBytes = foto instanceof File
     ? new Uint8Array(await foto.arrayBuffer())
     : null;
 
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<{ aparatur_id: number }>(
+    const rows = await executeQuery<{ aparatur_id: number }>(
       `INSERT INTO
        Aparatur (nama, jabatan, telepon, foto, kata_sandi)
        VALUES ($1, $2, $3, $4, $5)
-       RETURNING aparatur_id`,
+       RETURNING aparatur_id;`,
       [nama, jabatan, telepon, fotoBytes, kataSandi],
     );
 
     ctx.response.status = 201;
-    ctx.response.body = { aparatur_id: result.rows[0].aparatur_id };
+    ctx.response.body = { aparatur_id: rows[0].aparatur_id };
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan data aparatur." };
-  } finally {
-    connection.release();
   }
 };
+
 export const postArtikel = async (ctx: RouterContext<"/">) => {
   const ALLOWED_LAMPIRAN_TYPES = ["image/jpeg", "image/png", "image/jpg"];
   const MAX_LAMPIRAN_SIZE = 5 * 1024 * 1024; // 5MB per file
@@ -697,46 +690,42 @@ export const postArtikel = async (ctx: RouterContext<"/">) => {
     }
   }
 
-  const connection = await pool.connect();
   try {
-    await connection.queryObject("BEGIN");
+    const artikelId = await executeTransaction(async (connection) => {
+      const waktuUpload = Math.floor(Date.now() / 1000);
 
-    const waktuUpload = Math.floor(Date.now() / 1000);
-
-    const created = await connection.queryObject<{ artikel_id: number }>(
-      `INSERT INTO Artikel (judul, isi, waktu_upload)
-       VALUES ($1, $2, $3)
-       RETURNING artikel_id`,
-      [judul.trim(), isi.trim(), waktuUpload],
-    );
-    const artikelId = created.rows[0].artikel_id;
-
-    for (const labelId of labelIds) {
-      await connection.queryObject(
-        `INSERT INTO Label_Artikel (artikel_id, label_id) VALUES ($1, $2)`,
-        [artikelId, labelId],
+      const created = await connection.queryObject<{ artikel_id: number }>(
+        `INSERT INTO Artikel (judul, isi, waktu_upload)
+         VALUES ($1, $2, $3)
+         RETURNING artikel_id;`,
+        [judul.trim(), isi.trim(), waktuUpload],
       );
-    }
+      const id = created.rows[0].artikel_id;
 
-    for (const file of lampiranFiles) {
-      const fileBytes = new Uint8Array(await file.arrayBuffer());
-      await connection.queryObject(
-        `INSERT INTO Lampiran_Artikel (artikel_id, nama_file, besar_file, isi_file)
-         VALUES ($1, $2, $3, $4)`,
-        [artikelId, file.name, file.size, fileBytes],
-      );
-    }
+      for (const labelId of labelIds) {
+        await connection.queryObject(
+          `INSERT INTO Label_Artikel (artikel_id, label_id) VALUES ($1, $2);`,
+          [id, labelId],
+        );
+      }
 
-    await connection.queryObject("COMMIT");
+      for (const file of lampiranFiles) {
+        const fileBytes = new Uint8Array(await file.arrayBuffer());
+        await connection.queryObject(
+          `INSERT INTO Lampiran_Artikel (artikel_id, nama_file, besar_file, isi_file)
+           VALUES ($1, $2, $3, $4);`,
+          [id, file.name, file.size, fileBytes],
+        );
+      }
+
+      return id;
+    });
 
     ctx.response.status = 201;
     ctx.response.body = { artikel_id: artikelId };
   } catch (err) {
-    await connection.queryObject("ROLLBACK");
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal menyimpan artikel." };
-  } finally {
-    connection.release();
   }
 };

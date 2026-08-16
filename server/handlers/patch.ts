@@ -1,7 +1,8 @@
 import type { RouterContext } from "@oak/oak/router";
-import { pool } from "../dbpool.ts";
 import { safeDecodeURI } from "../helpers/safeDecodeURI.ts";
 import type { Umkm } from "../types/Umkm.d.ts";
+import { executeTransaction } from "../helpers/executeTransaction.ts";
+import { executeQuery } from "../helpers/executeQuery.ts";
 
 export const patchUmkm = async (ctx: RouterContext<"/:id">) => {
   const umkmId = Number(ctx.params.id);
@@ -77,38 +78,41 @@ export const patchUmkm = async (ctx: RouterContext<"/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const umkmCheck = await connection.queryObject<Pick<Umkm, "umkm_id">>(
-      `SELECT umkm_id FROM Umkm WHERE umkm_id = $1`,
-      [umkmId],
-    );
+    const updated = await executeTransaction(async (connection) => {
+      const umkmCheck = await connection.queryObject<Pick<Umkm, "umkm_id">>(
+        `SELECT umkm_id FROM Umkm WHERE umkm_id = $1;`,
+        [umkmId],
+      );
 
-    if (umkmCheck.rows.length === 0) {
+      if (umkmCheck.rows.length === 0) {
+        return null;
+      }
+
+      values.push(umkmId);
+      const result = await connection.queryObject<Omit<Umkm, "foto">>(
+        `UPDATE Umkm
+         SET ${setClauses.join(", ")}
+         WHERE umkm_id = $${paramIndex}
+         RETURNING umkm_id, nama, deskripsi, dusun_id;`,
+        values,
+      );
+
+      return result.rows[0];
+    });
+
+    if (updated === null) {
       ctx.response.status = 404;
       ctx.response.body = { error: `UMKM tidak ditemukan.` };
       return;
     }
 
-    values.push(umkmId);
-    const result = await connection.queryObject<
-      Omit<Umkm, "foto">
-    >(
-      `UPDATE Umkm
-       SET ${setClauses.join(", ")}
-       WHERE umkm_id = $${paramIndex}
-       RETURNING umkm_id, nama, deskripsi, dusun_id`,
-      values,
-    );
-
     ctx.response.status = 200;
-    ctx.response.body = result.rows[0];
+    ctx.response.body = updated;
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: `Gagal memperbarui UMKM.` };
-  } finally {
-    connection.release();
   }
 };
 
@@ -201,18 +205,17 @@ export const patchDusun = async (ctx: RouterContext<"/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
     values.push(id);
 
-    const result = await connection.queryObject(
+    const rows = await executeQuery(
       `UPDATE Dusun SET ${
         setClauses.join(", ")
-      } WHERE dusun_id = $${paramIndex}`,
+      } WHERE dusun_id = $${paramIndex};`,
       values,
     );
 
-    if (result.rowCount === 0) {
+    if (rows.length === 0) {
       ctx.response.status = 404;
       ctx.response.body = { error: "Data dusun tidak ditemukan." };
       return;
@@ -224,8 +227,6 @@ export const patchDusun = async (ctx: RouterContext<"/:id">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal memperbarui data dusun." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -278,7 +279,6 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
     }
   }
 
-  // Int fields: skip if missing, empty, or not a valid integer
   for (const field of PROFIL_INT_FIELDS) {
     const value = form.get(field);
     if (typeof value === "string" && value.trim() !== "") {
@@ -294,7 +294,6 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
     }
   }
 
-  // Decimal fields: same pattern
   for (const field of PROFIL_DECIMAL_FIELDS) {
     const value = form.get(field);
     if (typeof value === "string" && value.trim() !== "") {
@@ -308,7 +307,6 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
     }
   }
 
-  // File field: skip if not provided, or if it's an empty file input
   const peta = form.get("peta");
   if (peta instanceof File && peta.size > 0) {
     if (!["image/jpeg", "image/png", "image/jpg"].includes(peta.type)) {
@@ -334,27 +332,34 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const existing = await connection.queryObject<{ profil_id: number }>(
-      "SELECT profil_id FROM Profil LIMIT 1",
-    );
+    const updated = await executeTransaction(async (connection) => {
+      const existing = await connection.queryObject<{ profil_id: number }>(
+        "SELECT profil_id FROM Profil LIMIT 1;",
+      );
 
-    if (existing.rows.length === 0) {
+      if (existing.rows.length === 0) {
+        return null;
+      }
+
+      const profilId = existing.rows[0].profil_id;
+      values.push(profilId);
+
+      await connection.queryObject(
+        `UPDATE Profil SET ${
+          setClauses.join(", ")
+        } WHERE profil_id = $${paramIndex};`,
+        values,
+      );
+
+      return profilId;
+    });
+
+    if (updated === null) {
       ctx.response.status = 404;
       ctx.response.body = { error: "Data profil desa belum tersedia." };
       return;
     }
-
-    const profilId = existing.rows[0].profil_id;
-    values.push(profilId);
-
-    await connection.queryObject(
-      `UPDATE Profil SET ${
-        setClauses.join(", ")
-      } WHERE profil_id = $${paramIndex}`,
-      values,
-    );
 
     ctx.response.status = 200;
     ctx.response.body = { message: "Profil desa berhasil diperbarui." };
@@ -362,7 +367,5 @@ export const patchProfil = async (ctx: RouterContext<"/">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal memperbarui data profil desa." };
-  } finally {
-    connection.release();
   }
 };

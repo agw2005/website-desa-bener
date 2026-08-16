@@ -4,8 +4,7 @@ import type { Aparatur } from "../types/Aparatur.d.ts";
 import type { Dusun } from "../types/Dusun.d.ts";
 import type { Visi } from "../types/Visi.d.ts";
 import type { Misi } from "../types/Misi.d.ts";
-import type { ApbdesDetail } from "../types/Apbdes.d.ts";
-import { pool } from "../dbpool.ts";
+import type { ApbdesDetail, LampiranApbdes } from "../types/Apbdes.d.ts";
 import { getExtension } from "../helpers/getExtension.ts";
 import { contentType } from "@std/media-types/content-type";
 import { Label } from "../types/Label.d.ts";
@@ -16,11 +15,11 @@ import { fetchArtikelDetailById } from "../helpers/fetchArtikelDetailById.ts";
 import { Wisata } from "../types/Wisata.d.ts";
 import { Umkm, UmkmDetail } from "../types/Umkm.d.ts";
 import { PelayananDetail } from "../types/Pelayanan.d.ts";
+import { executeQuery } from "../helpers/executeQuery.ts";
 
 export const getPelayananLengkap = async (ctx: RouterContext<"/lengkap">) => {
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<PelayananDetail>(
+    const rows = await executeQuery<PelayananDetail>(
       `
       SELECT
         Pelayanan.pelayanan_id,
@@ -43,13 +42,11 @@ export const getPelayananLengkap = async (ctx: RouterContext<"/lengkap">) => {
     );
 
     ctx.response.status = 200;
-    ctx.response.body = result.rows;
+    ctx.response.body = rows;
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil data pelayanan." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -62,9 +59,8 @@ export const getPelayananById = async (ctx: RouterContext<"/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<PelayananDetail>(
+    const rows = await executeQuery<PelayananDetail>(
       `
       SELECT
         Pelayanan.pelayanan_id,
@@ -87,38 +83,33 @@ export const getPelayananById = async (ctx: RouterContext<"/:id">) => {
       [id],
     );
 
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       ctx.response.status = 404;
       ctx.response.body = { error: "Pelayanan tidak ditemukan." };
       return;
     }
 
     ctx.response.status = 200;
-    ctx.response.body = result.rows[0];
+    ctx.response.body = rows[0];
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil data pelayanan." };
-  } finally {
-    connection.release();
   }
 };
 
 export const getUmkmList = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<Omit<Umkm, "foto">>(
+    const rows = await executeQuery<Omit<Umkm, "foto">>(
       "SELECT umkm_id, nama, deskripsi, dusun_id FROM Umkm ORDER BY umkm_id DESC",
     );
 
     ctx.response.status = 200;
-    ctx.response.body = result.rows;
+    ctx.response.body = rows;
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil data UMKM." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -131,9 +122,8 @@ export const getUmkmById = async (ctx: RouterContext<"/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<Omit<UmkmDetail, "foto">>(
+    const rows = await executeQuery<Omit<UmkmDetail, "foto">>(
       `
       SELECT
         Umkm.umkm_id,
@@ -154,25 +144,23 @@ export const getUmkmById = async (ctx: RouterContext<"/:id">) => {
           '[]'
         ) AS kontak
       FROM Umkm
-      WHERE Umkm.umkm_id = $1
+      WHERE Umkm.umkm_id = $1;
       `,
       [id],
     );
 
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       ctx.response.status = 404;
       ctx.response.body = { error: "UMKM tidak ditemukan." };
       return;
     }
 
     ctx.response.status = 200;
-    ctx.response.body = result.rows[0];
+    ctx.response.body = rows[0];
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil data UMKM." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -185,20 +173,19 @@ export const getUmkmFoto = async (ctx: RouterContext<"/foto/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<Pick<Umkm, "foto">>(
-      "SELECT foto FROM Umkm WHERE umkm_id = $1",
+    const rows = await executeQuery<Pick<Umkm, "foto">>(
+      "SELECT foto FROM Umkm WHERE umkm_id = $1;",
       [id],
     );
 
-    if (result.rows.length === 0 || !result.rows[0]?.foto) {
+    if (rows.length === 0 || !rows[0]?.foto) {
       ctx.response.status = 404;
       ctx.response.body = { message: "Foto tidak ditemukan" };
       return;
     }
 
-    const foto = result.rows[0].foto;
+    const foto = rows[0].foto;
 
     const contentType = foto[0] === 0xFF && foto[1] === 0xD8 && foto[2] === 0xFF
       ? "image/jpeg"
@@ -215,8 +202,6 @@ export const getUmkmFoto = async (ctx: RouterContext<"/foto/:id">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil foto." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -231,23 +216,21 @@ export const getFotoTempatWisata = async (
     return;
   }
 
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<
+    const rows = await executeQuery<
       Pick<Wisata, "foto"> | null
     >(
       "SELECT foto FROM Wisata WHERE wisata_id = $1;",
       [id],
     );
 
-    if (result.rows.length === 0 || !result.rows[0]?.foto) {
+    if (rows.length === 0 || !rows[0]?.foto) {
       ctx.response.status = 404;
       ctx.response.body = { message: "Foto not found" };
       return;
     }
 
-    const foto = result.rows[0].foto;
+    const foto = rows[0].foto;
 
     const contentType = foto[0] === 0xFF && foto[1] === 0xD8 && foto[2] === 0xFF
       ? "image/jpeg"
@@ -260,52 +243,47 @@ export const getFotoTempatWisata = async (
       "public, max-age=31536000, immutable",
     );
     ctx.response.body = foto;
-  } finally {
-    connection.release();
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil foto tempat wisata." };
   }
 };
 
 export const getTempatWisata = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<Omit<Wisata, "foto">>(
+    const rows = await executeQuery<Omit<Wisata, "foto">>(
       "SELECT wisata_id, nama, deskripsi FROM Wisata;",
     );
 
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       ctx.response.status = 404;
       ctx.response.body = { error: "Belum ada tempat wisata." };
       return;
     }
 
     ctx.response.status = 200;
-    ctx.response.body = result.rows;
+    ctx.response.body = rows;
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil data tempat wisata." };
-  } finally {
-    connection.release();
   }
 };
 
 export const getArtikelTerbaru = async (ctx: RouterContext<"/terbaru">) => {
-  const connection = await pool.connect();
   try {
-    const latest = await connection.queryObject<Pick<Artikel, "artikel_id">>(
-      "SELECT artikel_id FROM Artikel ORDER BY artikel_id DESC LIMIT 1",
+    const rows = await executeQuery<Pick<Artikel, "artikel_id">>(
+      "SELECT artikel_id FROM Artikel ORDER BY artikel_id DESC LIMIT 1;",
     );
 
-    if (latest.rows.length === 0) {
+    if (rows.length === 0) {
       ctx.response.status = 404;
       ctx.response.body = { error: "Belum ada artikel." };
       return;
     }
 
-    const item = await fetchArtikelDetailById(
-      connection,
-      latest.rows[0].artikel_id,
-    );
+    const item = await fetchArtikelDetailById(rows[0].artikel_id);
 
     if (!item) {
       ctx.response.status = 404;
@@ -319,8 +297,6 @@ export const getArtikelTerbaru = async (ctx: RouterContext<"/terbaru">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil artikel terbaru." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -335,22 +311,21 @@ export const getArtikelLampiran = async (
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<
+    const rows = await executeQuery<
       { nama_file: string; isi_file: Uint8Array }
     >(
-      "SELECT nama_file, isi_file FROM Lampiran_Artikel WHERE lampiran_artikel_id = $1",
+      "SELECT nama_file, isi_file FROM Lampiran_Artikel WHERE lampiran_artikel_id = $1;",
       [id],
     );
 
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       ctx.response.status = 404;
       ctx.response.body = { error: "Lampiran tidak ditemukan." };
       return;
     }
 
-    const { nama_file, isi_file } = result.rows[0];
+    const { nama_file, isi_file } = rows[0];
     const extension = getExtension(nama_file);
     const fileContentType = contentType(extension) ??
       "application/octet-stream";
@@ -366,8 +341,6 @@ export const getArtikelLampiran = async (
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil lampiran." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -380,9 +353,8 @@ export const getArtikelById = async (ctx: RouterContext<"/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const item = await fetchArtikelDetailById(connection, id);
+    const item = await fetchArtikelDetailById(id);
 
     if (!item) {
       ctx.response.status = 404;
@@ -396,8 +368,6 @@ export const getArtikelById = async (ctx: RouterContext<"/:id">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil data artikel." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -410,23 +380,21 @@ export const thumbnail = async (ctx: RouterContext<"/thumbnail/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<
+    const rows = await executeQuery<
       { isi_file: Uint8Array | null }
     >(
       "SELECT isi_file FROM Lampiran_Artikel WHERE artikel_id = $1;",
       [id],
     );
 
-    if (result.rows.length === 0 || !result.rows[0].isi_file) {
+    if (rows.length === 0 || !rows[0].isi_file) {
       ctx.response.status = 404;
       ctx.response.body = { message: "Foto not found" };
       return;
     }
 
-    const foto = result.rows[0].isi_file;
+    const foto = rows[0].isi_file;
 
     const contentType = foto[0] === 0xFF && foto[1] === 0xD8 && foto[2] === 0xFF
       ? "image/jpeg"
@@ -439,8 +407,10 @@ export const thumbnail = async (ctx: RouterContext<"/thumbnail/:id">) => {
       "public, max-age=31536000, immutable",
     );
     ctx.response.body = foto;
-  } finally {
-    connection.release();
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil thumbnail artikel." };
   }
 };
 
@@ -467,7 +437,6 @@ export const getKomentars = async (ctx: RouterContext<"/">) => {
     }
   }
 
-  const connection = await pool.connect();
   try {
     const whereClauses: string[] = [];
     const values: unknown[] = [];
@@ -486,20 +455,20 @@ export const getKomentars = async (ctx: RouterContext<"/">) => {
     values.push(limit + 1);
     const limitParamIndex = paramIndex;
 
-    const result = await connection.queryObject<Komentar>(
+    const rows = await executeQuery<Komentar>(
       `
       SELECT
         *
       FROM Komentar
       ${whereSql}
       ORDER BY Komentar.komentar_id DESC
-      LIMIT $${limitParamIndex}
+      LIMIT $${limitParamIndex};
       `,
       values,
     );
 
-    const hasNextPage = result.rows.length > limit;
-    const rawItems = hasNextPage ? result.rows.slice(0, limit) : result.rows;
+    const hasNextPage = rows.length > limit;
+    const rawItems = hasNextPage ? rows.slice(0, limit) : rows;
     const items = rawItems.map((row) => bigintToNumber(row, ["waktu_upload"]));
 
     const nextCursor = hasNextPage ? items[items.length - 1].komentar_id : null;
@@ -510,8 +479,6 @@ export const getKomentars = async (ctx: RouterContext<"/">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil data komentar." };
-  } finally {
-    connection.release();
   }
 };
 
@@ -549,7 +516,6 @@ export const getArtikels = async (ctx: RouterContext<"/">) => {
     }
   }
 
-  const connection = await pool.connect();
   try {
     const whereClauses: string[] = [];
     const values: unknown[] = [];
@@ -576,7 +542,7 @@ export const getArtikels = async (ctx: RouterContext<"/">) => {
     values.push(limit + 1);
     const limitParamIndex = paramIndex;
 
-    const result = await connection.queryObject<ArtikelWithLabel>(
+    const rows = await executeQuery<ArtikelWithLabel>(
       `
       SELECT
         Artikel.artikel_id,
@@ -595,13 +561,13 @@ export const getArtikels = async (ctx: RouterContext<"/">) => {
       FROM Artikel
       ${whereSql}
       ORDER BY Artikel.artikel_id DESC
-      LIMIT $${limitParamIndex}
+      LIMIT $${limitParamIndex};
       `,
       values,
     );
 
-    const hasNextPage = result.rows.length > limit;
-    const rawItems = hasNextPage ? result.rows.slice(0, limit) : result.rows;
+    const hasNextPage = rows.length > limit;
+    const rawItems = hasNextPage ? rows.slice(0, limit) : rows;
     const items = rawItems.map((row) => bigintToNumber(row, ["waktu_upload"]));
     const nextCursor = hasNextPage ? items[items.length - 1].artikel_id : null;
 
@@ -611,56 +577,67 @@ export const getArtikels = async (ctx: RouterContext<"/">) => {
     console.error(err);
     ctx.response.status = 500;
     ctx.response.body = { error: "Gagal mengambil data artikel." };
-  } finally {
-    connection.release();
   }
 };
 
 export const getLabel = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
-  const result = await connection.queryObject<Label>(
-    "SELECT * FROM Label;",
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<Label>(
+      "SELECT * FROM Label;",
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil label." };
+  }
 };
 
 export const deskripsiSekilas = async (ctx: RouterContext<"/deskripsi">) => {
-  const connection = await pool.connect();
-  const result = await connection.queryObject<
-    Pick<Profil, "deskripsi_sekilas">
-  >(
-    "SELECT deskripsi_sekilas FROM Profil LIMIT 1;",
-  );
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<
+      Pick<Profil, "deskripsi_sekilas">
+    >(
+      "SELECT deskripsi_sekilas FROM Profil LIMIT 1;",
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil deskripsi sekilas." };
+  }
 };
 
 export const getKalender = async (ctx: RouterContext<"/kalender">) => {
-  const connection = await pool.connect();
-  const result = await connection.queryObject<Pick<Profil, "tautan_kalender">>(
-    "SELECT tautan_kalender FROM Profil LIMIT 1;",
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<Pick<Profil, "tautan_kalender">>(
+      "SELECT tautan_kalender FROM Profil LIMIT 1;",
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil tautan kalender." };
+  }
 };
 
 export const aparaturDesa = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
-  const result = await connection.queryObject<
-    Omit<Aparatur, "kata_sandi" | "foto">
-  >(
-    "SELECT aparatur_id, nama, jabatan, telepon FROM Aparatur WHERE aparatur_id <> 1;",
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<
+      Omit<Aparatur, "kata_sandi" | "foto">
+    >(
+      "SELECT aparatur_id, nama, jabatan, telepon FROM Aparatur WHERE aparatur_id <> 1;",
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data aparatur desa." };
+  }
 };
 
 export const fotoAparaturDesa = async (ctx: RouterContext<"/foto/:id">) => {
@@ -678,21 +655,19 @@ export const fotoAparaturDesa = async (ctx: RouterContext<"/foto/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<Pick<Aparatur, "foto">>(
+    const rows = await executeQuery<Pick<Aparatur, "foto">>(
       "SELECT foto FROM Aparatur WHERE aparatur_id = $1;",
       [id],
     );
 
-    if (result.rows.length === 0 || !result.rows[0].foto) {
+    if (rows.length === 0 || !rows[0].foto) {
       ctx.response.status = 404;
       ctx.response.body = { message: "Foto not found" };
       return;
     }
 
-    const foto = result.rows[0].foto;
+    const foto = rows[0].foto;
 
     const contentType = foto[0] === 0xFF && foto[1] === 0xD8 && foto[2] === 0xFF
       ? "image/jpeg"
@@ -705,58 +680,66 @@ export const fotoAparaturDesa = async (ctx: RouterContext<"/foto/:id">) => {
       "public, max-age=31536000, immutable",
     );
     ctx.response.body = foto;
-  } finally {
-    connection.release();
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil foto aparatur desa." };
   }
 };
 
 export const namaDusun = async (ctx: RouterContext<"/nama">) => {
-  const connection = await pool.connect();
-  const result = await connection.queryObject<
-    { dusun_id: number; nama: string }
-  >(
-    "SELECT dusun_id, nama FROM Dusun;",
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<
+      Pick<Dusun, "dusun_id" | "nama">
+    >(
+      "SELECT dusun_id, nama FROM Dusun;",
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil nama dusun." };
+  }
 };
 
 export const getDusun = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
-
-  const result = await connection.queryObject<Dusun>(
-    "SELECT * FROM Dusun;",
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<Dusun>(
+      "SELECT * FROM Dusun;",
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data dusun." };
+  }
 };
 
 export const getOneDusun = async (ctx: RouterContext<"/:id">) => {
   const id = ctx.params.id;
 
-  const connection = await pool.connect();
-
-  const result = await connection.queryObject<Dusun>(
-    "SELECT * FROM Dusun WHERE dusun_id = $1;",
-    [id],
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<Dusun>(
+      "SELECT * FROM Dusun WHERE dusun_id = $1;",
+      [id],
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data dusun." };
+  }
 };
 
 export const getProfilDesa = async (ctx: RouterContext<"/data">) => {
-  const connection = await pool.connect();
-
-  const result = await connection.queryObject<
-    Omit<Profil, "deskripsi_sekilas" | "peta" | "tautan_kalender">
-  >(
-    `SELECT
+  try {
+    const rows = await executeQuery<
+      Omit<Profil, "deskripsi_sekilas" | "peta" | "tautan_kalender">
+    >(
+      `SELECT
       kode_desa,
       kecamatan,
       kabupaten_kota,
@@ -773,28 +756,30 @@ export const getProfilDesa = async (ctx: RouterContext<"/data">) => {
       batas_utara,
       sejarah
     FROM Profil LIMIT 1;`,
-  );
+    );
 
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil profil desa." };
+  }
 };
 
 export const petaDesa = async (ctx: RouterContext<"/peta">) => {
-  const connection = await pool.connect();
-
   try {
-    const result = await connection.queryObject<{ peta: Uint8Array | null }>(
+    const rows = await executeQuery<{ peta: Uint8Array | null }>(
       "SELECT peta FROM Profil LIMIT 1;",
     );
 
-    if (result.rows.length === 0 || !result.rows[0].peta) {
+    if (rows.length === 0 || !rows[0].peta) {
       ctx.response.status = 404;
       ctx.response.body = { message: "Peta desa not found" };
       return;
     }
 
-    const peta = result.rows[0].peta;
+    const peta = rows[0].peta;
 
     const contentType = peta[0] === 0xFF && peta[1] === 0xD8 && peta[2] === 0xFF
       ? "image/jpeg"
@@ -807,45 +792,54 @@ export const petaDesa = async (ctx: RouterContext<"/peta">) => {
       "public, max-age=31536000, immutable",
     );
     ctx.response.body = peta;
-  } finally {
-    connection.release();
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil peta desa." };
   }
 };
 
 export const getProfil = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
+  try {
+    const rows = await executeQuery<Omit<Profil, "peta">>(
+      "SELECT profil_id, deskripsi_sekilas, kode_desa, kecamatan, kabupaten_kota, provinsi, tahun_pembentukan, luas, koordinat, tipologi, klasifikasi, kategori, batas_timur, batas_barat, batas_selatan, batas_utara, sejarah, tautan_kalender FROM Profil LIMIT 1;",
+    );
 
-  const result = await connection.queryObject<Omit<Profil, "peta">>(
-    "SELECT profil_id, deskripsi_sekilas, kode_desa, kecamatan, kabupaten_kota, provinsi, tahun_pembentukan, luas, koordinat, tipologi, klasifikasi, kategori, batas_timur, batas_barat, batas_selatan, batas_utara, sejarah, tautan_kalender FROM Profil LIMIT 1;",
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil profil desa." };
+  }
 };
 
 export const getVisi = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
-
-  const result = await connection.queryObject<Visi>(
-    "SELECT * FROM Visi;",
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<Visi>(
+      "SELECT * FROM Visi;",
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil visi." };
+  }
 };
 
 export const getMisi = async (ctx: RouterContext<"/">) => {
-  const connection = await pool.connect();
-
-  const result = await connection.queryObject<Misi>(
-    "SELECT * FROM Misi;",
-  );
-
-  ctx.response.status = 200;
-  ctx.response.body = result.rows;
-  connection.release();
+  try {
+    const rows = await executeQuery<Misi>(
+      "SELECT * FROM Misi;",
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil misi." };
+  }
 };
 
 export const getApbdesAtYear = async (ctx: RouterContext<"/:year">) => {
@@ -857,9 +851,8 @@ export const getApbdesAtYear = async (ctx: RouterContext<"/:year">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<ApbdesDetail>(
+    const rows = await executeQuery<ApbdesDetail>(
       `
       SELECT
         Apbdes.apbdes_id,
@@ -877,13 +870,12 @@ export const getApbdesAtYear = async (ctx: RouterContext<"/:year">) => {
           '[]'
         ) AS lampiran
       FROM Apbdes
-      WHERE Apbdes.tahun = $1
+      WHERE Apbdes.tahun = $1;
       `,
       [year],
     );
 
-    // No Apbdes row yet for this year — not an error, just "nothing uploaded yet."
-    const item = result.rows[0] ??
+    const item = rows[0] ??
       { apbdes_id: null, tahun: year, lampiran: [] };
 
     ctx.response.status = 200;
@@ -894,8 +886,6 @@ export const getApbdesAtYear = async (ctx: RouterContext<"/:year">) => {
     ctx.response.body = {
       error: `Gagal mengambil data APBDes pada tahun ${year}.`,
     };
-  } finally {
-    connection.release();
   }
 };
 
@@ -908,22 +898,21 @@ export const getApbdesFile = async (ctx: RouterContext<"/file/:id">) => {
     return;
   }
 
-  const connection = await pool.connect();
   try {
-    const result = await connection.queryObject<
-      { nama_file: string; isi_file: Uint8Array }
+    const rows = await executeQuery<
+      Pick<LampiranApbdes, "nama_file" | "isi_file">
     >(
-      "SELECT nama_file, isi_file FROM Lampiran_Apbdes WHERE apbdes_file_id = $1",
+      "SELECT nama_file, isi_file FROM Lampiran_Apbdes WHERE apbdes_file_id = $1;",
       [id],
     );
 
-    if (result.rows.length === 0) {
+    if (rows.length === 0) {
       ctx.response.status = 404;
       ctx.response.body = { error: "Lampiran tidak ditemukan." };
       return;
     }
 
-    const { nama_file: namaFile, isi_file: isiFile } = result.rows[0];
+    const { nama_file: namaFile, isi_file: isiFile } = rows[0];
     const extension = getExtension(namaFile);
     const fileContentType = contentType(extension);
 
@@ -946,8 +935,6 @@ export const getApbdesFile = async (ctx: RouterContext<"/file/:id">) => {
   } catch (err) {
     console.error(err);
     ctx.response.status = 500;
-    ctx.response.body = { error: "Gagal mengambil lampiran." };
-  } finally {
-    connection.release();
+    ctx.response.body = { error: "Gagal mengambil lampiran APBDes." };
   }
 };
