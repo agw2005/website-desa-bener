@@ -624,6 +624,31 @@ export const getKalender = async (ctx: RouterContext<"/kalender">) => {
   }
 };
 
+export const oneAparatur = async (ctx: RouterContext<"/:id">) => {
+  const aparaturId = Number(ctx.params.id);
+
+  if (!Number.isInteger(aparaturId) || aparaturId <= 1) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `ID aparatur tidak valid.` };
+    return;
+  }
+
+  try {
+    const rows = await executeQuery<
+      Omit<Aparatur, "kata_sandi" | "foto">
+    >(
+      "SELECT aparatur_id, nama, jabatan, telepon FROM Aparatur WHERE aparatur_id = $1;",
+      [aparaturId],
+    );
+    ctx.response.status = 200;
+    ctx.response.body = rows;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: "Gagal mengambil data aparatur desa." };
+  }
+};
+
 export const aparaturDesa = async (ctx: RouterContext<"/">) => {
   try {
     const rows = await executeQuery<

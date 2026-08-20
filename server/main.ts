@@ -28,6 +28,7 @@ import {
   getUmkmList,
   getVisi,
   namaDusun,
+  oneAparatur,
   petaDesa,
   thumbnail,
 } from "./handlers/get.ts";
@@ -46,7 +47,13 @@ import {
   postVisi,
   postWisata,
 } from "./handlers/post.ts";
-import { patchDusun, patchProfil, patchUmkm } from "./handlers/patch.ts";
+import {
+  patchAparatur,
+  patchDusun,
+  patchProfil,
+  patchUmkm,
+  setNullFotoAparatur,
+} from "./handlers/patch.ts";
 import type { Next } from "@oak/oak/middleware";
 import {
   deleteAparatur,
@@ -151,7 +158,10 @@ visi
 
 aparatur
   .get("/foto/:id", fotoAparaturDesa)
+  .patch("/foto/:id", requireAuth, setNullFotoAparatur)
+  .get("/:id", oneAparatur)
   .delete("/:id", requireAuth, deleteAparatur)
+  .patch("/:id", requireAuth, patchAparatur)
   .post("/login", requestJwtAparatur)
   .post("/", requireAuth, postAparatur)
   .get("/", aparaturDesa);

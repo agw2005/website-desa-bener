@@ -1,8 +1,188 @@
 import type { RouterContext } from "@oak/oak/router";
 import { safeDecodeURI } from "../helpers/safeDecodeURI.ts";
 import type { Umkm } from "../types/Umkm.d.ts";
+import type { Aparatur } from "../types/Aparatur.d.ts";
 import { executeTransaction } from "../helpers/executeTransaction.ts";
 import { executeQuery } from "../helpers/executeQuery.ts";
+
+export const setNullFotoAparatur = async (ctx: RouterContext<"/foto/:id">) => {
+  const aparaturId = Number(ctx.params.id);
+
+  if (!Number.isInteger(aparaturId) || aparaturId === 1) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `ID UMKM tidak valid.` };
+    return;
+  }
+
+  try {
+    const updated = await executeTransaction(async (connection) => {
+      const aparaturCheck = await connection.queryObject<
+        Pick<Aparatur, "aparatur_id">
+      >(
+        `SELECT aparatur_id FROM Aparatur WHERE aparatur_id = $1;`,
+        [aparaturId],
+      );
+
+      if (aparaturCheck.rows.length === 0) {
+        return null;
+      }
+
+      const result = await connection.queryObject<
+        Omit<Aparatur, "foto" | "kata_sandi">
+      >(
+        `UPDATE Aparatur
+         SET foto = NULL
+         WHERE aparatur_id = $1
+         RETURNING aparatur_id, nama, jabatan, telepon;`,
+        [aparaturId],
+      );
+
+      return result.rows[0];
+    });
+
+    if (updated === null) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: `Aparatur tidak ditemukan.` };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = updated;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: `Gagal menghapus foto aparatur.` };
+  }
+};
+
+export const patchAparatur = async (ctx: RouterContext<"/:id">) => {
+  const aparaturId = Number(ctx.params.id);
+
+  if (!Number.isInteger(aparaturId) || aparaturId === 1) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `ID UMKM tidak valid.` };
+    return;
+  }
+
+  const form = await ctx.request.body.formData();
+  const nama = form.get("nama");
+  const jabatan = form.get("jabatan");
+  const telepon = form.get("telepon");
+  const foto = form.get("foto");
+  const kata_sandi = form.get("kata_sandi");
+
+  const setClauses: string[] = [];
+  const values: unknown[] = [];
+  let paramIndex = 1;
+
+  if (nama !== null) {
+    if (typeof nama !== "string" || nama.trim() === "") {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `Nama aparatur tidak boleh kosong.` };
+      return;
+    }
+    setClauses.push(`nama = $${paramIndex++}`);
+    values.push(nama.trim());
+  }
+
+  if (jabatan !== null) {
+    if (typeof jabatan !== "string" || jabatan.trim() === "") {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `Jabatan aparatur tidak boleh kosong.` };
+      return;
+    }
+    setClauses.push(`jabatan = $${paramIndex++}`);
+    values.push(jabatan.trim());
+  }
+
+  if (telepon !== null) {
+    if (typeof telepon !== "string") {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `Telepon aparatur tidak valid.` };
+      return;
+    }
+    const trimmed = telepon.trim();
+    setClauses.push(`telepon = $${paramIndex++}`);
+    values.push(trimmed === "" ? null : trimmed);
+  }
+
+  if (kata_sandi !== null) {
+    if (typeof kata_sandi !== "string" || kata_sandi.trim() === "") {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `Kata sandi aparatur tidak boleh kosong.` };
+      return;
+    }
+    setClauses.push(`kata_sandi = $${paramIndex++}`);
+    values.push(kata_sandi.trim());
+  }
+
+  if (foto !== null) {
+    if (!(foto instanceof File)) {
+      ctx.response.status = 400;
+      ctx.response.body = { error: `Foto aparatur harus berupa file.` };
+      return;
+    }
+    if (foto.size > 0) {
+      if (!["image/jpeg", "image/png", "image/jpg"].includes(foto.type)) {
+        ctx.response.status = 400;
+        ctx.response.body = {
+          error: "Foto aparatur harus berformat JPEG, PNG, atau JPG.",
+        };
+        return;
+      }
+      const fotoBytes = new Uint8Array(await foto.arrayBuffer());
+      setClauses.push(`foto = $${paramIndex++}`);
+      values.push(fotoBytes);
+    }
+  }
+
+  if (setClauses.length === 0) {
+    ctx.response.status = 400;
+    ctx.response.body = { error: `Tidak ada data untuk diperbarui.` };
+    return;
+  }
+
+  try {
+    const updated = await executeTransaction(async (connection) => {
+      const aparaturCheck = await connection.queryObject<
+        Pick<Aparatur, "aparatur_id">
+      >(
+        `SELECT aparatur_id FROM Aparatur WHERE aparatur_id = $1;`,
+        [aparaturId],
+      );
+
+      if (aparaturCheck.rows.length === 0) {
+        return null;
+      }
+
+      values.push(aparaturId);
+      const result = await connection.queryObject<
+        Omit<Aparatur, "foto" | "kata_sandi">
+      >(
+        `UPDATE Aparatur
+         SET ${setClauses.join(", ")}
+         WHERE aparatur_id = $${paramIndex}
+         RETURNING aparatur_id, nama, jabatan, telepon;`,
+        values,
+      );
+
+      return result.rows[0];
+    });
+
+    if (updated === null) {
+      ctx.response.status = 404;
+      ctx.response.body = { error: `Aparatur tidak ditemukan.` };
+      return;
+    }
+
+    ctx.response.status = 200;
+    ctx.response.body = updated;
+  } catch (err) {
+    console.error(err);
+    ctx.response.status = 500;
+    ctx.response.body = { error: `Gagal memperbarui Aparatur.` };
+  }
+};
 
 export const patchUmkm = async (ctx: RouterContext<"/:id">) => {
   const umkmId = Number(ctx.params.id);
@@ -63,7 +243,7 @@ export const patchUmkm = async (ctx: RouterContext<"/:id">) => {
     if (!["image/jpeg", "image/png", "image/jpg"].includes(foto.type)) {
       ctx.response.status = 400;
       ctx.response.body = {
-        error: "Peta harus berformat JPEG, PNG, atau JPG.",
+        error: "Foto UMKM harus berformat JPEG, PNG, atau JPG.",
       };
       return;
     }

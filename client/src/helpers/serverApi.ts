@@ -40,6 +40,7 @@ export const serverApi = {
     visi: () => buildUrl("/visi"),
     aparatur: {
       all: () => buildUrl("/aparatur"),
+      one: (id: number | string) => buildUrl(`/aparatur/${id}`),
       photo: (id: number | string) => buildUrl(`/aparatur/foto/${id}`),
     },
     profil: {
@@ -97,5 +98,9 @@ export const serverApi = {
     profil: () => buildUrl("/profil"),
     dusun: (id: number | string) => buildUrl(`/dusun/${id}`),
     umkm: (id: number | string) => buildUrl(`/umkm/${id}`),
+    aparatur: {
+      data: (id: number | string) => buildUrl(`/aparatur/${id}`),
+      deletePhoto: (id: number | string) => buildUrl(`/aparatur/foto/${id}`),
+    },
   },
 };

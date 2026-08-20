@@ -8,6 +8,8 @@ import PasswordInput from "../reusable/inputs/PasswordInput.tsx";
 import OneFileInput from "../reusable/inputs/OneFileInput.tsx";
 import { authFetch } from "../../helpers/authFetch.ts";
 import { serverApi } from "../../helpers/serverApi.ts";
+import AparaturEditForm from "./AparaturEditForm.tsx";
+import DropdownInput from "../reusable/inputs/DropdownInput.tsx";
 
 const AparaturManager = () => {
   const {
@@ -25,9 +27,11 @@ const AparaturManager = () => {
     useState("");
   const [inputFotoAparatur, setInputFotoAparatur] = useState<null | File>(null);
   const [aparaturTerkonfirmasi, setAparaturTerkonfirmasi] = useState(false);
-  const [previewFotoUrl, setPreviewFotoUrl] = useState<string | null>(null);
+  const [_previewFotoUrl, setPreviewFotoUrl] = useState<string | null>(null);
 
   const [requiredInputIsMissing, setRequiredInputIsMissing] = useState(false);
+
+  const [selectedAparatur, setSelectedAparatur] = useState<number | "">("");
 
   useEffect(() => {
     if (!inputFotoAparatur) {
@@ -41,11 +45,7 @@ const AparaturManager = () => {
 
   const handleAparaturFotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setInputFotoAparatur(file);
-    } else {
-      setInputFotoAparatur(null);
-    }
+    setInputFotoAparatur(file ?? null);
   };
 
   const resetForm = () => {
@@ -91,178 +91,122 @@ const AparaturManager = () => {
     }
   };
 
-  const handleDeleteAparatur = async (id: number) => {
-    const response = await authFetch(
-      serverApi.delete.aparatur(id),
-      { method: "DELETE" },
-    );
-    if (!response.ok) console.error(await response.json());
-    refetchAparaturDesa();
-  };
-
   return (
     <RoundedSection title="Aparatur Desa">
-      <div className="flex flex-col gap-8 xl:flex-row">
-        <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <TextInput
-            label="Nama"
-            name="nama-aparatur"
-            id="nama-aparatur"
-            value={inputNamaAparatur}
-            onChangeHandler={(e) => setInputNamaAparatur(e.target.value)}
-            placeholder="Contoh: Beni Saefudin"
-          />
+      <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 xl:flex-row">
+          <div className="flex min-w-0 flex-1 flex-col gap-2">
+            <h2 className="text-2xl font-bold">Tambah Aparatur Baru</h2>
+            <TextInput
+              label="Nama"
+              name="nama-aparatur"
+              id="nama-aparatur"
+              value={inputNamaAparatur}
+              onChangeHandler={(e) => setInputNamaAparatur(e.target.value)}
+              placeholder="Contoh: Beni Saefudin"
+            />
 
-          <TextInput
-            label="Jabatan"
-            name="jabatan-aparatur"
-            id="jabatan-aparatur"
-            value={inputJabatanAparatur}
-            onChangeHandler={(e) => setInputJabatanAparatur(e.target.value)}
-            placeholder="Contoh: Kepala Desa"
-          />
+            <TextInput
+              label="Jabatan"
+              name="jabatan-aparatur"
+              id="jabatan-aparatur"
+              value={inputJabatanAparatur}
+              onChangeHandler={(e) => setInputJabatanAparatur(e.target.value)}
+              placeholder="Contoh: Kepala Desa"
+            />
 
-          <TextInput
-            label="Telepon"
-            name="telepon-aparatur"
-            id="telepon-aparatur"
-            value={inputTeleponAparatur}
-            onChangeHandler={(e) => setInputTeleponAparatur(e.target.value)}
-            placeholder="Contoh: 0812-3456-7890"
-          />
+            <TextInput
+              label="Telepon"
+              name="telepon-aparatur"
+              id="telepon-aparatur"
+              value={inputTeleponAparatur}
+              onChangeHandler={(e) => setInputTeleponAparatur(e.target.value)}
+              placeholder="Contoh: 0812-3456-7890"
+            />
 
-          <p className="text-xs font-bold text-red-700">
-            Disarankan memakai foto dengan rasio 2x3
-          </p>
+            <p className="text-xs font-bold text-red-700">
+              Disarankan memakai foto dengan rasio 2x3
+            </p>
 
-          <OneFileInput
-            label="Foto"
-            name="foto-aparatur"
-            id="foto-aparatur"
-            onChangeHandler={handleAparaturFotoChange}
-            accept=".png, .jpg, .jpeg"
-            fileName={inputFotoAparatur?.name}
-            placeholder="(png, jpg, jpeg)"
-          />
+            <OneFileInput
+              label="Foto"
+              name="foto-aparatur"
+              id="foto-aparatur"
+              onChangeHandler={handleAparaturFotoChange}
+              accept=".png, .jpg, .jpeg"
+              fileName={inputFotoAparatur?.name}
+              placeholder="(png, jpg, jpeg)"
+            />
 
-          {previewFotoUrl && (
-            <div className="mt-2 mb-4 w-max rounded border p-2">
-              <p className="mb-2 text-sm font-semibold">
-                Pratinjau Foto:
-              </p>
+            <PasswordInput
+              label="Kata Sandi"
+              name="kata-sandi-aparatur"
+              id="kata-sandi-aparatur"
+              value={inputKataSandiAparatur}
+              onChangeHandler={(e) => setInputKataSandiAparatur(e.target.value)}
+            />
 
-              <img
-                src={previewFotoUrl}
-                alt="Pratinjau upload aparatur"
-                className="h-48 w-32 rounded object-cover shadow-sm"
-                onError={(e) => {
-                  e.currentTarget.src = "/tidak-ada-gambar-2x3.png";
-                  e.currentTarget.onerror = null;
-                }}
+            <PasswordInput
+              label="Konfirmasi Sandi"
+              name="konfirmasi-sandi-aparatur"
+              id="konfirmasi-sandi-aparatur"
+              value={inputKonfirmasiSandiAparatur}
+              onChangeHandler={(e) =>
+                setInputKonfirmasiSandiAparatur(e.target.value)}
+            />
+
+            <Button
+              variant="black"
+              onClick={async () => {
+                setAparaturTerkonfirmasi(false);
+                if (inputKataSandiAparatur !== inputKonfirmasiSandiAparatur) {
+                  setAparaturTerkonfirmasi(true);
+                  return;
+                }
+                await handleAddAparatur();
+              }}
+            >
+              Tambah Aparatur Desa
+            </Button>
+
+            {aparaturTerkonfirmasi && (
+              <div className="w-max max-w-full rounded-2xl bg-red-600 px-4 py-2 font-bold text-white">
+                Kata Sandi tidak sesuai
+              </div>
+            )}
+
+            {requiredInputIsMissing && (
+              <div className="w-max max-w-full rounded-2xl bg-red-600 px-4 py-2 font-bold text-white">
+                Nama, Jabatan, dan Kata sandi wajib diisi
+              </div>
+            )}
+          </div>
+
+          <div className="min-w-0 flex-1 flex flex-col gap-2">
+            <h2 className="text-2xl font-bold">Kelola Aparatur</h2>
+            {aparaturDesa && (
+              <DropdownInput
+                label="Aparatur"
+                name="selected-aparatur"
+                id="selected-aparatur"
+                value={selectedAparatur}
+                options={aparaturDesa}
+                getId={(a) => a.aparatur_id}
+                getLabel={(a) => `${a.nama} — ${a.jabatan}`}
+                onChangeHandler={setSelectedAparatur}
+                placeholder="Pilih Aparatur"
               />
-            </div>
-          )}
+            )}
 
-          <PasswordInput
-            label="Kata Sandi"
-            name="kata-sandi-aparatur"
-            id="kata-sandi-aparatur"
-            value={inputKataSandiAparatur}
-            onChangeHandler={(e) => setInputKataSandiAparatur(e.target.value)}
-          />
-
-          <PasswordInput
-            label="Konfirmasi Sandi"
-            name="konfirmasi-sandi-aparatur"
-            id="konfirmasi-sandi-aparatur"
-            value={inputKonfirmasiSandiAparatur}
-            onChangeHandler={(e) =>
-              setInputKonfirmasiSandiAparatur(e.target.value)}
-          />
-
-          <Button
-            variant="black"
-            onClick={async () => {
-              setAparaturTerkonfirmasi(false);
-
-              if (
-                inputKataSandiAparatur !== inputKonfirmasiSandiAparatur
-              ) {
-                setAparaturTerkonfirmasi(true);
-                return;
-              }
-
-              await handleAddAparatur();
-            }}
-          >
-            Tambah Aparatur Desa
-          </Button>
-
-          {aparaturTerkonfirmasi && (
-            <div className="w-max max-w-full rounded-2xl bg-red-600 px-4 py-2 font-bold text-white">
-              Kata Sandi tidak sesuai
-            </div>
-          )}
-
-          {requiredInputIsMissing && (
-            <div className="w-max max-w-full rounded-2xl bg-red-600 px-4 py-2 font-bold text-white">
-              Nama, Jabatan, dan Kata sandi wajib diisi
-            </div>
-          )}
-        </div>
-
-        {/* Table */}
-        <div className="min-w-0 flex-1 overflow-x-auto">
-          <table className="w-full min-w-125 border-collapse text-left">
-            <thead>
-              <tr className="bg-amber-700 text-white">
-                <th className="border border-black px-4 py-2 text-center font-bold">
-                  No
-                </th>
-
-                <th className="border border-black px-4 py-2 text-center font-bold">
-                  Nama
-                </th>
-
-                <th className="border border-black px-4 py-2 text-center font-bold">
-                  Jabatan
-                </th>
-
-                <th className="border border-black px-4 py-2 text-center font-bold">
-                  Aksi
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {aparaturDesa &&
-                aparaturDesa.map((aparatur, index) => (
-                  <tr
-                    key={aparatur.aparatur_id}
-                    className="border"
-                  >
-                    <td className="border border-black px-4 py-2 text-center">
-                      {index + 1}
-                    </td>
-
-                    <td className="border border-black px-4 py-2 font-medium">
-                      {aparatur.nama}
-                    </td>
-
-                    <td className="border border-black px-4 py-2">
-                      {aparatur.jabatan}
-                    </td>
-
-                    <td
-                      onClick={() => handleDeleteAparatur(aparatur.aparatur_id)}
-                      className="cursor-pointer select-none border border-black bg-red-700 px-4 py-2 text-center font-bold text-white hover:bg-red-900 active:bg-red-600"
-                    >
-                      Hapus
-                    </td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
+            {selectedAparatur !== "" && (
+              <AparaturEditForm
+                key={selectedAparatur}
+                aparaturId={selectedAparatur}
+                refetchAparatur={refetchAparaturDesa}
+                aparaturSetter={setSelectedAparatur}
+              />
+            )}
+          </div>
         </div>
       </div>
     </RoundedSection>
